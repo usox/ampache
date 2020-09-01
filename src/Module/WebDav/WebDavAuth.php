@@ -24,7 +24,7 @@ declare(strict_types=0);
 
 namespace Ampache\Module\WebDav;
 
-use Ampache\Module\Authorization\Auth;
+use Ampache\Module\Authentication\AuthenticationManagerInterface;
 use Sabre\DAV;
 
 /**
@@ -34,15 +34,22 @@ final class WebDavAuth extends DAV\Auth\Backend\AbstractBasic
 {
     protected $realm = 'Ampache';
 
+    private AuthenticationManagerInterface $authenticationManager;
+
+    public function __construct(
+        AuthenticationManagerInterface $authenticationManager
+    ) {
+        $this->authenticationManager = $authenticationManager;
+    }
+
     /**
-     * validateUserPass
      * @param $username
      * @param $password
      * @return mixed
      */
     protected function validateUserPass($username, $password)
     {
-        $auth = Auth::login($username, $password, true);
+        $auth = $this->authenticationManager->login($username, $password, true);
 
         return $auth['success'];
     }

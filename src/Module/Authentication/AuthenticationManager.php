@@ -24,9 +24,10 @@ declare(strict_types=1);
 
 namespace Ampache\Module\Authentication;
 
-use Ampache\Config\AmpConfig;
 use Ampache\Config\ConfigContainerInterface;
 use Ampache\Module\Authentication\Authenticator\AuthenticatorInterface;
+use Ampache\Module\System\Dba;
+use Ampache\Module\System\Session;
 
 final class AuthenticationManager implements AuthenticationManagerInterface
 {
@@ -48,7 +49,7 @@ final class AuthenticationManager implements AuthenticationManagerInterface
     public function login(
         string $username,
         string $password,
-        bool $allow_ui
+        bool $allow_ui = false
     ): array {
         $result = [];
 
@@ -59,12 +60,85 @@ final class AuthenticationManager implements AuthenticationManagerInterface
                 continue;
             }
 
-            $result = $authenticator($username, $password);
+            $result = $authenticator->auth($username, $password);
             if ($result['success'] || ($allow_ui && !empty($result['ui_required']))) {
                 break;
             }
         }
 
         return $result;
+    }
+
+    public function postAuth(string $method): ?array
+    {
+        $result = [];
+
+        if (in_array($method, $this->configContainer->get('auth_methods'))) {
+            $authenticator = $this->authenticatorList[$method] ?? null;
+
+            if ($authenticator !== null) {
+                $result = $authenticator->postAuth();
+            }
+        }
+
+        return $result;
+    }
+
+    public function tokenLogin(
+        string $username,
+        string $token,
+        string $salt
+    ): array {
+        // subsonic token auth with apikey
+        if (strlen((string)$token) && strlen((string)$salt) && strlen((string)$username)) {
+            $sql        = 'SELECT `apikey` FROM `user` WHERE `username` = ?';
+            $db_results = Dba::read($sql, [$username]);
+            $row        = Dba::fetch_assoc($db_results);
+            $hash_token = hash('md5', ($row['apikey'] . $salt));
+            if ($token == $hash_token) {
+                return [
+                    'success' => true,
+                    'type' => 'api',
+                    'username' => $username
+                ];
+            }
+        }
+
+        return [];
+    }
+
+    /**
+     * This is called when you want to log out and nuke your session.
+     * This is the function used for the Ajax logouts, if no id is passed
+     * it tries to find one from the session,
+     */
+    public function logout(string $key = '', bool $relogin = true): void
+    {
+        // If no key is passed try to find the session id
+        $key = $key ? $key : session_id();
+
+        // Nuke the cookie before all else
+        Session::destroy($key);
+        if ((!$relogin) && $this->configContainer->get('logout_redirect')) {
+            $target = $this->configContainer->get('logout_redirect');
+        } else {
+            $target = $this->configContainer->get('web_path') . '/login.php';
+        }
+
+        // Do a quick check to see if this is an AJAXed logout request
+        // if so use the iframe to redirect
+        if (defined('AJAX_INCLUDE')) {
+            ob_end_clean();
+            ob_start();
+
+            xoutput_headers();
+
+            $results            = array();
+            $results['rfc3514'] = '<script>reloadRedirect("' . $target . '")</script>';
+            echo (string)xoutput_from_array($results);
+        } else {
+            /* Redirect them to the login page */
+            header('Location: ' . $target);
+        }
     }
 }

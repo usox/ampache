@@ -20,11 +20,34 @@
  *
  */
 
+declare(strict_types=0);
+
 namespace Ampache\Module\Authentication\Authenticator;
 
-interface AuthenticatorInterface
-{
-    public function auth(string $username, string $password): array;
+use Ampache\Module\System\Core;
 
-    public function postAuth(): ?array;
+final class HttpAuthenticator implements AuthenticatorInterface
+{
+    public function auth(string $username, string $password): array
+    {
+        unset($password);
+        $results = array();
+        if (Core::get_server('REMOTE_USER') == $username || Core::get_server('HTTP_REMOTE_USER') == $username) {
+            $results['success']  = true;
+            $results['type']     = 'http';
+            $results['username'] = $username;
+            $results['name']     = $username;
+            $results['email']    = '';
+        } else {
+            $results['success'] = false;
+            $results['error']   = 'HTTP auth login attempt failed';
+        }
+
+        return $results;
+    }
+
+    public function postAuth(): ?array
+    {
+        return null;
+    }
 }

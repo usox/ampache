@@ -24,15 +24,25 @@ declare(strict_types=1);
 
 namespace Ampache\Module\Authentication;
 
+use Ampache\Config\ConfigContainerInterface;
 use Ampache\Module\Authentication\Authenticator\DatabaseAuthenticator;
+use Ampache\Module\Authentication\Authenticator\ExternalAuthenticator;
+use Ampache\Module\Authentication\Authenticator\HttpAuthenticator;
+use Ampache\Module\Authentication\Authenticator\OpenIdAuthenticator;
+use Ampache\Module\Authentication\Authenticator\PamAuthenticator;
 use Psr\Container\ContainerInterface;
 use function DI\factory;
 
 return [
     AuthenticationManagerInterface::class => factory(static function (ContainerInterface $dic): AuthenticationManagerInterface {
         return new AuthenticationManager(
+            $dic->get(ConfigContainerInterface::class),
             [
                 'mysql' => $dic->get(DatabaseAuthenticator::class),
+                'pam' => $dic->get(PamAuthenticator::class),
+                'external' => $dic->get(ExternalAuthenticator::class),
+                'http' => $dic->get(HttpAuthenticator::class),
+                'openid' => $dic->get(OpenIdAuthenticator::class),
             ]
         );
     }),

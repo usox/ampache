@@ -78,4 +78,9 @@ final class DatabaseAuthenticator implements AuthenticatorInterface
             'error' => 'MySQL login attempt failed'
         ];
     }
+
+    public function postAuth(): ?array
+    {
+        return null;
+    }
 }

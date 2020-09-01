@@ -20,11 +20,38 @@
  *
  */
 
+declare(strict_types=0);
+
 namespace Ampache\Module\Authentication\Authenticator;
 
-interface AuthenticatorInterface
+final class PamAuthenticator implements AuthenticatorInterface
 {
-    public function auth(string $username, string $password): array;
+    public function auth(string $username, string $password): array
+    {
+        $results = [];
+        if (!function_exists('pam_auth')) {
+            $results['success'] = false;
+            $results['error']   = 'The PAM PHP module is not installed';
 
-    public function postAuth(): ?array;
+            return $results;
+        }
+
+        $password = scrub_in($password);
+
+        if (pam_auth($username, $password)) {
+            $results['success']  = true;
+            $results['type']     = 'pam';
+            $results['username'] = $username;
+        } else {
+            $results['success'] = false;
+            $results['error']   = 'PAM login attempt failed';
+        }
+
+        return $results;
+    }
+
+    public function postAuth(): ?array
+    {
+        return null;
+    }
 }

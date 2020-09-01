@@ -151,6 +151,7 @@ set_memory_limit($results['memory_limit']);
 
 /**** END Set PHP Vars ****/
 
+
 // If we want a session
 if (!defined('NO_SESSION') && AmpConfig::get('use_auth')) {
     // Verify their session
