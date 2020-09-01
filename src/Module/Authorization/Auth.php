@@ -25,6 +25,7 @@ declare(strict_types=0);
 namespace Ampache\Module\Authorization;
 
 use Ampache\Config\AmpConfig;
+use Ampache\Module\Authentication\Authenticator\DatabaseAuthenticator;
 use Auth_OpenID;
 use Auth_OpenID_PAPE_Request;
 use Auth_OpenID_SRegRequest;
@@ -109,16 +110,37 @@ class Auth
             return $token_check;
         }
 
+        $auth_mapping = [
+            'mysql' => static function (string $username, string $password): array {
+                return self::mysql_auth($username, $password);
+            },
+            'pam' => static function (string $username, string $password): array {
+                return self::pam_auth($username, $password);
+            },
+            'external' => static function (string $username, string $password): array {
+                return self::external_auth($username, $password);
+            },
+            'ldap' => static function (string $username, string $password): array {
+                return Ldap::auth($username, $password);
+            },
+            'http' => static function (string $username, string $password): array {
+                return self::http_auth($username, $password);
+            },
+            'openid' => static function (string $username, string $password): array {
+                return self::openid_auth($username, $password);
+            },
+        ];
+
         $results = array();
         // If no token check the regular methods
         foreach (AmpConfig::get('auth_methods') as $method) {
-            $function_name = $method . '_auth';
+            $authenticator = $authenticators[$method] ?? null;
 
-            if (!method_exists(Auth::class, $function_name)) {
+            if ($authenticator === null) {
                 continue;
             }
 
-            $results = self::$function_name($username, $password);
+            $results = $authenticator($username, $password);
             if ($results['success'] || ($allow_ui && !empty($results['ui_required']))) {
                 break;
             }
@@ -291,17 +313,6 @@ class Auth
             'success' => false,
             'error' => 'The external authenticator did not accept the login'
         );
-    }
-
-    /**
-     * ldap_auth
-     * @param string $username
-     * @param string $password
-     * @return array
-     */
-    private static function ldap_auth($username, $password)
-    {
-        return Ldap::auth($username, $password);
     }
 
     /**
