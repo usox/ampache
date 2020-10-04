@@ -77,11 +77,11 @@ use Ampache\Module\Util\ZipHandlerInterface;
 <?php
     if (User::is_registered()) {
         if (AmpConfig::get('ratings')) { ?>
-    <td class="cel_rating" id="rating_<?php echo $libitem->id; ?>_playlist"><?php Rating::show($libitem->id, 'playlist'); ?></td>
+    <td class="cel_rating" id="rating_<?php echo $libitem->id; ?>_playlist"><?php echo Rating::show($libitem->id, 'playlist'); ?></td>
     <?php
         }
         if (AmpConfig::get('userflags')) { ?>
-    <td class="cel_userflag" id="userflag_<?php echo $libitem->id; ?>_playlist"><?php Userflag::show($libitem->id, 'playlist'); ?></td>
+    <td class="cel_userflag" id="userflag_<?php echo $libitem->id; ?>_playlist"><?php echo Userflag::show($libitem->id, 'playlist'); ?></td>
     <?php
         }
     } ?>

@@ -98,11 +98,11 @@ if ($video_type != 'video') {
 <?php
     if (User::is_registered()) {
         if (AmpConfig::get('ratings')) { ?>
-    <td class="cel_rating" id="rating_<?php echo $libitem->id ?>_video"><?php Rating::show($libitem->id, 'video') ?></td>
+    <td class="cel_rating" id="rating_<?php echo $libitem->id ?>_video"><?php echo Rating::show($libitem->id, 'video') ?></td>
     <?php
         }
         if (AmpConfig::get('userflags')) { ?>
-    <td class="cel_userflag" id="userflag_<?php echo $libitem->id ?>_video"><?php Userflag::show($libitem->id, 'video') ?></td>
+    <td class="cel_userflag" id="userflag_<?php echo $libitem->id ?>_video"><?php echo Userflag::show($libitem->id, 'video') ?></td>
     <?php
         }
     } ?>

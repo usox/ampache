@@ -51,7 +51,7 @@ $button_flip_state_id = 'button_flip_state_' . $song->id; ?>
     <?php $rating    = new Rating($song->id, 'song'); ?>
     <dt class="<?php echo $rowparity; ?>"><?php echo T_('Rating'); ?></dt>
     <dd class="<?php echo $rowparity; ?>">
-        <div id="rating_<?php echo $song->id; ?>_song"><?php Rating::show($song->id, 'song');
+        <div id="rating_<?php echo $song->id; ?>_song"><?php echo Rating::show($song->id, 'song');
         $average = $rating->get_average_rating();
         if ($average > 0) {
             /* HINT: Average rating. e.g. (average 3.7)*/
@@ -66,7 +66,7 @@ $button_flip_state_id = 'button_flip_state_' . $song->id; ?>
     <?php $rowparity = Ui::flip_class(); ?>
     <dt class="<?php echo $rowparity; ?>"><?php echo T_('Fav.'); ?></dt>
     <dd class="<?php echo $rowparity; ?>">
-        <div id="userflag_<?php echo $song->id; ?>_song"><?php Userflag::show($song->id, 'song'); ?>
+        <div id="userflag_<?php echo $song->id; ?>_song"><?php echo Userflag::show($song->id, 'song'); ?>
         </div>
     </dd>
     <?php

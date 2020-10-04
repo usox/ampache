@@ -1953,46 +1953,6 @@ function theme_exists($theme_name)
 } // theme_exists
 
 /**
- * show_rating
- * This takes an artist id and includes the right file
- * @param integer $object_id
- * @param string $type
- */
-function show_rating($object_id, $type)
-{
-    $rating = new Rating($object_id, $type);
-
-    require Ui::find_template('show_object_rating.inc.php');
-} // show_rating
-
-/**
- * get_rating_name
- * This takes a score and returns the name that we should use
- * @param string $score
- * @return string
- */
-function get_rating_name($score)
-{
-    switch ($score) {
-        case '0':
-            return T_("Don't Play");
-        case '1':
-            return T_("It's Pretty Bad");
-        case '2':
-            return T_("It's Ok");
-        case '3':
-            return T_("It's Pretty Good");
-        case '4':
-            return T_("I Love It!");
-        case '5':
-            return T_("It's Insane");
-        // I'm fired
-        default:
-            return T_("Off the Charts!");
-    } // end switch
-} // get_rating_name
-
-/**
  * Used in graph class als format string
  *
  * @see \Ampache\Module\Util\Graph

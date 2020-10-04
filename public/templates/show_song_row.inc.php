@@ -88,13 +88,13 @@ if ($libitem->enabled || Access::check('interface', 50)) { ?>
     if (User::is_registered()) {
         if (AmpConfig::get('ratings')) { ?>
             <td class="cel_rating" id="rating_<?php echo $libitem->id; ?>_song">
-                <?php Rating::show($libitem->id, 'song') ?>
+                <?php echo Rating::show($libitem->id, 'song') ?>
             </td>
     <?php
         }
         if (AmpConfig::get('userflags')) { ?>
             <td class="cel_userflag" id="userflag_<?php echo $libitem->id; ?>_song">
-                <?php Userflag::show($libitem->id, 'song') ?>
+                <?php echo Userflag::show($libitem->id, 'song') ?>
             </td>
     <?php
         }

@@ -92,4 +92,11 @@ final class ConfigContainer implements ConfigContainerInterface
             explode(',', $typeList)
         );
     }
+
+    public function isFeatureEnabled(string $feature): bool
+    {
+        $value = $this->configuration[$feature] ?? false;
+
+        return $value === 'true' || $value === true || $value === 1 || $value === '1';
+    }
 }

@@ -49,13 +49,13 @@ Ui::show_box_top('<div id="playlist_row_' . $playlist->id . '">' . $title . '</d
 <?php if (User::is_registered()) { ?>
     <?php if (AmpConfig::get('ratings')) { ?>
     <div style="display:table-cell;" id="rating_<?php echo $playlist->id; ?>_playlist">
-            <?php Rating::show($playlist->id, 'playlist'); ?>
+            <?php echo Rating::show($playlist->id, 'playlist'); ?>
     </div>
     <?php
     } ?>
     <?php if (AmpConfig::get('userflags')) { ?>
     <div style="display:table-cell;" id="userflag_<?php echo $playlist->id; ?>_playlist">
-            <?php Userflag::show($playlist->id, 'playlist'); ?>
+            <?php echo Userflag::show($playlist->id, 'playlist'); ?>
     </div>
     <?php
     } ?>

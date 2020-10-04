@@ -312,6 +312,12 @@ class Song extends database_object implements Media, library_item
      */
     public $f_license;
 
+    /** @var int */
+    public $skip_cnt;
+
+    /** @var int */
+    public $object_cnt;
+
     /* Setting Variables */
     /**
      * @var boolean $_fake

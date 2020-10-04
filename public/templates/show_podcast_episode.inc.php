@@ -41,7 +41,7 @@ use Ampache\Module\Util\Ui;
         <?php $rowparity = Ui::flip_class(); ?>
         <dt class="<?php echo $rowparity; ?>"><?php echo T_('Rating'); ?></dt>
         <dd class="<?php echo $rowparity; ?>">
-            <div id="rating_<?php echo $episode->id; ?>_podcast_episode"><?php Rating::show($episode->id,
+            <div id="rating_<?php echo $episode->id; ?>_podcast_episode"><?php echo Rating::show($episode->id,
                     'podcast_episode'); ?>
             </div>
         </dd>
@@ -52,7 +52,7 @@ use Ampache\Module\Util\Ui;
         <?php $rowparity = Ui::flip_class(); ?>
         <dt class="<?php echo $rowparity; ?>"><?php echo T_('Fav.'); ?></dt>
         <dd class="<?php echo $rowparity; ?>">
-            <div id="userflag_<?php echo $episode->id; ?>_podcast_episode"><?php Userflag::show($episode->id,
+            <div id="userflag_<?php echo $episode->id; ?>_podcast_episode"><?php echo Userflag::show($episode->id,
                     'podcast_episode'); ?>
             </div>
         </dd>

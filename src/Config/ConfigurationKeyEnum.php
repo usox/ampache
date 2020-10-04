@@ -30,10 +30,23 @@ namespace Ampache\Config;
  */
 final class ConfigurationKeyEnum
 {
-    public const SESSION_NAME      = 'session_name';
-    public const BACKEND_WEBDAV    = 'webdav_backend';
-    public const RAW_WEB_PATH      = 'raw_web_path';
-    public const USE_AUTH          = 'use_auth';
-    public const WEB_PATH          = 'web_path';
-    public const ALLOWED_ZIP_TYPES = 'allow_zip_types';
+    public const SESSION_NAME       = 'session_name';
+    public const BACKEND_WEBDAV     = 'webdav_backend';
+    public const RAW_WEB_PATH       = 'raw_web_path';
+    public const USE_AUTH           = 'use_auth';
+    public const WEB_PATH           = 'web_path';
+    public const ALLOWED_ZIP_TYPES  = 'allow_zip_types';
+    public const USER_FLAGS         = 'userflags';
+    public const WAVEFORM           = 'waveform';
+    public const DIRECTPLAY         = 'directplay';
+    public const SOCIABLE           = 'sociable';
+    public const SHARE              = 'share';
+    public const STATISTICAL_GRAPHS = 'statistical_graphs';
+    public const UPLOAD_ALLOW_EDIT  = 'upload_allow_edit';
+    public const LABEL              = 'label';
+    public const SHOW_LYRICS        = 'show_lyrics';
+    public const LICENSING          = 'licensing';
+    public const SHOW_SKIPPED_TIMES = 'show_skipped_times';
+    public const SHOW_PLAYED_TIMES  = 'show_played_times';
+    public const DEMO_MODE          = 'demo_mode';
 }

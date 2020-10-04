@@ -76,13 +76,13 @@ $zipHandler = $dic->get(ZipHandlerInterface::class);
 <?php if (User::is_registered()) { ?>
     <?php if (AmpConfig::get('ratings')) { ?>
     <div style="display:table-cell;" id="rating_<?php echo $album->id; ?>_album">
-            <?php Rating::show($album->id, 'album'); ?>
+            <?php echo Rating::show($album->id, 'album'); ?>
     </div>
     <?php
         } ?>
     <?php if (AmpConfig::get('userflags')) { ?>
     <div style="display:table-cell;" id="userflag_<?php echo $album->id; ?>_album">
-            <?php Userflag::show($album->id, 'album'); ?>
+            <?php echo Userflag::show($album->id, 'album'); ?>
     </div>
     <?php
         } ?>

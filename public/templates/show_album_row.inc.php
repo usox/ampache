@@ -91,11 +91,11 @@ if (Art::is_enabled()) {
 <?php
     if (User::is_registered()) {
         if (AmpConfig::get('ratings')) { ?>
-            <td class="cel_rating" id="rating_<?php echo $libitem->id; ?>_album"><?php Rating::show($libitem->id, 'album'); ?></td>
+            <td class="cel_rating" id="rating_<?php echo $libitem->id; ?>_album"><?php echo Rating::show($libitem->id, 'album'); ?></td>
     <?php
         }
         if (AmpConfig::get('userflags')) { ?>
-            <td class="cel_userflag" id="userflag_<?php echo $libitem->id; ?>_album"><?php Userflag::show($libitem->id, 'album'); ?></td>
+            <td class="cel_userflag" id="userflag_<?php echo $libitem->id; ?>_album"><?php echo Userflag::show($libitem->id, 'album'); ?></td>
     <?php
         }
     } ?>

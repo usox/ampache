@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-/* vim:set softtabstop=4 shiftwidth=4 expandtab: */
 /**
+ * vim:set softtabstop=4 shiftwidth=4 expandtab:
  *
  * LICENSE: GNU Affero General Public License, version 3 (AGPL-3.0-or-later)
  * Copyright 2001 - 2020 Ampache.org
@@ -109,7 +109,6 @@ return [
     ShoutApplication::class => autowire(ShoutApplication::class),
     ShowGetApplication::class => autowire(ShowGetApplication::class),
     SmartPlaylistApplication::class => autowire(SmartPlaylistApplication::class),
-    SongApplication::class => autowire(SongApplication::class),
     StatisticGraphApplication::class => autowire(StatisticGraphApplication::class),
     StatsApplication::class => autowire(StatsApplication::class),
     StreamApplication::class => autowire(StreamApplication::class),

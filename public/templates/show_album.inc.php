@@ -77,7 +77,7 @@ if ($directplay_limit > 0) {
     <?php if (AmpConfig::get('ratings')) {
             $rating = new Rating($album->id, 'album'); ?>
     <div style="display:table-cell;" id="rating_<?php echo $album->id; ?>_album">
-            <?php Rating::show($album->id, 'album');
+            <?php echo Rating::show($album->id, 'album');
             $average = $rating->get_average_rating();
             if ($average > 0) {
                 /* HINT: Average rating. e.g. (average 3.7) */
@@ -88,7 +88,7 @@ if ($directplay_limit > 0) {
         } ?>
     <?php if (AmpConfig::get('userflags')) { ?>
     <div style="display:table-cell;" id="userflag_<?php echo $album->id; ?>_album">
-            <?php Userflag::show($album->id, 'album'); ?>
+            <?php echo Userflag::show($album->id, 'album'); ?>
     </div>
     <?php
         } ?>

@@ -1,6 +1,6 @@
 <?php
-/* vim:set softtabstop=4 shiftwidth=4 expandtab: */
-/**
+/*
+ * vim:set softtabstop=4 shiftwidth=4 expandtab:
  *
  * LICENSE: GNU Affero General Public License, version 3 (AGPL-3.0-or-later)
  * Copyright 2001 - 2020 Ampache.org
@@ -20,20 +20,9 @@
  *
  */
 
-/* Create some variables we are going to need */
+namespace Ampache\Module\Application;
 
-use Ampache\Config\AmpConfig;
-use Ampache\Module\Api\Ajax;
-
-$web_path = AmpConfig::get('web_path');
-$base_url = '?action=set_userflag&userflag_type=' . $userflag->type . '&object_id=' . $userflag->id;
-$othering = false;
-$flagged  = (!$userflag->get_flag()) ? false : true; ?>
-<div class="userflag">
-<?php
-    if ($flagged) {
-        echo Ajax::text($base_url . '&userflag=0', '', 'userflag_i_' . $userflag->id . '_' . $userflag->type, '', 'userflag_true');
-    } else {
-        echo Ajax::text($base_url . '&userflag=1', '', 'userflag_i_' . $userflag->id . '_' . $userflag->type, '', 'userflag_false');
-    } ?>
-</div>
+final class ApplicationTypeEnum
+{
+    public const SONG = 'application.type.song';
+}

@@ -33,9 +33,13 @@ use Ampache\Config\Init\InitializationHandlerGetText;
 use Ampache\Config\Init\InitializationHandlerGlobals;
 use Ampache\Module\Util\EnvironmentInterface;
 use getID3;
+use Http\Message\RequestFactory;
 use MusicBrainz\HttpAdapters\RequestsHttpAdapter;
 use MusicBrainz\MusicBrainz;
+use Nyholm\Psr7\Factory\Psr17Factory;
+use Nyholm\Psr7Server\ServerRequestCreator;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use SpotifyWebAPI\SpotifyWebAPI;
 use function DI\autowire;
 use function DI\factory;
@@ -66,5 +70,17 @@ return [
                 $c->get(InitializationHandlerGlobals::class),
             ]
         );
+    }),
+    ServerRequestInterface::class => factory(static function (): ServerRequestInterface {
+        $psr17Factory = new Psr17Factory();
+
+        $creator = new ServerRequestCreator(
+            $psr17Factory,
+            $psr17Factory,
+            $psr17Factory,
+            $psr17Factory
+        );
+
+        return $creator->fromGlobals();
     }),
 ];

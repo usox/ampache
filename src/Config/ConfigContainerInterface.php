@@ -71,4 +71,9 @@ interface ConfigContainerInterface
      * Return a list of types which are zip-able
      */
     public function getTypesAllowedForZip(): array;
+    
+    /**
+     * Check if a certain feature is enabled
+     */
+    public function isFeatureEnabled(string $feature): bool;
 }
