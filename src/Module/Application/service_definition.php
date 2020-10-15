@@ -31,5 +31,5 @@ return [
     Song\ConfirmDeleteAction::class => autowire(Song\ConfirmDeleteAction::class),
     Song\ShowLyricsAction::class => autowire(Song\ShowLyricsAction::class),
     Song\ShowSongAction::class => autowire(Song\ShowSongAction::class),
-    ApplicationTypeEnum::SONG => autowire(ApplicationRunner::class),
+    ApplicationRunner::class => autowire(ApplicationRunner::class),
 ];

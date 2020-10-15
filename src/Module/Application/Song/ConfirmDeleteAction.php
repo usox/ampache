@@ -32,6 +32,7 @@ use Ampache\Module\Application\ApplicationActionInterface;
 use Ampache\Module\System\LegacyLogger;
 use Ampache\Module\Util\Ui;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 
 final class ConfirmDeleteAction implements ApplicationActionInterface
@@ -48,8 +49,9 @@ final class ConfirmDeleteAction implements ApplicationActionInterface
         $this->logger          = $logger;
     }
 
-    public function run(): ?ResponseInterface
-    {
+    public function run(
+        ServerRequestInterface $request
+    ): ?ResponseInterface {
         Ui::show_header();
 
         $response = null;

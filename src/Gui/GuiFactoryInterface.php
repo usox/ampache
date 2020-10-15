@@ -2,7 +2,7 @@
 /*
  * vim:set softtabstop=4 shiftwidth=4 expandtab:
  *
- * LICENSE: GNU Affero General Public License, version 3 (AGPL-3.0-or-later)
+ *  LICENSE: GNU Affero General Public License, version 3 (AGPL-3.0-or-later)
  * Copyright 2001 - 2020 Ampache.org
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,9 +20,12 @@
  *
  */
 
-namespace Ampache\Module\Application;
+namespace Ampache\Gui;
 
-final class ApplicationTypeEnum
+use Ampache\Gui\Song\SongViewAdapterInterface;
+use Ampache\Model\Song;
+
+interface GuiFactoryInterface
 {
-    public const SONG = 'application.type.song';
+    public function createSongViewAdapter(Song $song): SongViewAdapterInterface;
 }

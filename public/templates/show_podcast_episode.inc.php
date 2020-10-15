@@ -90,7 +90,7 @@ use Ampache\Module\Util\Ui;
     } ?>
         <?php if (Access::check('interface', 25)) { ?>
             <?php if (AmpConfig::get('share')) { ?>
-                <?php Share::display_ui('podcast_episode', $episode->id, false); ?>
+                <?php echo Share::display_ui('podcast_episode', $episode->id, false); ?>
             <?php
         } ?>
         <?php

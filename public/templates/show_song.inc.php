@@ -112,7 +112,7 @@ $button_flip_state_id = 'button_flip_state_' . $song->id; ?>
     } ?>
         <?php if (Access::check('interface', 25)) { ?>
         <?php if (AmpConfig::get('share')) { ?>
-        <?php Share::display_ui('song', $song->id, false); ?>
+        <?php echo Share::display_ui('song', $song->id, false); ?>
         <?php
             } ?>
         <?php

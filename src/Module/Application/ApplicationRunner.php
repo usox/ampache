@@ -28,7 +28,6 @@ namespace Ampache\Module\Application;
 use Ampache\Module\System\LegacyLogger;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
-use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 
@@ -47,6 +46,7 @@ final class ApplicationRunner
     }
 
     /**
+     * @param ServerRequestInterface $request
      * @param array<string, string> $action_list A dict containing request keys and handler class names
      * @param string $default_action The request key for the default action
      */
@@ -55,9 +55,9 @@ final class ApplicationRunner
         array $action_list,
         string $default_action
     ): void {
-        $action_name = $request->getQueryParams()['action'] ?? '';
+        $action_name = $request->getParsedBody()['action'] ?? $request->getQueryParams()['action'] ?? '';
 
-        $handler_name = $action_list[$action_name] ?? $action_list[$default_action];
+        $handler_name = $action_list[$action_name] ?? $action_list[$default_action] ?? '';
 
         try {
             /** @var ApplicationActionInterface $handler */
@@ -76,12 +76,11 @@ final class ApplicationRunner
             [LegacyLogger::CONTEXT_TYPE => __CLASS__]
         );
 
-        $response = $handler->run();
+        $response = $handler->run($request);
 
-        if ($response === null) {
+        if ($response !== null) {
+            // @todo emit psr7 response
             return;
         }
-
-        // @todo emit psr7 response
     }
 }

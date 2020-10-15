@@ -25,12 +25,10 @@ declare(strict_types=1);
 namespace Ampache\Gui;
 
 use Ampache\Gui\Song\SongView;
-use Ampache\Gui\Song\SongViewAdapter;
-use Ampache\Gui\Song\SongViewAdapterInterface;
 use Ampache\Gui\Song\SongViewInterface;
 use function DI\autowire;
 
 return [
     SongViewInterface::class => autowire(SongView::class),
-    SongViewAdapterInterface::class => autowire(SongViewAdapter::class),
+    GuiFactoryInterface::class => autowire(GuiFactory::class),
 ];

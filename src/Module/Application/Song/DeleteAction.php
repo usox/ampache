@@ -29,6 +29,7 @@ use Ampache\Config\ConfigurationKeyEnum;
 use Ampache\Module\Application\ApplicationActionInterface;
 use Ampache\Module\Util\Ui;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 final class DeleteAction implements ApplicationActionInterface
 {
@@ -40,8 +41,9 @@ final class DeleteAction implements ApplicationActionInterface
         $this->configContainer = $configContainer;
     }
 
-    public function run(): ?ResponseInterface
-    {
+    public function run(
+        ServerRequestInterface $request
+    ): ?ResponseInterface {
         Ui::show_header();
         $response = null;
         if ($this->configContainer->isFeatureEnabled(ConfigurationKeyEnum::DEMO_MODE) === true) {

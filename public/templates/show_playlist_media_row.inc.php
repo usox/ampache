@@ -88,7 +88,7 @@ if (!isset($libitem->enabled) || $libitem->enabled || Access::check('interface',
     }
     if (Access::check('interface', 25)) {
         if (AmpConfig::get('share')) {
-            Share::display_ui($object_type, $libitem->id, false);
+            echo Share::display_ui($object_type, $libitem->id, false);
         }
     }
     if ($playlist) {

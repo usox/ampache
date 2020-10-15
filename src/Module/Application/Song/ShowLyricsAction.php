@@ -28,11 +28,13 @@ use Ampache\Model\Song;
 use Ampache\Module\Application\ApplicationActionInterface;
 use Ampache\Module\Util\Ui;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 final class ShowLyricsAction implements ApplicationActionInterface
 {
-    public function run(): ?ResponseInterface
-    {
+    public function run(
+        ServerRequestInterface $request
+    ): ?ResponseInterface {
         Ui::show_header();
 
         $song = new Song($_REQUEST['song_id']);

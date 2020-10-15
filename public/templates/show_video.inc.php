@@ -110,7 +110,7 @@ $subtitles = $video->get_subtitles();
     } ?>
     <?php if (Access::check('interface', 25)) { ?>
             <?php if (AmpConfig::get('share')) { ?>
-                <?php Share::display_ui('video', $video->id, false); ?>
+                <?php echo Share::display_ui('video', $video->id, false); ?>
             <?php
         } ?>
         <?php

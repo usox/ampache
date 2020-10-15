@@ -176,7 +176,7 @@ if (AmpConfig::get('sociable') && $owner_id > 0) {
     <?php if (Access::check('interface', 25)) { ?>
             <?php if (AmpConfig::get('share')) { ?>
             <li>
-                <?php Share::display_ui('album', $album->id); ?>
+                <?php echo Share::display_ui('album', $album->id); ?>
             </li>
             <?php
         } ?>

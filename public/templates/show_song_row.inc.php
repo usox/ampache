@@ -109,7 +109,7 @@ if ($libitem->enabled || Access::check('interface', 50)) { ?>
     }
     if (Access::check('interface', 25)) {
         if (AmpConfig::get('share')) {
-            Share::display_ui('song', $libitem->id, false);
+            echo Share::display_ui('song', $libitem->id, false);
         }
     }
     if (Access::check_function('download')) { ?>

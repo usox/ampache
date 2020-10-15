@@ -2334,13 +2334,21 @@ class Song extends database_object implements Media, library_item
     /**
      * Show custom play actions.
      */
-    public function show_custom_play_actions()
+    public function show_custom_play_actions(): string
     {
         $actions = Song::get_custom_play_actions();
+        
+        $buttons = '';
         foreach ($actions as $action) {
-            echo Ajax::button('?page=stream&action=directplay&object_type=song&object_id=' . $this->id . '&custom_play_action=' . $action['index'],
-                $action['icon'], T_($action['title']), $action['icon'] . '_song_' . $this->id);
+            $buttons .= Ajax::button(
+                '?page=stream&action=directplay&object_type=song&object_id=' . $this->id . '&custom_play_action=' . $action['index'],
+                $action['icon'],
+                T_($action['title']),
+                $action['icon'] . '_song_' . $this->id
+            );
         }
+        
+        return $buttons;
     }
 
     /**

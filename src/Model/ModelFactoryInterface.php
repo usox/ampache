@@ -20,6 +20,8 @@
  *
  */
 
+declare(strict_types=0);
+
 namespace Ampache\Model;
 
 interface ModelFactoryInterface
@@ -35,4 +37,13 @@ interface ModelFactoryInterface
         ?int $songId = null,
         string $limitThreshold = ''
     ): Song;
+
+    public function createRating(
+        int $objectId,
+        string $typeId
+    ): Rating;
+
+    public function createUser(
+        ?int $userId = null
+    ): User;
 }

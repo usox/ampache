@@ -23,10 +23,13 @@
 namespace Ampache\Module\Application;
 
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 interface ApplicationActionInterface
 {
-    public function run(): ?ResponseInterface;
+    public function run(
+        ServerRequestInterface $request
+    ): ?ResponseInterface;
 
     public static function getRequestKey(): string;
 }

@@ -37,4 +37,64 @@ interface SongViewAdapterInterface
     public function getUserFlags(): string;
 
     public function getWaveformUrl(): string;
+
+    public function isDirectplayEnabled(): bool;
+
+    public function canAutoplayNext(): bool;
+
+    public function canAppendNext(): bool;
+
+    public function getDirectplayButton(): string;
+
+    public function getAutoplayNextButton(): string;
+
+    public function getAppendNextButton(): string;
+
+    public function getCustomPlayActions(): string;
+
+    public function getTemporaryPlaylistButton(): string;
+
+    public function canPostShout(): bool;
+
+    public function getPostShoutUrl(): string;
+
+    public function getPostShoutIcon(): string;
+
+    public function canShare(): string;
+
+    public function getShareUi(): string;
+
+    public function canDownload(): bool;
+
+    public function getExternalPlayUrl(): string;
+
+    public function getExternalPlayIcon(): string;
+
+    public function getDownloadUrl(): string;
+
+    public function getDownloadIcon(): string;
+
+    public function canDisplayStats(): bool;
+
+    public function getDisplayStatsUrl(): string;
+
+    public function getDisplayStatsIcon(): string;
+
+    public function isEditable(): bool;
+
+    public function getEditButtonTitle(): string;
+
+    public function getEditIcon(): string;
+
+    public function canToggleState(): bool;
+
+    public function getToggleStateButton(): string;
+
+    public function getDeletionUrl(): string;
+
+    public function getDeletionIcon(): string;
+
+    public function canBeDeleted(): bool;
+
+    public function getProperties(): array;
 }

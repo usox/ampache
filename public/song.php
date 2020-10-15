@@ -24,7 +24,6 @@
 declare(strict_types=1);
 
 use Ampache\Module\Application\ApplicationRunner;
-use Ampache\Module\Application\ApplicationTypeEnum;
 use Ampache\Module\Application\Song\ConfirmDeleteAction;
 use Ampache\Module\Application\Song\DeleteAction;
 use Ampache\Module\Application\Song\ShowLyricsAction;
@@ -35,8 +34,7 @@ use Psr\Http\Message\ServerRequestInterface;
 /** @var ContainerInterface $dic */
 $dic = require __DIR__ . '/../src/Config/Init.php';
 
-/** @var ApplicationRunner $application */
-$application = $dic->get(ApplicationTypeEnum::SONG);
+$application = $dic->get(ApplicationRunner::class);
 $application->run(
     $dic->get(ServerRequestInterface::class),
     [

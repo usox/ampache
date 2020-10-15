@@ -54,4 +54,20 @@ final class ModelFactory implements ModelFactoryInterface
             $limitThreshold
         );
     }
+    
+    public function createRating(
+        int $objectId,
+        string $typeId
+    ): Rating {
+        return new Rating(
+            $objectId,
+            $typeId
+        );
+    }
+    
+    public function createUser(
+        ?int $userId = null
+    ): User {
+        return new User($userId);
+    }
 }

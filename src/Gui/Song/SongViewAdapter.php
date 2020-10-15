@@ -28,10 +28,10 @@ use Ampache\Config\AmpConfig;
 use Ampache\Config\ConfigContainerInterface;
 use Ampache\Config\ConfigurationKeyEnum;
 use Ampache\Model\Catalog;
+use Ampache\Model\ModelFactoryInterface;
 use Ampache\Model\Rating;
 use Ampache\Model\Share;
 use Ampache\Model\Song;
-use Ampache\Model\User;
 use Ampache\Model\Userflag;
 use Ampache\Module\Api\Ajax;
 use Ampache\Module\Authorization\Access;
@@ -43,13 +43,17 @@ final class SongViewAdapter implements SongViewAdapterInterface
 {
     private ConfigContainerInterface $configContainer;
 
+    private ModelFactoryInterface $modelFactory;
+
     private Song $song;
 
     public function __construct(
         ConfigContainerInterface $configContainer,
+        ModelFactoryInterface $modelFactory,
         Song $song
     ) {
         $this->configContainer = $configContainer;
+        $this->modelFactory    = $modelFactory;
         $this->song            = $song;
     }
 
@@ -65,7 +69,10 @@ final class SongViewAdapter implements SongViewAdapterInterface
 
     public function getAverageRating(): string
     {
-        $rating = new Rating($this->song->getId(), 'song');
+        $rating = $this->modelFactory->createRating(
+            $this->song->getId(),
+            'song'
+        );
 
         return (string) $rating->get_average_rating();
     }
@@ -147,10 +154,7 @@ final class SongViewAdapter implements SongViewAdapterInterface
 
     public function getCustomPlayActions(): string
     {
-        // @todo refactor
-        $this->song->show_custom_play_actions();
-
-        return '';
+        return $this->song->show_custom_play_actions();
     }
 
     public function getTemporaryPlaylistButton(): string
@@ -194,10 +198,7 @@ final class SongViewAdapter implements SongViewAdapterInterface
 
     public function getShareUi(): string
     {
-        // @todo refactor
-        Share::display_ui('song', $this->song->getId(), false);
-
-        return '';
+        return Share::display_ui('song', $this->song->getId(), false);
     }
 
     public function canDownload(): bool
@@ -390,7 +391,7 @@ final class SongViewAdapter implements SongViewAdapterInterface
 
         $owner_id = $this->song->get_user_owner();
         if ($this->configContainer->isFeatureEnabled(ConfigurationKeyEnum::SOCIABLE) && $owner_id > 0) {
-            $owner = new User($owner_id);
+            $owner = $this->modelFactory->createUser($owner_id);
             $owner->format();
             $songprops[T_('Uploaded by')]  = $owner->f_link;
         }

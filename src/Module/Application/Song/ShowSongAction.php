@@ -25,13 +25,14 @@ declare(strict_types=0);
 namespace Ampache\Module\Application\Song;
 
 use Ampache\Config\ConfigContainerInterface;
-use Ampache\Gui\Song\SongViewAdapter;
+use Ampache\Gui\GuiFactoryInterface;
 use Ampache\Gui\Song\SongViewInterface;
-use Ampache\Model\Song;
+use Ampache\Model\ModelFactoryInterface;
 use Ampache\Module\Application\ApplicationActionInterface;
 use Ampache\Module\System\LegacyLogger;
 use Ampache\Module\Util\Ui;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 
 final class ShowSongAction implements ApplicationActionInterface
@@ -40,22 +41,32 @@ final class ShowSongAction implements ApplicationActionInterface
 
     private ConfigContainerInterface $configContainer;
 
+    private ModelFactoryInterface $modelFactory;
+
+    private GuiFactoryInterface $guiFactory;
+
     private LoggerInterface $logger;
 
     public function __construct(
         SongViewInterface $songView,
         ConfigContainerInterface $configContainer,
+        ModelFactoryInterface $modelFactory,
+        GuiFactoryInterface $guiFactory,
         LoggerInterface $logger
     ) {
         $this->songView        = $songView;
         $this->logger          = $logger;
+        $this->modelFactory    = $modelFactory;
+        $this->guiFactory      = $guiFactory;
         $this->configContainer = $configContainer;
     }
 
-    public function run(): ?ResponseInterface
-    {
+    public function run(
+        ServerRequestInterface $request
+    ): ?ResponseInterface {
         Ui::show_header();
-        $song = new Song($_REQUEST['song_id']);
+        
+        $song = $this->modelFactory->createSong((int) $_REQUEST['song_id']);
         $song->format();
         $song->fill_ext_info();
         if (!$song->id) {
@@ -63,14 +74,11 @@ final class ShowSongAction implements ApplicationActionInterface
                 'Requested a song that does not exist',
                 [LegacyLogger::CONTEXT_TYPE => __CLASS__]
             );
-            echo T_("You have requested a Song that does not exist.");
+            echo T_('You have requested a Song that does not exist.');
         } else {
             Ui::show_box_top($song->title . ' ' . T_('Details'), 'box box_song_details');
             $code = $this->songView->render(
-                new SongViewAdapter(
-                    $this->configContainer,
-                    $song
-                )
+                $this->guiFactory->createSongViewAdapter($song)
             );
             echo $code;
             Ui::show_box_bottom();
