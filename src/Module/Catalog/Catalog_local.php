@@ -23,6 +23,8 @@
 namespace Ampache\Module\Catalog;
 
 use Ampache\Config\AmpConfig;
+use Ampache\Module\Podcast\PodcastEpisodeDownloaderInterface;
+use Ampache\Module\Podcast\PodcastSyncerInterface;
 use Ampache\Repository\Model\Album;
 use Ampache\Repository\Model\Art;
 use Ampache\Repository\Model\Artist;
@@ -42,6 +44,7 @@ use Ampache\Module\Util\ObjectTypeToClassNameMapper;
 use Ampache\Module\Util\Recommendation;
 use Ampache\Module\Util\Ui;
 use Ampache\Module\Util\VaInfo;
+use Ampache\Repository\PodcastEpisodeRepositoryInterface;
 use Exception;
 
 /**
@@ -921,13 +924,21 @@ class Catalog_local extends Catalog
 
     private function sync_podcasts()
     {
-        $podcasts = self::get_podcasts();
+        $podcasts                 = self::get_podcasts();
+        $podcastSyncer            = static::getPodcastSyncer();
+        $podcastEpisodeDownloader = static::getPodcastEpisodeDownloader();
+
         foreach ($podcasts as $podcast) {
-            $podcast->sync_episodes(false);
-            $episodes = $podcast->get_episodes('pending');
-            foreach ($episodes as $episode_id) {
-                $episode = new Podcast_Episode($episode_id);
-                $episode->gather();
+            $podcastSyncer->sync($podcast, false);
+            $episodeIds = static::getPodcastEpisodeRepository()->getEpisodeIds(
+                $podcast->getId(),
+                'pending'
+            );
+            foreach ($episodeIds as $episodeId) {
+                $podcastEpisodeDownloader->download(
+                    new Podcast_Episode($episodeId)
+                );
+
                 $this->count++;
             }
         }
@@ -1052,4 +1063,34 @@ class Catalog_local extends Catalog
 
         return true;
     } // move_catalog_proc
+
+    /**
+     * @deprecated Inject by constructor
+     */
+    private function getPodcastSyncer(): PodcastSyncerInterface
+    {
+        global $dic;
+
+        return $dic->get(PodcastSyncerInterface::class);
+    }
+
+    /**
+     * @deprecated Inject by constructor
+     */
+    private static function getPodcastEpisodeRepository(): PodcastEpisodeRepositoryInterface
+    {
+        global $dic;
+
+        return $dic->get(PodcastEpisodeRepositoryInterface::class);
+    }
+
+    /**
+     * @deprecated Inject by constructor
+     */
+    private function getPodcastEpisodeDownloader(): PodcastEpisodeDownloaderInterface
+    {
+        global $dic;
+
+        return $dic->get(PodcastEpisodeDownloaderInterface::class);
+    }
 }

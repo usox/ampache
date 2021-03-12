@@ -30,6 +30,7 @@ use Ampache\Module\Application\ApplicationActionInterface;
 use Ampache\Module\Application\Exception\AccessDeniedException;
 use Ampache\Module\Authorization\GuiGatekeeperInterface;
 use Ampache\Module\Catalog\MediaDeletionCheckerInterface;
+use Ampache\Module\Podcast\PodcastEpisodeDeleterInterface;
 use Ampache\Module\System\LegacyLogger;
 use Ampache\Module\Util\UiInterface;
 use Ampache\Repository\Model\ModelFactoryInterface;
@@ -51,18 +52,22 @@ final class ConfirmDeleteAction implements ApplicationActionInterface
 
     private MediaDeletionCheckerInterface $mediaDeletionChecker;
 
+    private PodcastEpisodeDeleterInterface $podcastEpisodeDeleter;
+
     public function __construct(
         ConfigContainerInterface $configContainer,
         UiInterface $ui,
         ModelFactoryInterface $modelFactory,
         LoggerInterface $logger,
-        MediaDeletionCheckerInterface $mediaDeletionChecker
+        MediaDeletionCheckerInterface $mediaDeletionChecker,
+        PodcastEpisodeDeleterInterface $podcastEpisodeDeleter
     ) {
-        $this->configContainer      = $configContainer;
-        $this->ui                   = $ui;
-        $this->modelFactory         = $modelFactory;
-        $this->logger               = $logger;
-        $this->mediaDeletionChecker = $mediaDeletionChecker;
+        $this->configContainer       = $configContainer;
+        $this->ui                    = $ui;
+        $this->modelFactory          = $modelFactory;
+        $this->logger                = $logger;
+        $this->mediaDeletionChecker  = $mediaDeletionChecker;
+        $this->podcastEpisodeDeleter = $podcastEpisodeDeleter;
     }
 
     public function run(ServerRequestInterface $request, GuiGatekeeperInterface $gatekeeper): ?ResponseInterface
@@ -85,7 +90,7 @@ final class ConfirmDeleteAction implements ApplicationActionInterface
 
         $this->ui->showHeader();
 
-        if ($episode->remove()) {
+        if ($this->podcastEpisodeDeleter->delete($episode)) {
             $this->ui->showConfirmation(
                 T_('No Problem'),
                 T_('Podcast Episode has been deleted'),

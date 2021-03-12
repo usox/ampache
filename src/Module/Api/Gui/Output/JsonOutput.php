@@ -44,6 +44,7 @@ use Ampache\Repository\Model\Song;
 use Ampache\Repository\Model\User;
 use Ampache\Repository\Model\Userflag;
 use Ampache\Repository\Model\Video;
+use Ampache\Repository\PodcastEpisodeRepositoryInterface;
 use Ampache\Repository\SongRepositoryInterface;
 
 final class JsonOutput implements ApiOutputInterface
@@ -57,14 +58,18 @@ final class JsonOutput implements ApiOutputInterface
 
     private SongRepositoryInterface $songRepository;
 
+    private PodcastEpisodeRepositoryInterface $podcastEpisodeRepository;
+
     public function __construct(
         ModelFactoryInterface $modelFactory,
         AlbumRepositoryInterface $albumRepository,
-        SongRepositoryInterface $songRepository
+        SongRepositoryInterface $songRepository,
+        PodcastEpisodeRepositoryInterface $podcastEpisodeRepository
     ) {
-        $this->modelFactory     = $modelFactory;
-        $this->albumRepository  = $albumRepository;
-        $this->songRepository   = $songRepository;
+        $this->modelFactory             = $modelFactory;
+        $this->albumRepository          = $albumRepository;
+        $this->songRepository           = $songRepository;
+        $this->podcastEpisodeRepository = $podcastEpisodeRepository;
     }
 
     /**
@@ -693,14 +698,15 @@ final class JsonOutput implements ApiOutputInterface
             $podcast_public_url  = $podcast->link;
             $podcast_episodes    = array();
             if ($episodes) {
-                $items            = $podcast->get_episodes();
-                $podcast_episodes = $this->podcast_episodes($items,
+                $podcast_episodes = $this->podcast_episodes(
+                    $this->podcastEpisodeRepository->getEpisodeIds($podcast->getId()),
                     $userId,
                     false,
                     true,
                     true,
                     $limit,
-                    $offset);
+                    $offset
+                );
             }
 
             // Build this element

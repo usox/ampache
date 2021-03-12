@@ -21,6 +21,10 @@
 
 namespace Ampache\Repository;
 
+use Ampache\Repository\Model\Podcast;
+use Ampache\Repository\Model\Podcast_Episode;
+use Generator;
+
 interface PodcastEpisodeRepositoryInterface
 {
     /**
@@ -32,4 +36,58 @@ interface PodcastEpisodeRepositoryInterface
         int $catalogId,
         int $count
     ): array;
+
+    /**
+     * @return iterable<Podcast_Episode>
+     */
+    public function getDownloadableEpisodeIds(
+        Podcast $podcast,
+        int $limit
+    ): Generator;
+
+    /**
+     * @return iterable<Podcast_Episode>
+     */
+    public function getDeletableEpisodes(
+        Podcast $podcast,
+        int $limit
+    ): Generator;
+
+    public function create(
+        int $podcastId,
+        string $title,
+        string $guid,
+        string $source,
+        string $website,
+        string $description,
+        string $author,
+        string $category,
+        int $time,
+        int $pubdate
+    ): bool;
+
+    /**
+     * Gets all episodes for the podcast
+     *
+     * @param string $state_filter
+     * @return int[]
+     */
+    public function getEpisodeIds(
+        int $podcastId,
+        ?string $state_filter = null
+    ): array;
+
+    public function remove(Podcast_Episode $podcastEpisode): bool;
+
+    public function changeState(int $podcastEpisodeId, string $state): void;
+
+    /**
+     * Sets the vital meta informations after the episode has been downloaded
+     */
+    public function updateDownloadState(
+        Podcast_Episode $podcastEpisode,
+        string $filePath,
+        int $size,
+        int $duration
+    ): void;
 }

@@ -28,6 +28,9 @@ use Ampache\Module\Authorization\AccessLevelEnum;
 use Ampache\Module\Plugin\Adapter\UserMediaPlaySaverAdapterInterface;
 use Ampache\Module\Podcast\PodcastCreatorInterface;
 use Ampache\Module\Podcast\PodcastDeleterInterface;
+use Ampache\Module\Podcast\PodcastEpisodeDeleterInterface;
+use Ampache\Module\Podcast\PodcastEpisodeDownloaderInterface;
+use Ampache\Module\Podcast\PodcastSyncerInterface;
 use Ampache\Module\Share\ShareCreatorInterface;
 use Ampache\Module\User\Management\Exception\UserCreationFailedException;
 use Ampache\Module\User\Management\UserCreatorInterface;
@@ -2286,7 +2289,7 @@ class Subsonic_Api
         if (AmpConfig::get('podcast') && Access::check('interface', 75)) {
             $podcasts = Catalog::get_podcasts();
             foreach ($podcasts as $podcast) {
-                $podcast->sync_episodes(true);
+                static::getPodcastSyncer()->sync($podcast, true);
             }
             $response = Subsonic_Xml_Data::createSuccessResponse('refreshpodcasts');
         } else {
@@ -2368,7 +2371,7 @@ class Subsonic_Api
         if (AmpConfig::get('podcast') && Access::check('interface', 75)) {
             $episode = new Podcast_Episode(Subsonic_Xml_Data::getAmpacheId($id));
             if ($episode->id !== null) {
-                if ($episode->remove()) {
+                if (static::getPodcastEpisodeDeleter()->delete($episode)) {
                     $response = Subsonic_Xml_Data::createSuccessResponse('deletepodcastepisode');
                 } else {
                     $response = Subsonic_Xml_Data::createError(Subsonic_Xml_Data::SSERROR_GENERIC, '',
@@ -2398,7 +2401,7 @@ class Subsonic_Api
         if (AmpConfig::get('podcast') && Access::check('interface', 75)) {
             $episode = new Podcast_Episode(Subsonic_Xml_Data::getAmpacheId($id));
             if ($episode->id !== null) {
-                $episode->gather();
+                static::getPodcastEpisodeDownloader()->download($episode);
                 $response = Subsonic_Xml_Data::createSuccessResponse('downloadpodcastepisode');
             } else {
                 $response = Subsonic_Xml_Data::createError(Subsonic_Xml_Data::SSERROR_DATA_NOTFOUND, '',
@@ -2748,5 +2751,35 @@ class Subsonic_Api
         global $dic;
 
         return $dic->get(PodcastDeleterInterface::class);
+    }
+
+    /**
+     * @deprecated Inject by constructor
+     */
+    private static function getPodcastSyncer(): PodcastSyncerInterface
+    {
+        global $dic;
+
+        return $dic->get(PodcastSyncerInterface::class);
+    }
+
+    /**
+     * @deprecated Inject by constructor
+     */
+    private static function getPodcastEpisodeDeleter(): PodcastEpisodeDeleterInterface
+    {
+        global $dic;
+
+        return $dic->get(PodcastEpisodeDeleterInterface::class);
+    }
+
+    /**
+     * @deprecated Inject by constructor
+     */
+    private static function getPodcastEpisodeDownloader(): PodcastEpisodeDownloaderInterface
+    {
+        global $dic;
+
+        return $dic->get(PodcastEpisodeDownloaderInterface::class);
     }
 }

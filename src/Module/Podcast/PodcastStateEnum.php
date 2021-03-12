@@ -17,27 +17,15 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
  */
 
-namespace Ampache\Repository;
+declare(strict_types=1);
 
-use Ampache\Repository\Model\Podcast;
+namespace Ampache\Module\Podcast;
 
-interface PodcastRepositoryInterface
+final class PodcastStateEnum
 {
-    /**
-     * This returns an array of ids of podcasts in this catalog
-     *
-     * @return int[]
-     */
-    public function getPodcastIds(int $catalogId): array;
-
-    public function remove(
-        Podcast $podcast
-    ): bool;
-
-    public function updateLastsync(
-        Podcast $podcast,
-        int $time
-    ): void;
+    public const PENDING   = 'pending';
+    public const COMPLETED = 'completed';
 }

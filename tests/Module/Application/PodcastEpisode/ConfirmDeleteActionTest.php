@@ -29,6 +29,7 @@ use Ampache\MockeryTestCase;
 use Ampache\Module\Application\Exception\AccessDeniedException;
 use Ampache\Module\Authorization\GuiGatekeeperInterface;
 use Ampache\Module\Catalog\MediaDeletionCheckerInterface;
+use Ampache\Module\Podcast\PodcastEpisodeDeleterInterface;
 use Ampache\Module\System\LegacyLogger;
 use Ampache\Module\Util\UiInterface;
 use Ampache\Repository\Model\ModelFactoryInterface;
@@ -54,22 +55,27 @@ class ConfirmDeleteActionTest extends MockeryTestCase
     /** @var MediaDeletionCheckerInterface|MockInterface */
     private MockInterface $mediaDeletionChecker;
 
+    /** @var MockInterface|PodcastEpisodeDeleterInterface */
+    private MockInterface $podcastEpisodeDeleter;
+
     private ConfirmDeleteAction $subject;
 
     public function setUp(): void
     {
-        $this->configContainer      = $this->mock(ConfigContainerInterface::class);
-        $this->ui                   = $this->mock(UiInterface::class);
-        $this->modelFactory         = $this->mock(ModelFactoryInterface::class);
-        $this->logger               = $this->mock(LoggerInterface::class);
-        $this->mediaDeletionChecker = $this->mock(MediaDeletionCheckerInterface::class);
+        $this->configContainer       = $this->mock(ConfigContainerInterface::class);
+        $this->ui                    = $this->mock(UiInterface::class);
+        $this->modelFactory          = $this->mock(ModelFactoryInterface::class);
+        $this->logger                = $this->mock(LoggerInterface::class);
+        $this->mediaDeletionChecker  = $this->mock(MediaDeletionCheckerInterface::class);
+        $this->podcastEpisodeDeleter = $this->mock(PodcastEpisodeDeleterInterface::class);
 
         $this->subject = new ConfirmDeleteAction(
             $this->configContainer,
             $this->ui,
             $this->modelFactory,
             $this->logger,
-            $this->mediaDeletionChecker
+            $this->mediaDeletionChecker,
+            $this->podcastEpisodeDeleter
         );
     }
 
@@ -190,8 +196,8 @@ class ConfirmDeleteActionTest extends MockeryTestCase
             ->withNoArgs()
             ->once();
 
-        $episode->shouldReceive('remove')
-            ->withNoArgs()
+        $this->podcastEpisodeDeleter->shouldReceive('delete')
+            ->with($episode)
             ->once()
             ->andReturnFalse();
 
@@ -256,8 +262,8 @@ class ConfirmDeleteActionTest extends MockeryTestCase
             ->withNoArgs()
             ->once();
 
-        $episode->shouldReceive('remove')
-            ->withNoArgs()
+        $this->podcastEpisodeDeleter->shouldReceive('delete')
+            ->with($episode)
             ->once()
             ->andReturnTrue();
 

@@ -23,11 +23,11 @@ declare(strict_types=1);
 
 namespace Ampache\Module\Podcast;
 
+use Ampache\Module\Catalog\Loader\CatalogLoaderInterface;
 use Ampache\Module\System\AmpError;
 use Ampache\Module\System\Core;
 use Ampache\Module\System\Dba;
 use Ampache\Repository\Model\Art;
-use Ampache\Repository\Model\Catalog;
 use Ampache\Repository\Model\ModelFactoryInterface;
 use Ampache\Repository\Model\Podcast;
 
@@ -35,10 +35,18 @@ final class PodcastCreator implements PodcastCreatorInterface
 {
     private ModelFactoryInterface $modelFactory;
 
+    private PodcastSyncerInterface $podcastSyncer;
+
+    private CatalogLoaderInterface $catalogLoader;
+
     public function __construct(
-        ModelFactoryInterface $modelFactory
+        ModelFactoryInterface $modelFactory,
+        PodcastSyncerInterface $podcastSyncer,
+        CatalogLoaderInterface $catalogLoader
     ) {
-        $this->modelFactory = $modelFactory;
+        $this->modelFactory  = $modelFactory;
+        $this->podcastSyncer = $podcastSyncer;
+        $this->catalogLoader = $catalogLoader;
     }
 
     public function create(
@@ -53,7 +61,7 @@ final class PodcastCreator implements PodcastCreatorInterface
         if ($catalog_id < 1) {
             AmpError::add('catalog', T_('Target Catalog is required'));
         } else {
-            $catalog = Catalog::create_from_id($catalog_id);
+            $catalog = $this->catalogLoader->byId($catalog_id);
             if ($catalog->gather_types !== "podcast") {
                 AmpError::add('catalog', T_('Wrong target Catalog type'));
             }
@@ -141,7 +149,7 @@ final class PodcastCreator implements PodcastCreatorInterface
             $art->insert_url($arturl);
         }
         if ($episodes) {
-            $podcast->add_episodes($episodes);
+            $this->podcastSyncer->addEpisodes($podcast, $episodes);
         }
 
         return $podcast;

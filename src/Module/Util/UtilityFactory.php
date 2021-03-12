@@ -33,4 +33,9 @@ final class UtilityFactory implements UtilityFactoryInterface
     {
         return new Mailer();
     }
+
+    public function createVaInfo(string $filePath): VaInfo
+    {
+        return new VaInfo($filePath);
+    }
 }
