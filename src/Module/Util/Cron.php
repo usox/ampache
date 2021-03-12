@@ -39,6 +39,7 @@ use Ampache\Repository\Model\Song;
 use Ampache\Repository\Model\Tag;
 use Ampache\Repository\Model\Userflag;
 use Ampache\Repository\PlaylistRepositoryInterface;
+use Ampache\Repository\PodcastEpisodeRepositoryInterface;
 use Ampache\Repository\PodcastRepositoryInterface;
 use Ampache\Repository\UserRepositoryInterface;
 
@@ -163,7 +164,7 @@ final class Cron
                             Userflag::build_cache('podcast', $podcasts, $user_id);
                             // podcast_episodes
                             $podcast          = new Podcast($podcast_id);
-                            $podcast_episodes = $podcast->get_episodes();
+                            $podcast_episodes = static::getPodcastEpisodeRepository()->getEpisodeIds($podcast->getId());
                             Rating::build_cache('podcast_episode', $podcast_episodes, $user_id);
                             Userflag::build_cache('podcast_episode', $podcast_episodes, $user_id);
                         } // end foreach $podcasts
@@ -206,5 +207,15 @@ final class Cron
         global $dic;
 
         return $dic->get(PodcastRepositoryInterface::class);
+    }
+
+    /**
+     * @deprecated Inject by constructor
+     */
+    private static function getPodcastEpisodeRepository(): PodcastEpisodeRepositoryInterface
+    {
+        global $dic;
+
+        return $dic->get(PodcastEpisodeRepositoryInterface::class);
     }
 }

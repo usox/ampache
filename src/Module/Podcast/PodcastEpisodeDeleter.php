@@ -17,54 +17,61 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
  */
 
 declare(strict_types=1);
 
 namespace Ampache\Module\Podcast;
 
-use Ampache\Repository\Model\ModelFactoryInterface;
-use Ampache\Repository\Model\Podcast;
+use Ampache\Config\ConfigContainerInterface;
+use Ampache\Config\ConfigurationKeyEnum;
+use Ampache\Module\System\LegacyLogger;
+use Ampache\Repository\Model\Podcast_Episode;
 use Ampache\Repository\PodcastEpisodeRepositoryInterface;
-use Ampache\Repository\PodcastRepositoryInterface;
+use Psr\Log\LoggerInterface;
 
 /**
- * Deletes a Podcast including its episodes
+ * Deletes a podcast episode
  */
-final class PodcastDeleter implements PodcastDeleterInterface
+final class PodcastEpisodeDeleter implements PodcastEpisodeDeleterInterface
 {
-    private PodcastRepositoryInterface $podcastRepository;
-
     private PodcastEpisodeRepositoryInterface $podcastEpisodeRepository;
 
-    private PodcastEpisodeDeleterInterface $podcastEpisodeDeleter;
+    private LoggerInterface $logger;
 
-    private ModelFactoryInterface $modelFactory;
+    private ConfigContainerInterface $configContainer;
 
     public function __construct(
-        PodcastRepositoryInterface $podcastRepository,
         PodcastEpisodeRepositoryInterface $podcastEpisodeRepository,
-        PodcastEpisodeDeleterInterface $podcastEpisodeDeleter,
-        ModelFactoryInterface $modelFactory
+        LoggerInterface $logger,
+        ConfigContainerInterface $configContainer
     ) {
-        $this->podcastRepository        = $podcastRepository;
         $this->podcastEpisodeRepository = $podcastEpisodeRepository;
-        $this->podcastEpisodeDeleter    = $podcastEpisodeDeleter;
-        $this->modelFactory             = $modelFactory;
+        $this->logger                   = $logger;
+        $this->configContainer          = $configContainer;
     }
 
     public function delete(
-        Podcast $podcast
+        Podcast_Episode $podcastEpisode
     ): bool {
-        $podcastId  = $podcast->getId();
-        $episodeIds = $this->podcastEpisodeRepository->getEpisodeIds($podcastId);
+        $this->logger->debug(
+            sprintf('Removing podcast episode %d', $podcastEpisode->getId()),
+            [LegacyLogger::CONTEXT_TYPE => __CLASS__]
+        );
 
-        foreach ($episodeIds as $episodeId) {
-            $this->podcastEpisodeDeleter->delete(
-                $this->modelFactory->createPodcastEpisode($episodeId)
-            );
+        if (
+            $this->configContainer->isFeatureEnabled(ConfigurationKeyEnum::DELETE_FROM_DISK) &&
+            !empty($podcastEpisode->file)
+        ) {
+            if (!unlink($podcastEpisode->file)) {
+                $this->logger->error(
+                    'Cannot delete file ' . $podcastEpisode->file,
+                    [LegacyLogger::CONTEXT_TYPE => __CLASS__]
+                );
+            }
         }
 
-        return $this->podcastRepository->remove($podcast);
+        return $this->podcastEpisodeRepository->remove($podcastEpisode);
     }
 }

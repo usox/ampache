@@ -120,4 +120,6 @@ final class ConfigurationKeyEnum
     public const SHARE_EXPIRE                  = 'share_expire';
     public const LIVE_STREAM                   = 'live_stream';
     public const AJAX_LOAD                     = 'ajax_load';
+    public const PODCAST_NEW_DOWNLOAD          = 'podcast_new_download';
+    public const PODCAST_KEEP                  = 'podcast_keep';
 }

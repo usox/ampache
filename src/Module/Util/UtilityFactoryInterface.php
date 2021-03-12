@@ -25,4 +25,6 @@ namespace Ampache\Module\Util;
 interface UtilityFactoryInterface
 {
     public function createMailer(): MailerInterface;
+
+    public function createVaInfo(string $filePath): VaInfo;
 }

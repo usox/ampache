@@ -30,6 +30,7 @@ use Ampache\Module\Api\Gui\Method\Exception\RequestParamMissingException;
 use Ampache\Module\Api\Gui\Method\Exception\ResultEmptyException;
 use Ampache\Module\Api\Gui\Output\ApiOutputInterface;
 use Ampache\Module\Authorization\AccessLevelEnum;
+use Ampache\Module\Podcast\PodcastSyncerInterface;
 use Ampache\Repository\Model\ModelFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamFactoryInterface;
@@ -42,12 +43,16 @@ final class UpdatePodcastMethod implements MethodInterface
 
     private StreamFactoryInterface $streamFactory;
 
+    private PodcastSyncerInterface $podcastSyncer;
+
     public function __construct(
         ModelFactoryInterface $modelFactory,
-        StreamFactoryInterface $streamFactory
+        StreamFactoryInterface $streamFactory,
+        PodcastSyncerInterface $podcastSyncer
     ) {
         $this->modelFactory  = $modelFactory;
         $this->streamFactory = $streamFactory;
+        $this->podcastSyncer = $podcastSyncer;
     }
 
     /**
@@ -93,7 +98,7 @@ final class UpdatePodcastMethod implements MethodInterface
                 sprintf(T_('Not Found: %d'), $objectId)
             );
         }
-        if ($podcast->sync_episodes(true)) {
+        if ($this->podcastSyncer->sync($podcast, true)) {
             return $response->withBody(
                 $this->streamFactory->createStream(
                     $output->success(sprintf(T_('Synced episodes for podcast: %d'), $objectId))

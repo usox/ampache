@@ -24,10 +24,8 @@ declare(strict_types=0);
 namespace Ampache\Repository\Model;
 
 use Ampache\Config\AmpConfig;
-use Ampache\Module\System\Core;
 use Ampache\Module\System\Dba;
-use PDOStatement;
-use SimpleXMLElement;
+use Ampache\Repository\PodcastEpisodeRepositoryInterface;
 
 class Podcast extends database_object implements library_item
 {
@@ -100,39 +98,6 @@ class Podcast extends database_object implements library_item
     {
         return array($this->catalog);
     }
-
-    /**
-     * get_episodes
-     * gets all episodes for this podcast
-     * @param string $state_filter
-     * @return int[]
-     */
-    public function get_episodes($state_filter = '')
-    {
-        $params = array();
-        $sql    = "SELECT `podcast_episode`.`id` FROM `podcast_episode` ";
-        if (AmpConfig::get('catalog_disable')) {
-            $sql .= "LEFT JOIN `podcast` ON `podcast`.`id` = `podcast_episode`.`podcast` ";
-            $sql .= "LEFT JOIN `catalog` ON `catalog`.`id` = `podcast`.`catalog` ";
-        }
-        $sql .= "WHERE `podcast_episode`.`podcast`='" . Dba::escape($this->id) . "' ";
-        if (!empty($state_filter)) {
-            $sql .= "AND `podcast_episode`.`state` = ? ";
-            $params[] = $state_filter;
-        }
-        if (AmpConfig::get('catalog_disable')) {
-            $sql .= "AND `catalog`.`enabled` = '1' ";
-        }
-        $sql .= "ORDER BY `podcast_episode`.`pubdate` DESC";
-        $db_results = Dba::read($sql, $params);
-
-        $results = array();
-        while ($row = Dba::fetch_assoc($db_results)) {
-            $results[] = (int) $row['id'];
-        }
-
-        return $results;
-    } // get_episodes
 
     /**
      * _get_extra info
@@ -225,7 +190,9 @@ class Podcast extends database_object implements library_item
      */
     public function get_childrens()
     {
-        return array('podcast_episode' => $this->get_episodes());
+        return [
+            'podcast_episode' => $this->getPodcastEpisodeRepository()->getEpisodeIds($this->getId())
+        ];
     }
 
     /**
@@ -247,7 +214,7 @@ class Podcast extends database_object implements library_item
     {
         $medias = array();
         if ($filter_type === null || $filter_type == 'podcast_episode') {
-            $episodes = $this->get_episodes('completed');
+            $episodes = $this->getPodcastEpisodeRepository()->getEpisodeIds($this->getId());
             foreach ($episodes as $episode_id) {
                 $medias[] = array(
                     'object_type' => 'podcast_episode',
@@ -331,157 +298,6 @@ class Podcast extends database_object implements library_item
     }
 
     /**
-     * add_episodes
-     * @param SimpleXMLElement $episodes
-     * @param integer $afterdate
-     * @param boolean $gather
-     */
-    public function add_episodes($episodes, $afterdate = 0, $gather = false)
-    {
-        foreach ($episodes as $episode) {
-            $this->add_episode($episode, $afterdate);
-        }
-
-        // Select episodes to download
-        $dlnb = (int)AmpConfig::get('podcast_new_download');
-        if ($dlnb <> 0) {
-            $sql = "SELECT `podcast_episode`.`id` FROM `podcast_episode` INNER JOIN `podcast` ON `podcast`.`id` = `podcast_episode`.`podcast` " . "WHERE `podcast`.`id` = ? AND `podcast_episode`.`addition_time` > `podcast`.`lastsync` " . "ORDER BY `podcast_episode`.`pubdate` DESC";
-            if ($dlnb > 0) {
-                $sql .= " LIMIT " . (string)$dlnb;
-            }
-            $db_results = Dba::read($sql, array($this->id));
-            while ($row = Dba::fetch_row($db_results)) {
-                $episode = new Podcast_Episode($row[0]);
-                $episode->change_state('pending');
-                if ($gather) {
-                    $episode->gather();
-                }
-            }
-        }
-        // Remove items outside limit
-        $keepnb = AmpConfig::get('podcast_keep');
-        if ($keepnb > 0) {
-            $sql        = "SELECT `podcast_episode`.`id` FROM `podcast_episode` WHERE `podcast_episode`.`podcast` = ? " . "ORDER BY `podcast_episode`.`pubdate` DESC LIMIT " . $keepnb . ",18446744073709551615";
-            $db_results = Dba::read($sql, array($this->id));
-            while ($row = Dba::fetch_row($db_results)) {
-                $episode = new Podcast_Episode($row[0]);
-                $episode->remove();
-            }
-        }
-        $this->update_lastsync(time());
-    }
-
-    /**
-     * add_episode
-     * @param SimpleXMLElement $episode
-     * @param integer $afterdate
-     * @return PDOStatement|boolean
-     */
-    private function add_episode(SimpleXMLElement $episode, $afterdate = 0)
-    {
-        debug_event(self::class, 'Adding new episode to podcast ' . $this->id . '...', 4);
-
-        $title       = html_entity_decode((string)$episode->title);
-        $website     = (string)$episode->link;
-        $guid        = (string)$episode->guid;
-        $description = html_entity_decode((string)$episode->description);
-        $author      = html_entity_decode((string)$episode->author);
-        $category    = html_entity_decode((string)$episode->category);
-        $source      = null;
-        $time        = 0;
-        if ($episode->enclosure) {
-            $source = $episode->enclosure['url'];
-        }
-        $itunes   = $episode->children('itunes', true);
-        $duration = (string) $itunes->duration;
-        // time is missing hour e.g. "15:23"
-        if (preg_grep("/^[0-9][0-9]\:[0-9][0-9]$/", array($duration))) {
-            $duration = '00:' . $duration;
-        }
-        // process a time string "03:23:01"
-        $ptime = (preg_grep("/[0-9][0-9]\:[0-9][0-9]\:[0-9][0-9]/", array($duration)))
-            ? date_parse((string)$duration)
-            : $duration;
-        // process "HH:MM:SS" time OR fall back to a seconds duration string e.g "24325"
-        $time = (is_array($ptime))
-            ? (int) $ptime['hour'] * 3600 + (int) $ptime['minute'] * 60 + (int) $ptime['second']
-            : (int) $ptime;
-
-
-        $pubdate    = 0;
-        $pubdatestr = (string)$episode->pubDate;
-        if ($pubdatestr) {
-            $pubdate = strtotime($pubdatestr);
-        }
-        if ($pubdate < 1) {
-            debug_event(self::class, 'Invalid episode publication date, skipped', 3);
-
-            return false;
-        }
-
-        if ($pubdate > $afterdate) {
-            $sql = "INSERT INTO `podcast_episode` (`title`, `guid`, `podcast`, `state`, `source`, `website`, `description`, `author`, `category`, `time`, `pubdate`, `addition_time`) " . "VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?)";
-
-            return Dba::write($sql, array(
-                $title,
-                $guid,
-                $this->id,
-                $source,
-                $website,
-                $description,
-                $author,
-                $category,
-                $time,
-                $pubdate,
-                time()
-            ));
-        } else {
-            debug_event(self::class, 'Episode published before ' . $afterdate . ' (' . $pubdate . '), skipped', 4);
-
-            return true;
-        }
-    }
-
-    /**
-     * update_lastsync
-     * @param integer $time
-     * @return PDOStatement|boolean
-     */
-    private function update_lastsync($time)
-    {
-        $sql = "UPDATE `podcast` SET `lastsync` = ? WHERE `id` = ?";
-
-        return Dba::write($sql, array($time, $this->id));
-    }
-
-    /**
-     * sync_episodes
-     * @param boolean $gather
-     * @return PDOStatement|boolean
-     */
-    public function sync_episodes($gather = false)
-    {
-        debug_event(self::class, 'Syncing feed ' . $this->feed . ' ...', 4);
-
-        $xmlstr = file_get_contents($this->feed, false, stream_context_create(Core::requests_options()));
-        if ($xmlstr === false) {
-            debug_event(self::class, 'Cannot access feed ' . $this->feed, 1);
-
-            return false;
-        }
-        $xml = simplexml_load_string($xmlstr);
-        if ($xml === false) {
-            debug_event(self::class, 'Cannot read feed ' . $this->feed, 1);
-
-            return false;
-        }
-
-        $this->add_episodes($xml->channel->item, $this->lastsync, $gather);
-
-        return true;
-    }
-
-    /**
      * get_root_path
      * @return string
      */
@@ -498,28 +314,24 @@ class Podcast extends database_object implements library_item
 
         // create path if it doesn't exist
         if (!is_dir($catalog->path . DIRECTORY_SEPARATOR . $dirname)) {
-            static::create_catalog_path($catalog->path . DIRECTORY_SEPARATOR . $dirname);
+            $path = $catalog->path . DIRECTORY_SEPARATOR . $dirname;
+            if (!is_dir($path)) {
+                if (mkdir($path) === false) {
+                    debug_event(__CLASS__, 'Cannot create directory ' . $path, 2);
+                }
+            }
         }
 
         return $catalog->path . DIRECTORY_SEPARATOR . $dirname;
     }
 
     /**
-     * create_catalog_path
-     * This returns the catalog types that are available
-     * @param string $path
-     * @return boolean
+     * @deprecated Inject by constructor
      */
-    private static function create_catalog_path($path)
+    private function getPodcastEpisodeRepository(): PodcastEpisodeRepositoryInterface
     {
-        if (!is_dir($path)) {
-            if (mkdir($path) === false) {
-                debug_event(__CLASS__, 'Cannot create directory ' . $path, 2);
+        global $dic;
 
-                return false;
-            }
-        }
-
-        return true;
+        return $dic->get(PodcastEpisodeRepositoryInterface::class);
     }
 }

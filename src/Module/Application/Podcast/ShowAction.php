@@ -31,6 +31,7 @@ use Ampache\Module\Application\ApplicationActionInterface;
 use Ampache\Module\Authorization\GuiGatekeeperInterface;
 use Ampache\Module\Util\Ui;
 use Ampache\Module\Util\UiInterface;
+use Ampache\Repository\PodcastEpisodeRepositoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -44,14 +45,18 @@ final class ShowAction implements ApplicationActionInterface
 
     private ModelFactoryInterface $modelFactory;
 
+    private PodcastEpisodeRepositoryInterface $podcastEpisodeRepository;
+
     public function __construct(
         ConfigContainerInterface $configContainer,
         UiInterface $ui,
-        ModelFactoryInterface $modelFactory
+        ModelFactoryInterface $modelFactory,
+        PodcastEpisodeRepositoryInterface $podcastEpisodeRepository
     ) {
-        $this->configContainer = $configContainer;
-        $this->ui              = $ui;
-        $this->modelFactory    = $modelFactory;
+        $this->configContainer          = $configContainer;
+        $this->ui                       = $ui;
+        $this->modelFactory             = $modelFactory;
+        $this->podcastEpisodeRepository = $podcastEpisodeRepository;
     }
 
     public function run(ServerRequestInterface $request, GuiGatekeeperInterface $gatekeeper): ?ResponseInterface
@@ -66,7 +71,8 @@ final class ShowAction implements ApplicationActionInterface
         if ($podcast_id > 0) {
             $podcast = $this->modelFactory->createPodcast($podcast_id);
             $podcast->format();
-            $object_ids  = $podcast->get_episodes();
+
+            $object_ids  = $this->podcastEpisodeRepository->getEpisodeIds($podcast->getId());
             $object_type = 'podcast_episode';
             require_once Ui::find_template('show_podcast.inc.php');
         }

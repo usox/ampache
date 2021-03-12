@@ -44,6 +44,7 @@ use Ampache\Repository\Model\Rating;
 use Ampache\Repository\Model\Search;
 use Ampache\Repository\Model\Share;
 use Ampache\Repository\AlbumRepositoryInterface;
+use Ampache\Repository\PodcastEpisodeRepositoryInterface;
 use Ampache\Repository\SongRepositoryInterface;
 use SimpleXMLElement;
 use Ampache\Repository\Model\Song;
@@ -1462,7 +1463,7 @@ class Subsonic_Xml_Data
             }
             $xchannel->addAttribute('status', 'completed');
             if ($includeEpisodes) {
-                $episodes = $podcast->get_episodes();
+                $episodes = static::getPodcastEpisodeRepository()->getEpisodeIds($podcast->getId());
                 foreach ($episodes as $episode_id) {
                     $episode = new Podcast_Episode($episode_id);
                     self::addPodcastEpisode($xchannel, $episode);
@@ -1612,5 +1613,15 @@ class Subsonic_Xml_Data
         global $dic;
 
         return $dic->get(AlbumRepositoryInterface::class);
+    }
+
+    /**
+     * @deprecated Inject by constructor
+     */
+    private static function getPodcastEpisodeRepository(): PodcastEpisodeRepositoryInterface
+    {
+        global $dic;
+
+        return $dic->get(PodcastEpisodeRepositoryInterface::class);
     }
 }

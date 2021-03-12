@@ -26,15 +26,28 @@ declare(strict_types=0);
 namespace Ampache\Application\Api\Ajax\Handler;
 
 use Ampache\Module\Authorization\Access;
+use Ampache\Module\Podcast\PodcastEpisodeDownloaderInterface;
+use Ampache\Module\Podcast\PodcastSyncerInterface;
 use Ampache\Module\System\Core;
 use Ampache\Repository\Model\Podcast;
 use Ampache\Repository\Model\Podcast_Episode;
 
 final class PodcastAjaxHandler implements AjaxHandlerInterface
 {
+    private PodcastSyncerInterface $podcastSyncer;
+
+    private PodcastEpisodeDownloaderInterface $podcastEpisodeDownloader;
+
+    public function __construct(
+        PodcastSyncerInterface $podcastSyncer,
+        PodcastEpisodeDownloaderInterface $podcastEpisodeDownloader
+    ) {
+        $this->podcastSyncer            = $podcastSyncer;
+        $this->podcastEpisodeDownloader = $podcastEpisodeDownloader;
+    }
+
     public function handle(): void
     {
-
         // Switch on the actions
         switch ($_REQUEST['action']) {
             case 'sync':
@@ -47,14 +60,14 @@ final class PodcastAjaxHandler implements AjaxHandlerInterface
                 if (isset($_REQUEST['podcast_id'])) {
                     $podcast = new Podcast($_REQUEST['podcast_id']);
                     if ($podcast->id) {
-                        $podcast->sync_episodes(true);
+                        $this->podcastSyncer->sync($podcast, true);
                     } else {
                         debug_event('podcast.ajax', 'Cannot find podcast', 1);
                     }
                 } elseif (isset($_REQUEST['podcast_episode_id'])) {
                     $episode = new Podcast_Episode($_REQUEST['podcast_episode_id']);
                     if ($episode->id !== null) {
-                        $episode->gather();
+                        $this->podcastEpisodeDownloader->download($episode);
                     } else {
                         debug_event('podcast.ajax', 'Cannot find podcast episode', 1);
                     }
