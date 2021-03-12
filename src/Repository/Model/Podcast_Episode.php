@@ -25,10 +25,10 @@ namespace Ampache\Repository\Model;
 
 use Ampache\Module\Playback\Stream;
 use Ampache\Module\Playback\Stream_Url;
+use Ampache\Module\Podcast\PodcastEpisodeDeleterInterface;
 use Ampache\Module\Statistics\Stats;
 use Ampache\Module\System\Dba;
 use Ampache\Module\Util\Ui;
-use Ampache\Module\Util\VaInfo;
 use Ampache\Module\Authorization\Access;
 use Ampache\Config\AmpConfig;
 use Ampache\Module\System\Core;
@@ -350,7 +350,14 @@ class Podcast_Episode extends database_object implements Media, library_item, Ga
         }
 
         if (!$this->played) {
-            self::update_played(true, $this->id);
+            if (!Access::check('interface', 25)) {
+                return false;
+            }
+
+            $sql = "UPDATE `podcast_episode` SET `played` = ? WHERE `id` = ?";
+            Dba::write($sql, [1, $this->id]);
+
+            return true;
         }
 
         return true;
@@ -366,47 +373,6 @@ class Podcast_Episode extends database_object implements Media, library_item, Ga
     {
         return Stats::has_played_history($this, $user, $agent, $date);
     }
-
-    /**
-     * update_played
-     * sets the played flag
-     * @param boolean $new_played
-     * @param integer $id
-     */
-    public static function update_played($new_played, $id)
-    {
-        self::_update_item('played', ($new_played ? 1 : 0), $id, '25');
-    } // update_played
-
-    /**
-     * _update_item
-     * This is a private function that should only be called from within the podcast episode class.
-     * It takes a field, value song_id and level. first and foremost it checks the level
-     * against Core::get_global('user') to make sure they are allowed to update this record
-     * it then updates it and sets $this->{$field} to the new value
-     * @param string $field
-     * @param integer $value
-     * @param integer $song_id
-     * @param integer $level
-     * @return boolean
-     */
-    private static function _update_item($field, $value, $song_id, $level)
-    {
-        /* Check them Rights! */
-        if (!Access::check('interface', $level)) {
-            return false;
-        }
-
-        /* Can't update to blank */
-        if (!strlen(trim((string)$value))) {
-            return false;
-        }
-
-        $sql = "UPDATE `podcast_episode` SET `$field` = ? WHERE `id` = ?";
-        Dba::write($sql, array($value, $song_id));
-
-        return true;
-    } // _update_item
 
     /**
      * Get stream name.
@@ -486,68 +452,7 @@ class Podcast_Episode extends database_object implements Media, library_item, Ga
      */
     public function remove()
     {
-        debug_event(self::class, 'Removing podcast episode ' . $this->id, 5);
-
-        if (AmpConfig::get('delete_from_disk') && !empty($this->file)) {
-            if (!unlink($this->file)) {
-                debug_event(self::class, 'Cannot delete file ' . $this->file, 3);
-            }
-        }
-
-        $sql = "DELETE FROM `podcast_episode` WHERE `id` = ?";
-
-        return Dba::write($sql, array($this->id));
-    }
-
-    /**
-     * change_state
-     * @param string $state
-     * @return PDOStatement|boolean
-     */
-    public function change_state($state)
-    {
-        $sql = "UPDATE `podcast_episode` SET `state` = ? WHERE `id` = ?";
-
-        return Dba::write($sql, array($state, $this->id));
-    }
-
-    /**
-     * gather
-     * download the podcast episode to your catalog
-     */
-    public function gather()
-    {
-        if (!empty($this->source)) {
-            $podcast = new Podcast($this->podcast);
-            $file    = $podcast->get_root_path();
-            if (!empty($file)) {
-                $pinfo = pathinfo($this->source);
-
-                $file .= DIRECTORY_SEPARATOR . $this->pubdate . '-' . str_replace(array('?', '<', '>', '\\', '/'), '_', $this->title) . '-' . strtok($pinfo['basename'], '?');
-                debug_event(self::class, 'Downloading ' . $this->source . ' to ' . $file . ' ...', 4);
-                if (file_put_contents($file, fopen($this->source, 'r')) !== false) {
-                    debug_event(self::class, 'Download completed.', 4);
-                    $this->file = $file;
-
-                    $vainfo = new VaInfo($this->file);
-                    $vainfo->get_info();
-                    $key   = VaInfo::get_tag_type($vainfo->tags);
-                    $infos = VaInfo::clean_tag_info($vainfo->tags, $key, $file);
-                    // No time information, get it from file
-                    if ($this->time < 1) {
-                        $this->time = $infos['time'];
-                    }
-                    $this->size = $infos['size'];
-
-                    $sql = "UPDATE `podcast_episode` SET `file` = ?, `size` = ?, `time` = ?, `state` = 'completed' WHERE `id` = ?";
-                    Dba::write($sql, array($this->file, $this->size, $this->time, $this->id));
-                } else {
-                    debug_event(self::class, 'Error when downloading podcast episode.', 1);
-                }
-            }
-        } else {
-            debug_event(self::class, 'Cannot download podcast episode ' . $this->id . ', empty source.', 3);
-        }
+        return $this->getPodcastEpisodeDeleter()->delete($this);
     }
 
     /**
@@ -560,5 +465,15 @@ class Podcast_Episode extends database_object implements Media, library_item, Ga
     public static function type_to_mime($type)
     {
         return Song::type_to_mime($type);
+    }
+
+    /**
+     * @deprecated Inject by constructor
+     */
+    private function getPodcastEpisodeDeleter(): PodcastEpisodeDeleterInterface
+    {
+        global $dic;
+
+        return $dic->get(PodcastEpisodeDeleterInterface::class);
     }
 }

@@ -17,27 +17,22 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
  */
 
-namespace Ampache\Repository;
+namespace Ampache\Module\Podcast;
 
 use Ampache\Repository\Model\Podcast;
+use SimpleXMLElement;
 
-interface PodcastRepositoryInterface
+interface PodcastSyncerInterface
 {
-    /**
-     * This returns an array of ids of podcasts in this catalog
-     *
-     * @return int[]
-     */
-    public function getPodcastIds(int $catalogId): array;
+    public function sync(Podcast $podcast, $gather = false): bool;
 
-    public function remove(
-        Podcast $podcast
-    ): bool;
-
-    public function updateLastsync(
+    public function addEpisodes(
         Podcast $podcast,
-        int $time
+        SimpleXMLElement $episodes,
+        int $afterdate = 0,
+        bool $gather = false
     ): void;
 }

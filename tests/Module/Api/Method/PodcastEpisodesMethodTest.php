@@ -34,6 +34,7 @@ use Ampache\Module\Api\Method\Exception\ResultEmptyException;
 use Ampache\Module\Api\Output\ApiOutputInterface;
 use Ampache\Repository\Model\ModelFactoryInterface;
 use Ampache\Repository\Model\Podcast;
+use Ampache\Repository\PodcastEpisodeRepositoryInterface;
 use Mockery\MockInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamFactoryInterface;
@@ -50,18 +51,23 @@ class PodcastEpisodesMethodTest extends MockeryTestCase
     /** @var ConfigContainerInterface|MockInterface|null */
     private MockInterface $configContainer;
 
+    /** @var MockInterface|PodcastEpisodeRepositoryInterface */
+    private MockInterface $podcastEpisodeRepository;
+
     private ?PodcastEpisodesMethod $subject;
 
     public function setUp(): void
     {
-        $this->streamFactory   = $this->mock(StreamFactoryInterface::class);
-        $this->modelFactory    = $this->mock(ModelFactoryInterface::class);
-        $this->configContainer = $this->mock(ConfigContainerInterface::class);
+        $this->streamFactory            = $this->mock(StreamFactoryInterface::class);
+        $this->modelFactory             = $this->mock(ModelFactoryInterface::class);
+        $this->configContainer          = $this->mock(ConfigContainerInterface::class);
+        $this->podcastEpisodeRepository = $this->mock(PodcastEpisodeRepositoryInterface::class);
 
         $this->subject = new PodcastEpisodesMethod(
             $this->streamFactory,
             $this->modelFactory,
-            $this->configContainer
+            $this->configContainer,
+            $this->podcastEpisodeRepository
         );
     }
 
@@ -169,8 +175,13 @@ class PodcastEpisodesMethodTest extends MockeryTestCase
             ->withNoArgs()
             ->once()
             ->andReturnFalse();
-        $podcast->shouldReceive('get_episodes')
+        $podcast->shouldReceive('getId')
             ->withNoArgs()
+            ->once()
+            ->andReturn($objectId);
+
+        $this->podcastEpisodeRepository->shouldReceive('getEpisodeIds')
+            ->with($objectId)
             ->once()
             ->andReturn([]);
 
@@ -229,8 +240,13 @@ class PodcastEpisodesMethodTest extends MockeryTestCase
             ->withNoArgs()
             ->once()
             ->andReturnFalse();
-        $podcast->shouldReceive('get_episodes')
+        $podcast->shouldReceive('getId')
             ->withNoArgs()
+            ->once()
+            ->andReturn($objectId);
+
+        $this->podcastEpisodeRepository->shouldReceive('getEpisodeIds')
+            ->with($objectId)
             ->once()
             ->andReturn($episodeIds);
 

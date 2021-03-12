@@ -17,27 +17,14 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
  */
 
-namespace Ampache\Repository;
+namespace Ampache\Module\Podcast;
 
-use Ampache\Repository\Model\Podcast;
+use Ampache\Repository\Model\Podcast_Episode;
 
-interface PodcastRepositoryInterface
+interface PodcastEpisodeDeleterInterface
 {
-    /**
-     * This returns an array of ids of podcasts in this catalog
-     *
-     * @return int[]
-     */
-    public function getPodcastIds(int $catalogId): array;
-
-    public function remove(
-        Podcast $podcast
-    ): bool;
-
-    public function updateLastsync(
-        Podcast $podcast,
-        int $time
-    ): void;
+    public function delete(Podcast_Episode $podcastEpisode): bool;
 }

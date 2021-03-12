@@ -24,7 +24,7 @@ declare(strict_types=1);
 namespace Ampache\Repository;
 
 use Ampache\Module\System\Dba;
-use Ampache\Repository\Model\Podcast_Episode;
+use Ampache\Repository\Model\Podcast;
 
 final class PodcastRepository implements PodcastRepositoryInterface
 {
@@ -50,13 +50,23 @@ final class PodcastRepository implements PodcastRepositoryInterface
     }
 
     public function remove(
-        int $podcastId
+        Podcast $podcast
     ): bool {
         $result = Dba::write(
             'DELETE FROM `podcast` WHERE `id` = ?',
-            [$podcastId]
+            [$podcast->getId()]
         );
 
         return $result !== false;
+    }
+
+    public function updateLastsync(
+        Podcast $podcast,
+        int $time
+    ): void {
+        Dba::write(
+            'UPDATE `podcast` SET `lastsync` = ? WHERE `id` = ?',
+            [$time, $podcast->getId()]
+        );
     }
 }

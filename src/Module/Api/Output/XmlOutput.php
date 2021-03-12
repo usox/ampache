@@ -47,6 +47,7 @@ use Ampache\Repository\Model\Tag;
 use Ampache\Repository\Model\User;
 use Ampache\Repository\Model\Userflag;
 use Ampache\Repository\Model\Video;
+use Ampache\Repository\PodcastEpisodeRepositoryInterface;
 use Ampache\Repository\SongRepositoryInterface;
 
 final class XmlOutput implements ApiOutputInterface
@@ -62,16 +63,20 @@ final class XmlOutput implements ApiOutputInterface
 
     private SongRepositoryInterface $songRepository;
 
+    private PodcastEpisodeRepositoryInterface $podcastEpisodeRepository;
+
     public function __construct(
         ModelFactoryInterface $modelFactory,
         XmlWriterInterface $xmlWriter,
         AlbumRepositoryInterface $albumRepository,
-        SongRepositoryInterface $songRepository
+        SongRepositoryInterface $songRepository,
+        PodcastEpisodeRepositoryInterface $podcastEpisodeRepository
     ) {
-        $this->modelFactory    = $modelFactory;
-        $this->xmlWriter       = $xmlWriter;
-        $this->albumRepository = $albumRepository;
-        $this->songRepository  = $songRepository;
+        $this->modelFactory             = $modelFactory;
+        $this->xmlWriter                = $xmlWriter;
+        $this->albumRepository          = $albumRepository;
+        $this->songRepository           = $songRepository;
+        $this->podcastEpisodeRepository = $podcastEpisodeRepository;
     }
 
     /**
@@ -629,9 +634,9 @@ final class XmlOutput implements ApiOutputInterface
                 "\t<rating>" . ($rating->get_user_rating($userId) ?: null) . "</rating>\n" .
                 "\t<averagerating>" . (string) ($rating->get_average_rating() ?: null) . "</averagerating>\n";
             if ($episodes) {
-                $items = $podcast->get_episodes();
+                $items = $this->podcastEpisodeRepository->getEpisodeIds($podcast->getId());
                 if (count($items) > 0) {
-                    $string .= $this->podcast_episodes($items, $userId, false);
+                    $string .= $this->podcast_episodes($items, $userId);
                 }
             }
             $string .= "\t</podcast>\n";
@@ -1062,9 +1067,9 @@ final class XmlOutput implements ApiOutputInterface
                         "\t<sync_date><![CDATA[" . $podcast->f_lastsync . "]]></sync_date>\n" .
                         "\t<public_url><![CDATA[" . $podcast->link . "]]></public_url>\n";
                     if ($include) {
-                        $episodes = $podcast->get_episodes();
-                        foreach ($episodes as $episode_id) {
-                            $string .= $this->podcast_episodes(array($episode_id), $userId, false);
+                        $episodeIds = $this->podcastEpisodeRepository->getEpisodeIds($podcast->getId());
+                        foreach ($episodeIds as $episodeId) {
+                            $string .= $this->podcast_episodes(array($episodeId), $userId);
                         }
                     }
                     $string .= "\t</podcast>\n";

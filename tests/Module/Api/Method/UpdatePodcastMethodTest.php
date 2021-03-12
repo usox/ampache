@@ -31,6 +31,7 @@ use Ampache\Module\Api\Method\Exception\RequestParamMissingException;
 use Ampache\Module\Api\Method\Exception\ResultEmptyException;
 use Ampache\Module\Api\Output\ApiOutputInterface;
 use Ampache\Module\Authorization\AccessLevelEnum;
+use Ampache\Module\Podcast\PodcastSyncerInterface;
 use Ampache\Repository\Model\ModelFactoryInterface;
 use Ampache\Repository\Model\Podcast;
 use Mockery\MockInterface;
@@ -46,16 +47,21 @@ class UpdatePodcastMethodTest extends MockeryTestCase
     /** @var StreamFactoryInterface|MockInterface|null */
     private MockInterface $streamFactory;
 
+    /** @var MockInterface|PodcastSyncerInterface */
+    private MockInterface $podcastSyncer;
+
     private UpdatePodcastMethod $subject;
 
     public function setUp(): void
     {
         $this->modelFactory  = $this->mock(ModelFactoryInterface::class);
         $this->streamFactory = $this->mock(StreamFactoryInterface::class);
+        $this->podcastSyncer = $this->mock(PodcastSyncerInterface::class);
 
         $this->subject = new UpdatePodcastMethod(
             $this->modelFactory,
-            $this->streamFactory
+            $this->streamFactory,
+            $this->podcastSyncer
         );
     }
 
@@ -159,8 +165,9 @@ class UpdatePodcastMethodTest extends MockeryTestCase
             ->withNoArgs()
             ->once()
             ->andReturnFalse();
-        $podcast->shouldReceive('sync_episodes')
-            ->with(true)
+
+        $this->podcastSyncer->shouldReceive('sync')
+            ->with($podcast, true)
             ->once()
             ->andReturnFalse();
 
@@ -197,8 +204,9 @@ class UpdatePodcastMethodTest extends MockeryTestCase
             ->withNoArgs()
             ->once()
             ->andReturnFalse();
-        $podcast->shouldReceive('sync_episodes')
-            ->with(true)
+
+        $this->podcastSyncer->shouldReceive('sync')
+            ->with($podcast, true)
             ->once()
             ->andReturnTrue();
 

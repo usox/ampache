@@ -23,10 +23,24 @@ declare(strict_types=1);
 
 namespace Ampache\Repository;
 
+use Ampache\Config\ConfigContainerInterface;
+use Ampache\Config\ConfigurationKeyEnum;
+use Ampache\Module\Podcast\PodcastStateEnum;
 use Ampache\Module\System\Dba;
+use Ampache\Repository\Model\Podcast;
+use Ampache\Repository\Model\Podcast_Episode;
+use Generator;
 
 final class PodcastEpisodeRepository implements PodcastEpisodeRepositoryInterface
 {
+    private ConfigContainerInterface $configContainer;
+
+    public function __construct(
+        ConfigContainerInterface $configContainer
+    ) {
+        $this->configContainer = $configContainer;
+    }
+
     /**
      * This returns an array of ids of latest podcast episodes in this catalog
      *
@@ -48,5 +62,187 @@ final class PodcastEpisodeRepository implements PodcastEpisodeRepositoryInterfac
         }
 
         return $results;
+    }
+
+    /**
+     * @return iterable<Podcast_Episode>
+     */
+    public function getDownloadableEpisodeIds(
+        Podcast $podcast,
+        int $limit
+    ): Generator {
+        $sql = <<<SQL
+        SELECT
+             `podcast_episode`.`id`
+        FROM
+             `podcast_episode`
+            INNER JOIN 
+                `podcast`
+            ON
+                `podcast`.`id` = `podcast_episode`.`podcast`
+        WHERE
+              `podcast`.`id` = ?
+          AND
+              `podcast_episode`.`addition_time` > `podcast`.`lastsync`
+        ORDER BY
+              `podcast_episode`.`pubdate` DESC
+        LIMIT %d;
+        SQL;
+
+        $db_results = Dba::read(
+            sprintf($sql, $limit),
+           [$podcast->getId()]
+        );
+        while ($row = Dba::fetch_row($db_results)) {
+            yield new Podcast_Episode((int) $row[0]);
+        }
+    }
+
+    /**
+     * @return iterable<Podcast_Episode>
+     */
+    public function getDeletableEpisodes(
+        Podcast $podcast,
+        int $limit
+    ): Generator {
+        $sql = <<<SQL
+        SELECT
+            `podcast_episode`.`id`
+        FROM
+            `podcast_episode`
+        WHERE
+            `podcast_episode`.`podcast` = ?
+        ORDER BY
+            `podcast_episode`.`pubdate` DESC
+        LIMIT
+            %d,18446744073709551615
+        SQL;
+
+        $db_results = Dba::read(
+            sprintf($sql, $limit),
+            [$podcast->getId()]
+        );
+        while ($row = Dba::fetch_row($db_results)) {
+            yield new Podcast_Episode((int) $row[0]);
+        }
+    }
+
+    public function create(
+        int $podcastId,
+        string $title,
+        string $guid,
+        string $source,
+        string $website,
+        string $description,
+        string $author,
+        string $category,
+        int $time,
+        int $pubdate
+    ): bool {
+        $sql = <<<SQL
+        INSERT INTO
+            `podcast_episode`
+            (`title`, `guid`, `podcast`, `state`, `source`, `website`, `description`, `author`, `category`, `time`, `pubdate`, `addition_time`)
+        VALUES
+            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        SQL;
+
+        $result = Dba::write(
+            $sql,
+            [
+                $title,
+                $guid,
+                $podcastId,
+                'pending',
+                $source,
+                $website,
+                $description,
+                $author,
+                $category,
+                $time,
+                $pubdate,
+                time()
+            ]
+        );
+
+        return $result !== false;
+    }
+
+    /**
+     * Gets all episodes for the podcast
+     *
+     * @param string $state_filter
+     * @return int[]
+     */
+    public function getEpisodeIds(
+        int $podcastId,
+        ?string $state_filter = null
+    ): array {
+        $catalogDisabled = $this->configContainer->isFeatureEnabled(ConfigurationKeyEnum::CATALOG_DISABLE);
+
+        $params = [];
+        $sql    = 'SELECT `podcast_episode`.`id` FROM `podcast_episode` ';
+        if ($catalogDisabled) {
+            $sql .= 'LEFT JOIN `podcast` ON `podcast`.`id` = `podcast_episode`.`podcast` ';
+            $sql .= 'LEFT JOIN `catalog` ON `catalog`.`id` = `podcast`.`catalog` ';
+        }
+        $sql .= 'WHERE `podcast_episode`.`podcast`= ? ';
+        $params[] = $podcastId;
+        if ($state_filter !== null) {
+            $sql .= 'AND `podcast_episode`.`state` = ? ';
+            $params[] = $state_filter;
+        }
+        if ($catalogDisabled) {
+            $sql .= 'AND `catalog`.`enabled` = \'1\' ';
+        }
+        $sql .= 'ORDER BY `podcast_episode`.`pubdate` DESC';
+
+        $db_results = Dba::read($sql, $params);
+
+        $results = [];
+        while ($row = Dba::fetch_assoc($db_results)) {
+            $results[] = (int) $row['id'];
+        }
+
+        return $results;
+    }
+
+    public function remove(Podcast_Episode $podcastEpisode): bool
+    {
+        $result = Dba::write(
+            'DELETE FROM `podcast_episode` WHERE `id` = ?',
+            [$podcastEpisode->getId()]
+        );
+
+        return $result !== false;
+    }
+
+    public function changeState(int $podcastEpisodeId, string $state): void
+    {
+        Dba::write(
+            'UPDATE `podcast_episode` SET `state` = ? WHERE `id` = ?',
+            [$state, $podcastEpisodeId]
+        );
+    }
+
+    /**
+     * Sets the vital meta informations after the episode has been downloaded
+     */
+    public function updateDownloadState(
+        Podcast_Episode $podcastEpisode,
+        string $filePath,
+        int $size,
+        int $duration
+    ): void {
+        Dba::write(
+            'UPDATE `podcast_episode` SET `file` = ?, `size` = ?, `time` = ?, `state` = ? WHERE `id` = ?',
+            [
+                $filePath,
+                $size,
+                $duration,
+                PodcastStateEnum::COMPLETED,
+                $podcastEpisode->getId(),
+            ]
+        );
     }
 }

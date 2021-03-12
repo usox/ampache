@@ -34,6 +34,7 @@ use Ampache\Module\Api\Method\Exception\RequestParamMissingException;
 use Ampache\Module\Api\Method\Exception\ResultEmptyException;
 use Ampache\Module\Api\Output\ApiOutputInterface;
 use Ampache\Module\Catalog\MediaDeletionCheckerInterface;
+use Ampache\Module\Podcast\PodcastEpisodeDeleterInterface;
 use Ampache\Repository\Model\ModelFactoryInterface;
 use Ampache\Repository\UpdateInfoRepositoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -53,18 +54,22 @@ final class PodcastEpisodeDeleteMethod implements MethodInterface
 
     private UpdateInfoRepositoryInterface $updateInfoRepository;
 
+    private PodcastEpisodeDeleterInterface $podcastEpisodeDeleter;
+
     public function __construct(
         StreamFactoryInterface $streamFactory,
         ConfigContainerInterface $configContainer,
         ModelFactoryInterface $modelFactory,
         MediaDeletionCheckerInterface $mediaDeletionChecker,
-        UpdateInfoRepositoryInterface $updateInfoRepository
+        UpdateInfoRepositoryInterface $updateInfoRepository,
+        PodcastEpisodeDeleterInterface $podcastEpisodeDeleter
     ) {
-        $this->streamFactory        = $streamFactory;
-        $this->configContainer      = $configContainer;
-        $this->modelFactory         = $modelFactory;
-        $this->mediaDeletionChecker = $mediaDeletionChecker;
-        $this->updateInfoRepository = $updateInfoRepository;
+        $this->streamFactory         = $streamFactory;
+        $this->configContainer       = $configContainer;
+        $this->modelFactory          = $modelFactory;
+        $this->mediaDeletionChecker  = $mediaDeletionChecker;
+        $this->updateInfoRepository  = $updateInfoRepository;
+        $this->podcastEpisodeDeleter = $podcastEpisodeDeleter;
     }
 
     /**
@@ -113,7 +118,7 @@ final class PodcastEpisodeDeleteMethod implements MethodInterface
             throw new AccessDeniedException(T_('Require: 75'));
         }
 
-        if ($episode->remove()) {
+        if ($this->podcastEpisodeDeleter->delete($episode)) {
             $this->updateInfoRepository->updateCountByTableName('podcast_episode');
 
             return $response->withBody(
