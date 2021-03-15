@@ -191,7 +191,7 @@ class Podcast extends database_object implements library_item
     public function get_childrens()
     {
         return [
-            'podcast_episode' => $this->getPodcastEpisodeRepository()->getEpisodeIds($this->getId())
+            'podcast_episode' => $this->getPodcastEpisodeRepository()->getEpisodeIds($this)
         ];
     }
 
@@ -214,7 +214,7 @@ class Podcast extends database_object implements library_item
     {
         $medias = array();
         if ($filter_type === null || $filter_type == 'podcast_episode') {
-            $episodes = $this->getPodcastEpisodeRepository()->getEpisodeIds($this->getId());
+            $episodes = $this->getPodcastEpisodeRepository()->getEpisodeIds($this);
             foreach ($episodes as $episode_id) {
                 $medias[] = array(
                     'object_type' => 'podcast_episode',

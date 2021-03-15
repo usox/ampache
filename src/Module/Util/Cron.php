@@ -164,7 +164,7 @@ final class Cron
                             Userflag::build_cache('podcast', $podcasts, $user_id);
                             // podcast_episodes
                             $podcast          = new Podcast($podcast_id);
-                            $podcast_episodes = static::getPodcastEpisodeRepository()->getEpisodeIds($podcast->getId());
+                            $podcast_episodes = static::getPodcastEpisodeRepository()->getEpisodeIds($podcast);
                             Rating::build_cache('podcast_episode', $podcast_episodes, $user_id);
                             Userflag::build_cache('podcast_episode', $podcast_episodes, $user_id);
                         } // end foreach $podcasts
