@@ -175,13 +175,9 @@ class PodcastEpisodesMethodTest extends MockeryTestCase
             ->withNoArgs()
             ->once()
             ->andReturnFalse();
-        $podcast->shouldReceive('getId')
-            ->withNoArgs()
-            ->once()
-            ->andReturn($objectId);
 
         $this->podcastEpisodeRepository->shouldReceive('getEpisodeIds')
-            ->with($objectId)
+            ->with($podcast)
             ->once()
             ->andReturn([]);
 
@@ -240,13 +236,9 @@ class PodcastEpisodesMethodTest extends MockeryTestCase
             ->withNoArgs()
             ->once()
             ->andReturnFalse();
-        $podcast->shouldReceive('getId')
-            ->withNoArgs()
-            ->once()
-            ->andReturn($objectId);
 
         $this->podcastEpisodeRepository->shouldReceive('getEpisodeIds')
-            ->with($objectId)
+            ->with($podcast)
             ->once()
             ->andReturn($episodeIds);
 

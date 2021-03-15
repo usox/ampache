@@ -699,7 +699,7 @@ final class JsonOutput implements ApiOutputInterface
             $podcast_episodes    = array();
             if ($episodes) {
                 $podcast_episodes = $this->podcast_episodes(
-                    $this->podcastEpisodeRepository->getEpisodeIds($podcast->getId()),
+                    $this->podcastEpisodeRepository->getEpisodeIds($podcast),
                     $userId,
                     false,
                     true,

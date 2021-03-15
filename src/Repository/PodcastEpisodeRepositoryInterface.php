@@ -21,6 +21,7 @@
 
 namespace Ampache\Repository;
 
+use Ampache\Module\Podcast\PodcastStateEnum;
 use Ampache\Repository\Model\Podcast;
 use Ampache\Repository\Model\Podcast_Episode;
 use Generator;
@@ -40,10 +41,10 @@ interface PodcastEpisodeRepositoryInterface
     /**
      * @return iterable<Podcast_Episode>
      */
-    public function getDownloadableEpisodeIds(
+    public function getDownloadableEpisodes(
         Podcast $podcast,
         int $limit
-    ): Generator;
+    ): iterable;
 
     /**
      * @return iterable<Podcast_Episode>
@@ -51,7 +52,7 @@ interface PodcastEpisodeRepositoryInterface
     public function getDeletableEpisodes(
         Podcast $podcast,
         int $limit
-    ): Generator;
+    ): iterable;
 
     public function create(
         int $podcastId,
@@ -69,17 +70,22 @@ interface PodcastEpisodeRepositoryInterface
     /**
      * Gets all episodes for the podcast
      *
-     * @param string $state_filter
      * @return int[]
      */
     public function getEpisodeIds(
-        int $podcastId,
+        Podcast $podcast,
         ?string $state_filter = null
     ): array;
 
     public function remove(Podcast_Episode $podcastEpisode): bool;
 
-    public function changeState(int $podcastEpisodeId, string $state): void;
+    /**
+     * @see PodcastStateEnum
+     */
+    public function changeState(
+        Podcast_Episode $podcastEpisode,
+        string $state
+    ): void;
 
     /**
      * Sets the vital meta informations after the episode has been downloaded

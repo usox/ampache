@@ -119,15 +119,15 @@ final class PodcastSyncer implements PodcastSyncerInterface
         }
 
         // Select episodes to download
-        $episode_download_amount = (int) $this->configContainer->get(ConfigurationKeyEnum::PODCAST_NEW_DOWNLOAD);
-        if ($episode_download_amount <> 0) {
-            $episodes = $this->podcastEpisodeRepository->getDownloadableEpisodeIds(
+        $episodeDownloadAmount = (int) $this->configContainer->get(ConfigurationKeyEnum::PODCAST_NEW_DOWNLOAD);
+        if ($episodeDownloadAmount <> 0) {
+            $episodes = $this->podcastEpisodeRepository->getDownloadableEpisodes(
                 $podcast,
-                $episode_download_amount
+                $episodeDownloadAmount
             );
 
             foreach ($episodes as $episode) {
-                $this->podcastEpisodeRepository->changeState($episode->getId(), PodcastStateEnum::PENDING);
+                $this->podcastEpisodeRepository->changeState($episode, PodcastStateEnum::PENDING);
                 if ($gather) {
                     $this->podcastEpisodeDownloader->download($episode);
                 }
@@ -135,11 +135,11 @@ final class PodcastSyncer implements PodcastSyncerInterface
         }
 
         // Remove items outside limit
-        $episode_keep_amount = (int) $this->configContainer->get(ConfigurationKeyEnum::PODCAST_KEEP);
-        if ($episode_keep_amount > 0) {
+        $episodeKeepAmount = (int) $this->configContainer->get(ConfigurationKeyEnum::PODCAST_KEEP);
+        if ($episodeKeepAmount > 0) {
             $episodes = $this->podcastEpisodeRepository->getDeletableEpisodes(
                 $podcast,
-                $episode_keep_amount
+                $episodeKeepAmount
             );
 
             foreach ($episodes as $episode) {

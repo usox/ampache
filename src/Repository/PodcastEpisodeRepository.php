@@ -29,7 +29,6 @@ use Ampache\Module\Podcast\PodcastStateEnum;
 use Ampache\Module\System\Dba;
 use Ampache\Repository\Model\Podcast;
 use Ampache\Repository\Model\Podcast_Episode;
-use Generator;
 
 final class PodcastEpisodeRepository implements PodcastEpisodeRepositoryInterface
 {
@@ -67,10 +66,10 @@ final class PodcastEpisodeRepository implements PodcastEpisodeRepositoryInterfac
     /**
      * @return iterable<Podcast_Episode>
      */
-    public function getDownloadableEpisodeIds(
+    public function getDownloadableEpisodes(
         Podcast $podcast,
         int $limit
-    ): Generator {
+    ): iterable {
         $sql = <<<SQL
         SELECT
              `podcast_episode`.`id`
@@ -104,7 +103,7 @@ final class PodcastEpisodeRepository implements PodcastEpisodeRepositoryInterfac
     public function getDeletableEpisodes(
         Podcast $podcast,
         int $limit
-    ): Generator {
+    ): iterable {
         $sql = <<<SQL
         SELECT
             `podcast_episode`.`id`
@@ -171,11 +170,10 @@ final class PodcastEpisodeRepository implements PodcastEpisodeRepositoryInterfac
     /**
      * Gets all episodes for the podcast
      *
-     * @param string $state_filter
      * @return int[]
      */
     public function getEpisodeIds(
-        int $podcastId,
+        Podcast $podcast,
         ?string $state_filter = null
     ): array {
         $catalogDisabled = $this->configContainer->isFeatureEnabled(ConfigurationKeyEnum::CATALOG_DISABLE);
@@ -187,7 +185,7 @@ final class PodcastEpisodeRepository implements PodcastEpisodeRepositoryInterfac
             $sql .= 'LEFT JOIN `catalog` ON `catalog`.`id` = `podcast`.`catalog` ';
         }
         $sql .= 'WHERE `podcast_episode`.`podcast`= ? ';
-        $params[] = $podcastId;
+        $params[] = $podcast->getId();
         if ($state_filter !== null) {
             $sql .= 'AND `podcast_episode`.`state` = ? ';
             $params[] = $state_filter;
@@ -217,11 +215,13 @@ final class PodcastEpisodeRepository implements PodcastEpisodeRepositoryInterfac
         return $result !== false;
     }
 
-    public function changeState(int $podcastEpisodeId, string $state): void
-    {
+    public function changeState(
+        Podcast_Episode $podcastEpisode,
+        string $state
+    ): void {
         Dba::write(
             'UPDATE `podcast_episode` SET `state` = ? WHERE `id` = ?',
-            [$state, $podcastEpisodeId]
+            [$state, $podcastEpisode->getId()]
         );
     }
 

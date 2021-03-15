@@ -27,7 +27,10 @@ use SimpleXMLElement;
 
 interface PodcastSyncerInterface
 {
-    public function sync(Podcast $podcast, $gather = false): bool;
+    public function sync(
+        Podcast $podcast,
+        bool $gather = false
+    ): bool;
 
     public function addEpisodes(
         Podcast $podcast,

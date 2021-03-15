@@ -960,7 +960,7 @@ class Upnp_Api
                     case 2: // Get podcast episodes list
                         $podcast = new Podcast($pathreq[1]);
                         if ($podcast->id) {
-                            $episodes                  = static::getPodcastEpisodeRepository()->getEpisodeIds($podcast->getId());
+                            $episodes                  = static::getPodcastEpisodeRepository()->getEpisodeIds($podcast);
                             [$maxCount, $episodes]     = self::_slice($episodes, $start, $count);
                             foreach ($episodes as $episode_id) {
                                 $episode = new Podcast_Episode($episode_id);

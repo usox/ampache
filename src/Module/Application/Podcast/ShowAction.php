@@ -72,7 +72,7 @@ final class ShowAction implements ApplicationActionInterface
             $podcast = $this->modelFactory->createPodcast($podcast_id);
             $podcast->format();
 
-            $object_ids  = $this->podcastEpisodeRepository->getEpisodeIds($podcast->getId());
+            $object_ids  = $this->podcastEpisodeRepository->getEpisodeIds($podcast);
             $object_type = 'podcast_episode';
             require_once Ui::find_template('show_podcast.inc.php');
         }
