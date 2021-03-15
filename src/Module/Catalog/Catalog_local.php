@@ -931,7 +931,7 @@ class Catalog_local extends Catalog
         foreach ($podcasts as $podcast) {
             $podcastSyncer->sync($podcast, false);
             $episodeIds = static::getPodcastEpisodeRepository()->getEpisodeIds(
-                $podcast->getId(),
+                $podcast,
                 'pending'
             );
             foreach ($episodeIds as $episodeId) {

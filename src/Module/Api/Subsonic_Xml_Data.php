@@ -1463,7 +1463,7 @@ class Subsonic_Xml_Data
             }
             $xchannel->addAttribute('status', 'completed');
             if ($includeEpisodes) {
-                $episodes = static::getPodcastEpisodeRepository()->getEpisodeIds($podcast->getId());
+                $episodes = static::getPodcastEpisodeRepository()->getEpisodeIds($podcast);
                 foreach ($episodes as $episode_id) {
                     $episode = new Podcast_Episode($episode_id);
                     self::addPodcastEpisode($xchannel, $episode);

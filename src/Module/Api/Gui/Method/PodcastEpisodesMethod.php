@@ -104,7 +104,7 @@ final class PodcastEpisodesMethod implements MethodInterface
             throw new ResultEmptyException((string) $objectId);
         }
 
-        $items = $this->podcastEpisodeRepository->getEpisodeIds($podcast->getId());
+        $items = $this->podcastEpisodeRepository->getEpisodeIds($podcast);
 
         if ($items === []) {
             $result = $output->emptyResult('podcast_episode');

@@ -56,8 +56,7 @@ final class PodcastDeleter implements PodcastDeleterInterface
     public function delete(
         Podcast $podcast
     ): bool {
-        $podcastId  = $podcast->getId();
-        $episodeIds = $this->podcastEpisodeRepository->getEpisodeIds($podcastId);
+        $episodeIds = $this->podcastEpisodeRepository->getEpisodeIds($podcast);
 
         foreach ($episodeIds as $episodeId) {
             $this->podcastEpisodeDeleter->delete(

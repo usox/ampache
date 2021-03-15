@@ -634,7 +634,7 @@ final class XmlOutput implements ApiOutputInterface
                 "\t<rating>" . ($rating->get_user_rating($userId) ?: null) . "</rating>\n" .
                 "\t<averagerating>" . (string) ($rating->get_average_rating() ?: null) . "</averagerating>\n";
             if ($episodes) {
-                $items = $this->podcastEpisodeRepository->getEpisodeIds($podcast->getId());
+                $items = $this->podcastEpisodeRepository->getEpisodeIds($podcast);
                 if (count($items) > 0) {
                     $string .= $this->podcast_episodes($items, $userId);
                 }
@@ -1067,7 +1067,7 @@ final class XmlOutput implements ApiOutputInterface
                         "\t<sync_date><![CDATA[" . $podcast->f_lastsync . "]]></sync_date>\n" .
                         "\t<public_url><![CDATA[" . $podcast->link . "]]></public_url>\n";
                     if ($include) {
-                        $episodeIds = $this->podcastEpisodeRepository->getEpisodeIds($podcast->getId());
+                        $episodeIds = $this->podcastEpisodeRepository->getEpisodeIds($podcast);
                         foreach ($episodeIds as $episodeId) {
                             $string .= $this->podcast_episodes(array($episodeId), $userId);
                         }
