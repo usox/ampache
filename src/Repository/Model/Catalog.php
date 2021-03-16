@@ -48,14 +48,10 @@ use Ampache\Module\Util\ObjectTypeToClassNameMapper;
 use Ampache\Module\Util\Recommendation;
 use Ampache\Module\Util\Ui;
 use Ampache\Module\Util\VaInfo;
-use Ampache\Repository\AlbumRepositoryInterface;
 use Ampache\Repository\CatalogRepositoryInterface;
 use Ampache\Repository\LabelRepositoryInterface;
 use Ampache\Repository\LicenseRepositoryInterface;
 use Ampache\Repository\PlaylistRepositoryInterface;
-use Ampache\Repository\PodcastEpisodeRepositoryInterface;
-use Ampache\Repository\PodcastRepositoryInterface;
-use Ampache\Repository\SongRepositoryInterface;
 use Ampache\Repository\TagRepositoryInterface;
 use Ampache\Repository\UpdateInfoRepository;
 use Exception;
@@ -1198,51 +1194,6 @@ abstract class Catalog extends database_object
         $results    = array();
         while ($row = Dba::fetch_assoc($db_results)) {
             $results[] = $row['id'];
-        }
-
-        return $results;
-    }
-
-    /**
-     *
-     * @param integer[]|null $catalogs
-     * @return Podcast[]
-     */
-    public static function get_podcasts($catalogs = null)
-    {
-        if (!$catalogs) {
-            $catalogs = static::getCatalogRepository()->getList('podcast');
-        }
-
-        $results = array();
-        foreach ($catalogs as $catalog_id) {
-            $podcast_ids = static::getPodcastRepository()->getPodcastIds((int) $catalog_id);
-            foreach ($podcast_ids as $podcast_id) {
-                $results[] = new Podcast($podcast_id);
-            }
-        }
-
-        return $results;
-    }
-
-    /**
-     *
-     * @param integer $count
-     * @return Podcast_Episode[]
-     */
-    public static function get_newest_podcasts($count)
-    {
-        $catalogs = static::getCatalogRepository()->getList('podcast');
-        $results  = array();
-
-        foreach ($catalogs as $catalog_id) {
-            $episode_ids = static::getPodcastEpisodeRepository()->getNewestPodcastsIds(
-                (int) $catalog_id,
-                $count
-            );
-            foreach ($episode_ids as $episode_id) {
-                $results[] = new Podcast_Episode($episode_id);
-            }
         }
 
         return $results;
@@ -2913,25 +2864,5 @@ abstract class Catalog extends database_object
         global $dic;
 
         return $dic->get(SingleItemUpdaterInterface::class);
-    }
-
-    /**
-     * @deprecated Inject by constructor
-     */
-    private static function getPodcastRepository(): PodcastRepositoryInterface
-    {
-        global $dic;
-
-        return $dic->get(PodcastRepositoryInterface::class);
-    }
-
-    /**
-     * @deprecated Inject by constructor
-     */
-    private static function getPodcastEpisodeRepository(): PodcastEpisodeRepositoryInterface
-    {
-        global $dic;
-
-        return $dic->get(PodcastEpisodeRepositoryInterface::class);
     }
 }

@@ -1,0 +1,77 @@
+<?php
+/*
+ * vim:set softtabstop=4 shiftwidth=4 expandtab:
+ *
+ * LICENSE: GNU Affero General Public License, version 3 (AGPL-3.0-or-later)
+ * Copyright 2001 - 2020 Ampache.org
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ */
+
+declare(strict_types=1);
+
+namespace Ampache\Module\Api\SubSonic\Method;
+
+use Ampache\Config\AmpConfig;
+use Ampache\Module\Api\SubSonic\Subsonic_Api;
+use Ampache\Module\Api\SubSonic\Subsonic_Xml_Data;
+use Ampache\Module\Authorization\Access;
+use Ampache\Module\Podcast\PodcastEpisodeDownloaderInterface;
+use Ampache\Repository\Model\ModelFactoryInterface;
+
+/**
+ * Request the server to download a podcast episode
+ * Takes the podcast episode id in parameter.
+ */
+final class DownloadPodcastEpisodeMethod implements SubsonicApiMethodInterface
+{
+    private PodcastEpisodeDownloaderInterface $podcastEpisodeDownloader;
+
+    private ModelFactoryInterface $modelFactory;
+
+    public function __construct(
+        PodcastEpisodeDownloaderInterface $podcastEpisodeDownloader,
+        ModelFactoryInterface $modelFactory
+    ) {
+        $this->podcastEpisodeDownloader = $podcastEpisodeDownloader;
+        $this->modelFactory             = $modelFactory;
+    }
+
+    public function handle(array $input): void
+    {
+        $id = Subsonic_Api::check_parameter($input, 'id');
+
+        if (AmpConfig::get('podcast') && Access::check('interface', 75)) {
+            $episode = $this->modelFactory->createPodcastEpisode((int) Subsonic_Xml_Data::getAmpacheId($id));
+            if (!$episode->isNew()) {
+                $this->podcastEpisodeDownloader->download($episode);
+                $response = Subsonic_Xml_Data::createSuccessResponse('downloadpodcastepisode');
+            } else {
+                $response = Subsonic_Xml_Data::createError(
+                    Subsonic_Xml_Data::SSERROR_DATA_NOTFOUND,
+                    '',
+                    'downloadpodcastepisode'
+                );
+            }
+        } else {
+            $response = Subsonic_Xml_Data::createError(
+                Subsonic_Xml_Data::SSERROR_UNAUTHORIZED,
+                '',
+                'downloadpodcastepisode'
+            );
+        }
+        Subsonic_Api::apiOutput($input, $response);
+    }
+}

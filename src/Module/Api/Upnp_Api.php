@@ -24,6 +24,7 @@ declare(strict_types=0);
 
 namespace Ampache\Module\Api;
 
+use Ampache\Module\Podcast\PodcastByCatalogLoaderInterface;
 use Ampache\Repository\Model\Album;
 use Ampache\Module\Playback\Stream;
 use Ampache\Config\AmpConfig;
@@ -950,8 +951,8 @@ class Upnp_Api
             case 'podcasts':
                 switch (count($pathreq)) {
                     case 1: // Get podcasts list
-                        $podcasts                  = Catalog::get_podcasts();
-                        [$maxCount, $podcasts]     = self::_slice($podcasts, $start, $count);
+                        $podcasts              = static::getPodcastByCatalogLoader()->load();
+                        [$maxCount, $podcasts] = self::_slice($podcasts, $start, $count);
                         foreach ($podcasts as $podcast) {
                             $podcast->format();
                             $mediaItems[] = self::_itemPodcast($podcast, $parent);
@@ -1989,5 +1990,15 @@ class Upnp_Api
         global $dic;
 
         return $dic->get(PodcastEpisodeRepositoryInterface::class);
+    }
+
+    /**
+     * @deprecated Inject by constructor
+     */
+    private static function getPodcastByCatalogLoader(): PodcastByCatalogLoaderInterface
+    {
+        global $dic;
+
+        return $dic->get(PodcastByCatalogLoaderInterface::class);
     }
 }

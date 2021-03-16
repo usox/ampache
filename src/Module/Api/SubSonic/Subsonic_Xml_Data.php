@@ -22,8 +22,9 @@
 
 declare(strict_types=0);
 
-namespace Ampache\Module\Api;
+namespace Ampache\Module\Api\SubSonic;
 
+use Ampache\Module\Util\ExtensionToMimeTypeMapperInterface;
 use Ampache\Repository\Model\Album;
 use Ampache\Repository\Model\Bookmark;
 use Ampache\Repository\Model\Podcast;
@@ -670,7 +671,7 @@ class Subsonic_Xml_Data
         }
         $extension       = pathinfo((string)$results['file'], PATHINFO_EXTENSION);
         $results['type'] = strtolower((string)$extension);
-        $results['mime'] = Song::type_to_mime($results['type']);
+        $results['mime'] = static::getExtensionToMimeTypeMapper()->mapAudio($results['type']);
 
         return $results;
     }
@@ -822,7 +823,10 @@ class Subsonic_Xml_Data
             // $transcode_settings = Song::get_transcode_settings_for_media(null, null, 'api', 'song');
             $transcode_type = AmpConfig::get('encode_player_api_target', 'mp3');
             $xsong->addAttribute('transcodedSuffix', (string)$transcode_type);
-            $xsong->addAttribute('transcodedContentType', Song::type_to_mime($transcode_type));
+            $xsong->addAttribute(
+                'transcodedContentType',
+                static::getExtensionToMimeTypeMapper()->mapAudio($transcode_type)
+            );
         }
 
         return $xsong;
@@ -1000,7 +1004,10 @@ class Subsonic_Xml_Data
             if (!empty($transcode_settings)) {
                 $transcode_type = $transcode_settings['format'];
                 $xvideo->addAttribute('transcodedSuffix', (string)$transcode_type);
-                $xvideo->addAttribute('transcodedContentType', Video::type_to_mime($transcode_type));
+                $xvideo->addAttribute(
+                    'transcodedContentType',
+                    static::getExtensionToMimeTypeMapper()->mapVideo($transcode_type)
+                );
             }
         }
     }
@@ -1623,5 +1630,15 @@ class Subsonic_Xml_Data
         global $dic;
 
         return $dic->get(PodcastEpisodeRepositoryInterface::class);
+    }
+
+    /**
+     * @deprecated Inject by constructor
+     */
+    private static function getExtensionToMimeTypeMapper(): ExtensionToMimeTypeMapperInterface
+    {
+        global $dic;
+
+        return $dic->get(ExtensionToMimeTypeMapperInterface::class);
     }
 }

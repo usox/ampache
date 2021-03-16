@@ -96,4 +96,9 @@ interface PodcastEpisodeRepositoryInterface
         int $size,
         int $duration
     ): void;
+
+    /**
+     * Cleans up the podcast_episode table
+     */
+    public function collectGarbage(): void;
 }
