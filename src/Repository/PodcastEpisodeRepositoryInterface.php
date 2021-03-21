@@ -24,7 +24,6 @@ namespace Ampache\Repository;
 use Ampache\Module\Podcast\PodcastStateEnum;
 use Ampache\Repository\Model\Podcast;
 use Ampache\Repository\Model\Podcast_Episode;
-use Generator;
 
 interface PodcastEpisodeRepositoryInterface
 {
@@ -96,4 +95,9 @@ interface PodcastEpisodeRepositoryInterface
         int $size,
         int $duration
     ): void;
+
+    /**
+     * Cleans up the podcast_episode table
+     */
+    public function collectGarbage(): void;
 }

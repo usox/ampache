@@ -24,6 +24,8 @@ namespace Ampache\Module\Catalog;
 
 use Ampache\Config\AmpConfig;
 use Ampache\Module\Podcast\PodcastEpisodeDownloaderInterface;
+use Ampache\Module\Podcast\PodcastByCatalogLoaderInterface;
+use Ampache\Module\Podcast\PodcastStateEnum;
 use Ampache\Module\Podcast\PodcastSyncerInterface;
 use Ampache\Repository\Model\Album;
 use Ampache\Repository\Model\Art;
@@ -924,7 +926,7 @@ class Catalog_local extends Catalog
 
     private function sync_podcasts()
     {
-        $podcasts                 = self::get_podcasts();
+        $podcasts                 = static::getPodcastByCatalogLoader()->load();
         $podcastSyncer            = static::getPodcastSyncer();
         $podcastEpisodeDownloader = static::getPodcastEpisodeDownloader();
 
@@ -932,7 +934,7 @@ class Catalog_local extends Catalog
             $podcastSyncer->sync($podcast, false);
             $episodeIds = static::getPodcastEpisodeRepository()->getEpisodeIds(
                 $podcast,
-                'pending'
+                PodcastStateEnum::PENDING
             );
             foreach ($episodeIds as $episodeId) {
                 $podcastEpisodeDownloader->download(
@@ -1092,5 +1094,15 @@ class Catalog_local extends Catalog
         global $dic;
 
         return $dic->get(PodcastEpisodeDownloaderInterface::class);
+    }
+
+    /**
+     * @deprecated Inject by constructor
+     */
+    private static function getPodcastByCatalogLoader(): PodcastByCatalogLoaderInterface
+    {
+        global $dic;
+
+        return $dic->get(PodcastByCatalogLoaderInterface::class);
     }
 }

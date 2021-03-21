@@ -1,9 +1,6 @@
 <?php
-
-declare(strict_types=0);
-
-/* vim:set softtabstop=4 shiftwidth=4 expandtab: */
-/**
+/*
+ * vim:set softtabstop=4 shiftwidth=4 expandtab:
  *
  * LICENSE: GNU Affero General Public License, version 3 (AGPL-3.0-or-later)
  * Copyright 2001 - 2020 Ampache.org
@@ -23,13 +20,22 @@ declare(strict_types=0);
  *
  */
 
-use Ampache\Module\Api\SubSonic\SubsonicApiApplication;
-use Psr\Container\ContainerInterface;
+namespace Ampache\Module\Util;
 
-define('NO_SESSION', '1');
-define('OUTDATED_DATABASE_OK', 1);
+/**
+ * FIXME: This should really be done the other way around.
+ * Store the mime type in the database, and provide a function
+ * to make it a human-friendly type.
+ */
+interface ExtensionToMimeTypeMapperInterface
+{
+    /**
+     * Returns the mime type for the specified audio file extension/type
+     */
+    public function mapAudio(string $extension): string;
 
-/** @var ContainerInterface $dic */
-$dic = require __DIR__ . '/../../src/Config/Init.php';
-
-$dic->get(SubsonicApiApplication::class)->run();
+    /**
+     * Returns the mime type for the specified video file extension/type
+     */
+    public function mapVideo(string $extension): string;
+}

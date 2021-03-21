@@ -30,6 +30,8 @@ use Ampache\Module\Song\Tag\SongId3TagWriterInterface;
 use Ampache\Module\Statistics\Stats;
 use Ampache\Module\System\Dba;
 use Ampache\Module\User\Activity\UserActivityPosterInterface;
+use Ampache\Module\Util\ExtensionToMimeTypeMapper;
+use Ampache\Module\Util\ExtensionToMimeTypeMapperInterface;
 use Ampache\Module\Util\Recommendation;
 use Ampache\Module\Util\Ui;
 use Ampache\Repository\Model\Metadata\Metadata;
@@ -736,43 +738,13 @@ class Song extends database_object implements Media, library_item, GarbageCollec
      * Returns the mime type for the specified file extension/type
      * @param string $type
      * @return string
+     *
+     * @deprecated
+     * @see ExtensionToMimeTypeMapper
      */
     public static function type_to_mime($type)
     {
-        // FIXME: This should really be done the other way around.
-        // Store the mime type in the database, and provide a function
-        // to make it a human-friendly type.
-        switch ($type) {
-            case 'spx':
-            case 'ogg':
-                return 'application/ogg';
-            case 'opus':
-                return 'audio/ogg; codecs=opus';
-            case 'wma':
-            case 'asf':
-                return 'audio/x-ms-wma';
-            case 'rm':
-            case 'ra':
-                return 'audio/x-realaudio';
-            case 'flac':
-                return 'audio/x-flac';
-            case 'wv':
-                return 'audio/x-wavpack';
-            case 'aac':
-            case 'mp4':
-            case 'm4a':
-                return 'audio/mp4';
-            case 'aacp':
-                return 'audio/aacp';
-            case 'mpc':
-                return 'audio/x-musepack';
-            case 'mkv':
-                return 'audio/x-matroska';
-            case 'mpeg3':
-            case 'mp3':
-            default:
-                return 'audio/mpeg';
-        }
+        return static::getExtentionToMimeTypeMapper()->mapAudio($type);
     }
 
     /**
@@ -2345,5 +2317,15 @@ class Song extends database_object implements Media, library_item, GarbageCollec
         global $dic;
 
         return $dic->get(UserActivityPosterInterface::class);
+    }
+
+    /**
+     * @deprecated inject dependency
+     */
+    private static function getExtentionToMimeTypeMapper(): ExtensionToMimeTypeMapperInterface
+    {
+        global $dic;
+
+        return $dic->get(ExtensionToMimeTypeMapperInterface::class);
     }
 }

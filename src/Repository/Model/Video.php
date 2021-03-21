@@ -547,49 +547,6 @@ class Video extends database_object implements Media, library_item, GarbageColle
     }
 
     /**
-     * type_to_mime
-     *
-     * Returns the mime type for the specified file extension/type
-     * @param string $type
-     * @return string
-     */
-    public static function type_to_mime($type)
-    {
-        // FIXME: This should really be done the other way around.
-        // Store the mime type in the database, and provide a function
-        // to make it a human-friendly type.
-        switch ($type) {
-            case 'avi':
-                return 'video/avi';
-            case 'ogg':
-            case 'ogv':
-                return 'application/ogg';
-            case 'wmv':
-                return 'audio/x-ms-wmv';
-            case 'mp4':
-            case 'm4v':
-                return 'video/mp4';
-            case 'mkv':
-                return 'video/x-matroska';
-            case 'mov':
-                return 'video/quicktime';
-            case 'divx':
-                return 'video/x-divx';
-            case 'webm':
-                return 'video/webm';
-            case 'flv':
-                return 'video/x-flv';
-            case 'ts':
-                return 'video/mp2t';
-            case 'mpg':
-            case 'mpeg':
-            case 'm2ts':
-            default:
-                return 'video/mpeg';
-        }
-    }
-
-    /**
      * Insert new video.
      * @param array $data
      * @param array $gtypes

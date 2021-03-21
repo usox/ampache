@@ -1,9 +1,6 @@
 <?php
-
-declare(strict_types=0);
-
-/* vim:set softtabstop=4 shiftwidth=4 expandtab: */
-/**
+/*
+ * vim:set softtabstop=4 shiftwidth=4 expandtab:
  *
  * LICENSE: GNU Affero General Public License, version 3 (AGPL-3.0-or-later)
  * Copyright 2001 - 2020 Ampache.org
@@ -23,13 +20,16 @@ declare(strict_types=0);
  *
  */
 
-use Ampache\Module\Api\SubSonic\SubsonicApiApplication;
-use Psr\Container\ContainerInterface;
+namespace Ampache\Module\Podcast;
 
-define('NO_SESSION', '1');
-define('OUTDATED_DATABASE_OK', 1);
+use Ampache\Repository\Model\Podcast;
 
-/** @var ContainerInterface $dic */
-$dic = require __DIR__ . '/../../src/Config/Init.php';
-
-$dic->get(SubsonicApiApplication::class)->run();
+interface PodcastByCatalogLoaderInterface
+{
+    /**
+     * @param int[]|null $catalogIds
+     *
+     * @return Podcast[]
+     */
+    public function load(?array $catalogIds = null): array;
+}

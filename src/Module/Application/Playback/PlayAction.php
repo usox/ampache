@@ -27,6 +27,7 @@ namespace Ampache\Module\Application\Playback;
 
 use Ampache\Config\AmpConfig;
 use Ampache\Module\Plugin\Adapter\UserMediaPlaySaverAdapterInterface;
+use Ampache\Module\Util\ExtensionToMimeTypeMapperInterface;
 use Ampache\Repository\Model\Catalog;
 use Ampache\Repository\Model\Democratic;
 use Ampache\Repository\Model\Podcast_Episode;
@@ -72,13 +73,16 @@ final class PlayAction implements ApplicationActionInterface
 
     private UserMediaPlaySaverAdapterInterface $userMediaPlaySaverAdapter;
 
+    private ExtensionToMimeTypeMapperInterface $extensionToMimeTypeMapper;
+
     public function __construct(
         Horde_Browser $browser,
         AuthenticationManagerInterface $authenticationManager,
         NetworkCheckerInterface $networkChecker,
         SongRepositoryInterface $songRepository,
         UserRepositoryInterface $userRepository,
-        UserMediaPlaySaverAdapterInterface $userMediaPlaySaverAdapter
+        UserMediaPlaySaverAdapterInterface $userMediaPlaySaverAdapter,
+        ExtensionToMimeTypeMapperInterface $extensionToMimeTypeMapper
     ) {
         $this->browser                   = $browser;
         $this->authenticationManager     = $authenticationManager;
@@ -86,6 +90,7 @@ final class PlayAction implements ApplicationActionInterface
         $this->songRepository            = $songRepository;
         $this->userRepository            = $userRepository;
         $this->userMediaPlaySaverAdapter = $userMediaPlaySaverAdapter;
+        $this->extensionToMimeTypeMapper = $extensionToMimeTypeMapper;
     }
 
     public function run(ServerRequestInterface $request, GuiGatekeeperInterface $gatekeeper): ?ResponseInterface
@@ -803,7 +808,11 @@ final class PlayAction implements ApplicationActionInterface
 
         $mime = $media->mime;
         if ($transcode && isset($transcoder)) {
-            $mime = $media->type_to_mime($transcoder['format']);
+            if ($type === 'video') {
+                $mime = $this->extensionToMimeTypeMapper->mapVideo($transcoder['format']);
+            } else {
+                $mime = $this->extensionToMimeTypeMapper->mapAudio($transcoder['format']);
+            }
             // Non-blocking stream doesn't work in Windows (php bug since 2005 and still here in 2020...)
             // We don't want to wait indefinitely for a potential error so we just ignore it.
             // https://bugs.php.net/bug.php?id=47918
