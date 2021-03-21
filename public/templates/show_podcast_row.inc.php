@@ -1,6 +1,6 @@
 <?php
-/* vim:set softtabstop=4 shiftwidth=4 expandtab: */
 /**
+ * vim:set softtabstop=4 shiftwidth=4 expandtab:
  *
  * LICENSE: GNU Affero General Public License, version 3 (AGPL-3.0-or-later)
  * Copyright 2001 - 2020 Ampache.org
@@ -47,12 +47,12 @@ use Ampache\Module\Util\Ui;
 </td>
 <?php if (Art::is_enabled()) { ?>
 <td class="<?php echo $cel_cover; ?>">
-    <?php Art::display('podcast', $libitem->id, $libitem->f_name, 2, $libitem->link); ?>
+    <?php Art::display('podcast', $libitem->id, $libitem->getTitleFormatted(), 2, $libitem->getLink()); ?>
 </td>
 <?php
     } ?>
-<td class="cel_title"><?php echo $libitem->f_link; ?></td>
-<td class="cel_episodes"><?php echo $libitem->episodes; ?></td>
+<td class="cel_title"><?php echo $libitem->getLinkFormatted(); ?></td>
+<td class="cel_episodes"><?php echo $libitem->getEpisodeCount(); ?></td>
 <?php
     if (User::is_registered()) {
         if (AmpConfig::get('ratings')) { ?>

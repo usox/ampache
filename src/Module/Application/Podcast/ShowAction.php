@@ -26,11 +26,10 @@ namespace Ampache\Module\Application\Podcast;
 
 use Ampache\Config\ConfigContainerInterface;
 use Ampache\Config\ConfigurationKeyEnum;
-use Ampache\Repository\Model\ModelFactoryInterface;
 use Ampache\Module\Application\ApplicationActionInterface;
 use Ampache\Module\Authorization\GuiGatekeeperInterface;
-use Ampache\Module\Util\Ui;
 use Ampache\Module\Util\UiInterface;
+use Ampache\Repository\Model\ModelFactoryInterface;
 use Ampache\Repository\PodcastEpisodeRepositoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -64,17 +63,20 @@ final class ShowAction implements ApplicationActionInterface
         if ($this->configContainer->isFeatureEnabled(ConfigurationKeyEnum::PODCAST) === false) {
             return null;
         }
+        $podcastId = (int) ($request->getQueryParams()['podcast'] ?? 0);
 
         $this->ui->showHeader();
-
-        $podcast_id = (int) filter_input(INPUT_GET, 'podcast', FILTER_SANITIZE_NUMBER_INT);
-        if ($podcast_id > 0) {
-            $podcast = $this->modelFactory->createPodcast($podcast_id);
+        if ($podcastId > 0) {
+            $podcast = $this->modelFactory->createPodcast($podcastId);
             $podcast->format();
 
-            $object_ids  = $this->podcastEpisodeRepository->getEpisodeIds($podcast);
-            $object_type = 'podcast_episode';
-            require_once Ui::find_template('show_podcast.inc.php');
+            $this->ui->show(
+                'show_podcast.inc.php',
+                [
+                    'podcastEpisodeIds' => $this->podcastEpisodeRepository->getEpisodeIds($podcast),
+                    'podcast' => $podcast
+                ]
+            );
         }
 
         $this->ui->showQueryStats();

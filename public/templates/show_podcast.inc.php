@@ -22,6 +22,7 @@
 
 use Ampache\Config\AmpConfig;
 use Ampache\Repository\Model\Art;
+use Ampache\Repository\Model\Podcast;
 use Ampache\Repository\Model\Rating;
 use Ampache\Repository\Model\User;
 use Ampache\Repository\Model\Userflag;
@@ -33,13 +34,17 @@ use Ampache\Repository\Model\Browse;
 use Ampache\Module\Util\Ui;
 
 $browse = new Browse();
-$browse->set_type($object_type);
+$browse->set_type('podcast_episode');
 
-Ui::show_box_top($podcast->f_title, 'info-box'); ?>
+/** @var Podcast $podcast */
+/** @var int[] $podcastEpisodeIds */
+$title = $podcast->getTitleFormatted();
+
+Ui::show_box_top($title, 'info-box'); ?>
 <div class="item_right_info">
     <?php
     $thumb = Ui::is_grid_view('podcast') ? 32 : 11;
-    Art::display('podcast', $podcast->id, $podcast->f_title, $thumb); ?>
+    Art::display('podcast', $podcast->id, $title, $thumb); ?>
 </div>
 <?php if ($podcast->description) { ?>
 <div id="item_summary">
@@ -134,7 +139,7 @@ Ui::show_box_top($podcast->f_title, 'info-box'); ?>
     <div id="tabs_content">
         <div id="episodes" class="tab_content" style="display: block;">
 <?php
-    $browse->show_objects($object_ids, true);
+    $browse->show_objects($podcastEpisodeIds, true);
     $browse->store(); ?>
         </div>
     </div>

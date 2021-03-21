@@ -45,7 +45,6 @@ class Podcast extends database_object implements library_item
     public $lastsync;
 
     public $episodes;
-    public $f_title;
     public $f_website;
     public $f_description;
     public $f_language;
@@ -53,8 +52,6 @@ class Podcast extends database_object implements library_item
     public $f_generator;
     public $f_lastbuilddate;
     public $f_lastsync;
-    public $link;
-    public $f_link;
 
     /**
      * Podcast
@@ -100,32 +97,6 @@ class Podcast extends database_object implements library_item
     }
 
     /**
-     * _get_extra info
-     * This returns the extra information for the podcast, this means totals etc
-     * @return array
-     */
-    private function _get_extra_info()
-    {
-        $cache = static::getDatabaseObjectCache();
-        // Try to find it in the cache and save ourselves the trouble
-        $cacheItem = $cache->retrieve('podcast_extra', $this->getId());
-        if ($cacheItem !== []) {
-            $row = $cacheItem;
-        } else {
-            $sql        = "SELECT COUNT(`podcast_episode`.`id`) AS `episode_count` FROM `podcast_episode` " . "WHERE `podcast_episode`.`podcast` = ?";
-            $db_results = Dba::read($sql, array($this->id));
-            $row        = Dba::fetch_assoc($db_results);
-
-            $cache->add('podcast_extra', $this->getId(), $row);
-        }
-
-        /* Set Object Vars */
-        $this->episodes = $row['episode_count'];
-
-        return $row;
-    } // _get_extra_info
-
-    /**
      * format
      * this function takes the object and reformats some values
      * @param boolean $details
@@ -133,7 +104,6 @@ class Podcast extends database_object implements library_item
      */
     public function format($details = true)
     {
-        $this->f_title         = scrub_out($this->title);
         $this->f_description   = scrub_out($this->description);
         $this->f_language      = scrub_out($this->language);
         $this->f_copyright     = scrub_out($this->copyright);
@@ -141,14 +111,52 @@ class Podcast extends database_object implements library_item
         $this->f_website       = scrub_out($this->website);
         $this->f_lastbuilddate = get_datetime((int)$this->lastbuilddate);
         $this->f_lastsync      = get_datetime((int)$this->lastsync);
-        $this->link            = AmpConfig::get('web_path') . '/podcast.php?action=show&podcast=' . $this->id;
-        $this->f_link          = '<a href="' . $this->link . '" title="' . $this->f_title . '">' . $this->f_title . '</a>';
-
-        if ($details) {
-            $this->_get_extra_info();
-        }
 
         return true;
+    }
+
+    public function getEpisodeCount(): int
+    {
+        $cache = static::getDatabaseObjectCache();
+        // Try to find it in the cache and save ourselves the trouble
+        $cacheItem = $cache->retrieve('podcast_extra', $this->getId());
+        if ($cacheItem !== []) {
+            $row = $cacheItem;
+        } else {
+            $sql        = "SELECT COUNT(`podcast_episode`.`id`) AS `episode_count` FROM `podcast_episode` WHERE `podcast_episode`.`podcast` = ?";
+            $db_results = Dba::read($sql, [$this->getId()]);
+            $row        = Dba::fetch_assoc($db_results);
+
+            $cache->add('podcast_extra', $this->getId(), $row);
+        }
+
+        return (int) $row['episode_count'];
+    }
+
+    public function getLink(): string
+    {
+        return sprintf(
+            '%s/podcast.php?action=show&podcast=%d',
+            AmpConfig::get('web_path'),
+            $this->getId()
+        );
+    }
+
+    public function getLinkFormatted(): string
+    {
+        $title = $this->getTitleFormatted();
+
+        return sprintf(
+            '<a href="%s" title="%s">%s</a>',
+            $this->getLink(),
+            $title,
+            $title
+        );
+    }
+
+    public function getTitleFormatted(): string
+    {
+        return scrub_out($this->title);
     }
 
     /**
@@ -161,7 +169,7 @@ class Podcast extends database_object implements library_item
         $keywords['podcast'] = array(
             'important' => true,
             'label' => T_('Podcast'),
-            'value' => $this->f_title
+            'value' => $this->getTitleFormatted()
         );
 
         return $keywords;
@@ -174,7 +182,7 @@ class Podcast extends database_object implements library_item
      */
     public function get_fullname()
     {
-        return $this->f_title;
+        return $this->getTitleFormatted();
     }
 
     /**
@@ -259,7 +267,7 @@ class Podcast extends database_object implements library_item
     public function display_art($thumb = 2, $force = false)
     {
         if (Art::has_db($this->id, 'podcast') || $force) {
-            Art::display('podcast', $this->id, $this->get_fullname(), $thumb, $this->link);
+            Art::display('podcast', $this->id, $this->get_fullname(), $thumb, $this->getLink());
         }
     }
 

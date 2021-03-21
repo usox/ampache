@@ -618,7 +618,7 @@ final class XmlOutput implements ApiOutputInterface
             $flag    = new Userflag($podcastId, 'podcast');
             $art_url = Art::url($podcastId, 'podcast', Core::get_request('auth'));
             $string .= "<podcast id=\"$podcastId\">\n" .
-                "\t<name><![CDATA[" . $podcast->f_title . "]]></name>\n" .
+                "\t<name><![CDATA[" . $podcast->getTitleFormatted() . "]]></name>\n" .
                 "\t<description><![CDATA[" . $podcast->description . "]]></description>\n" .
                 "\t<language><![CDATA[" . $podcast->f_language . "]]></language>\n" .
                 "\t<copyright><![CDATA[" . $podcast->f_copyright . "]]></copyright>\n" .
@@ -627,7 +627,7 @@ final class XmlOutput implements ApiOutputInterface
                 "\t<website><![CDATA[" . $podcast->f_website . "]]></website>\n" .
                 "\t<build_date><![CDATA[" . $podcast->f_lastbuilddate . "]]></build_date>\n" .
                 "\t<sync_date><![CDATA[" . $podcast->f_lastsync . "]]></sync_date>\n" .
-                "\t<public_url><![CDATA[" . $podcast->link . "]]></public_url>\n" .
+                "\t<public_url><![CDATA[" . $podcast->getLink() . "]]></public_url>\n" .
                 "\t<art><![CDATA[" . $art_url . "]]></art>\n" .
                 "\t<flag>" . (!$flag->get_flag($userId, false) ? 0 : 1) . "</flag>\n" .
                 "\t<preciserating>" . ($rating->get_user_rating($userId) ?: null) . "</preciserating>\n" .
@@ -1056,7 +1056,7 @@ final class XmlOutput implements ApiOutputInterface
                     $podcast = new Podcast($objectId);
                     $podcast->format();
                     $string .= "<podcast id=\"$objectId\">\n" .
-                        "\t<name><![CDATA[" . $podcast->f_title . "]]></name>\n" .
+                        "\t<name><![CDATA[" . $podcast->getTitle() . "]]></name>\n" .
                         "\t<description><![CDATA[" . $podcast->description . "]]></description>\n" .
                         "\t<language><![CDATA[" . $podcast->f_language . "]]></language>\n" .
                         "\t<copyright><![CDATA[" . $podcast->f_copyright . "]]></copyright>\n" .
@@ -1065,7 +1065,7 @@ final class XmlOutput implements ApiOutputInterface
                         "\t<website><![CDATA[" . $podcast->f_website . "]]></website>\n" .
                         "\t<build_date><![CDATA[" . $podcast->f_lastbuilddate . "]]></build_date>\n" .
                         "\t<sync_date><![CDATA[" . $podcast->f_lastsync . "]]></sync_date>\n" .
-                        "\t<public_url><![CDATA[" . $podcast->link . "]]></public_url>\n";
+                        "\t<public_url><![CDATA[" . $podcast->getLink() . "]]></public_url>\n";
                     if ($include) {
                         $episodeIds = $this->podcastEpisodeRepository->getEpisodeIds($podcast);
                         foreach ($episodeIds as $episodeId) {

@@ -686,7 +686,7 @@ final class JsonOutput implements ApiOutputInterface
             $rating              = new Rating($podcast_id, 'podcast');
             $flag                = new Userflag($podcast_id, 'podcast');
             $art_url             = Art::url($podcast_id, 'podcast', Core::get_request('auth'));
-            $podcast_name        = $podcast->f_title;
+            $podcast_name        = $podcast->getTitleFormatted();
             $podcast_description = $podcast->description;
             $podcast_language    = $podcast->f_language;
             $podcast_copyright   = $podcast->f_copyright;
@@ -695,7 +695,7 @@ final class JsonOutput implements ApiOutputInterface
             $podcast_website     = $podcast->f_website;
             $podcast_build_date  = $podcast->f_lastbuilddate;
             $podcast_sync_date   = $podcast->f_lastsync;
-            $podcast_public_url  = $podcast->link;
+            $podcast_public_url  = $podcast->getLink();
             $podcast_episodes    = array();
             if ($episodes) {
                 $podcast_episodes = $this->podcast_episodes(
