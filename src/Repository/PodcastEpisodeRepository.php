@@ -266,4 +266,17 @@ final class PodcastEpisodeRepository implements PodcastEpisodeRepositoryInterfac
 
         Dba::write($sql);
     }
+
+    /**
+     * Returns the amount of available episodes for a certain podcast
+     */
+    public function getEpisodeCount(int $podcastId): int
+    {
+        $db_results = Dba::read(
+            'SELECT COUNT(`podcast_episode`.`id`) AS `episode_count` FROM `podcast_episode` WHERE `podcast_episode`.`podcast` = ?',
+            [$podcastId]
+        );
+
+        return (int) Dba::fetch_assoc($db_results)['episode_count'];
+    }
 }

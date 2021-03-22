@@ -153,10 +153,6 @@ class ShowActionTest extends MockeryTestCase
             ->once()
             ->andReturn($podcast);
 
-        $podcast->shouldReceive('format')
-            ->withNoArgs()
-            ->once();
-
         $this->podcastEpisodeRepository->shouldReceive('getEpisodeIds')
             ->with($podcast)
             ->once()

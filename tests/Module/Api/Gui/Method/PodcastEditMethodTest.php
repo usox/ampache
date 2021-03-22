@@ -204,13 +204,6 @@ class PodcastEditMethodTest extends MockeryTestCase
         $generator   = 'some-generator';
         $copyright   = 'some-copyright';
 
-        $podcast->feed        = $feed;
-        $podcast->title       = $title;
-        $podcast->website     = $website;
-        $podcast->description = $description;
-        $podcast->generator   = $generator;
-        $podcast->copyright   = $copyright;
-
         $this->expectException(RequestParamMissingException::class);
         $this->expectExceptionMessage(sprintf('Bad Request: %d', $objectId));
 
@@ -244,6 +237,30 @@ class PodcastEditMethodTest extends MockeryTestCase
             ])
             ->once()
             ->andReturnFalse();
+        $podcast->shouldReceive('getFeed')
+            ->withNoArgs()
+            ->once()
+            ->andReturn($feed);
+        $podcast->shouldReceive('getTitle')
+            ->withNoArgs()
+            ->once()
+            ->andReturn($title);
+        $podcast->shouldReceive('getWebsite')
+            ->withNoArgs()
+            ->once()
+            ->andReturn($website);
+        $podcast->shouldReceive('getDescription')
+            ->withNoArgs()
+            ->once()
+            ->andReturn($description);
+        $podcast->shouldReceive('getGenerator')
+            ->withNoArgs()
+            ->once()
+            ->andReturn($generator);
+        $podcast->shouldReceive('getCopyright')
+            ->withNoArgs()
+            ->once()
+            ->andReturn($copyright);
 
         $this->subject->handle(
             $gatekeeper,

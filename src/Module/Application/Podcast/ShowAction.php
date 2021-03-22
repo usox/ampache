@@ -68,7 +68,6 @@ final class ShowAction implements ApplicationActionInterface
         $this->ui->showHeader();
         if ($podcastId > 0) {
             $podcast = $this->modelFactory->createPodcast($podcastId);
-            $podcast->format();
 
             $this->ui->show(
                 'show_podcast.inc.php',

@@ -161,9 +161,8 @@ class Podcast_Episode extends database_object implements Media, library_item
         $this->f_link = '<a href="' . $this->link . '" title="' . $this->f_title . '">' . $this->f_title . '</a>';
 
         if ($details) {
-            $podcast = new Podcast($this->podcast);
-            $podcast->format();
-            $this->catalog        = $podcast->catalog;
+            $podcast              = new Podcast($this->podcast);
+            $this->catalog        = $podcast->getCatalog();
             $this->f_podcast      = $podcast->getTitleFormatted();
             $this->f_podcast_link = $podcast->getLinkFormatted();
             $this->f_file         = $this->f_podcast . ' - ' . $this->f_file;

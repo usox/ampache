@@ -613,20 +613,19 @@ final class XmlOutput implements ApiOutputInterface
 
         foreach ($podcastIds as $podcastId) {
             $podcast = new Podcast($podcastId);
-            $podcast->format();
             $rating  = new Rating($podcastId, 'podcast');
             $flag    = new Userflag($podcastId, 'podcast');
             $art_url = Art::url($podcastId, 'podcast', Core::get_request('auth'));
             $string .= "<podcast id=\"$podcastId\">\n" .
                 "\t<name><![CDATA[" . $podcast->getTitleFormatted() . "]]></name>\n" .
-                "\t<description><![CDATA[" . $podcast->description . "]]></description>\n" .
-                "\t<language><![CDATA[" . $podcast->f_language . "]]></language>\n" .
-                "\t<copyright><![CDATA[" . $podcast->f_copyright . "]]></copyright>\n" .
-                "\t<feed_url><![CDATA[" . $podcast->feed . "]]></feed_url>\n" .
-                "\t<generator><![CDATA[" . $podcast->f_generator . "]]></generator>\n" .
-                "\t<website><![CDATA[" . $podcast->f_website . "]]></website>\n" .
-                "\t<build_date><![CDATA[" . $podcast->f_lastbuilddate . "]]></build_date>\n" .
-                "\t<sync_date><![CDATA[" . $podcast->f_lastsync . "]]></sync_date>\n" .
+                "\t<description><![CDATA[" . $podcast->getDescription() . "]]></description>\n" .
+                "\t<language><![CDATA[" . $podcast->getLanguageFormatted() . "]]></language>\n" .
+                "\t<copyright><![CDATA[" . $podcast->getCopyrightFormatted() . "]]></copyright>\n" .
+                "\t<feed_url><![CDATA[" . $podcast->getFeed() . "]]></feed_url>\n" .
+                "\t<generator><![CDATA[" . $podcast->getGeneratorFormatted() . "]]></generator>\n" .
+                "\t<website><![CDATA[" . $podcast->getWebsiteFormatted() . "]]></website>\n" .
+                "\t<build_date><![CDATA[" . $podcast->getLastBuildDateFormatted() . "]]></build_date>\n" .
+                "\t<sync_date><![CDATA[" . $podcast->getLastSyncFormatted() . "]]></sync_date>\n" .
                 "\t<public_url><![CDATA[" . $podcast->getLink() . "]]></public_url>\n" .
                 "\t<art><![CDATA[" . $art_url . "]]></art>\n" .
                 "\t<flag>" . (!$flag->get_flag($userId, false) ? 0 : 1) . "</flag>\n" .
@@ -1054,17 +1053,16 @@ final class XmlOutput implements ApiOutputInterface
                     break;
                 case 'podcast':
                     $podcast = new Podcast($objectId);
-                    $podcast->format();
                     $string .= "<podcast id=\"$objectId\">\n" .
-                        "\t<name><![CDATA[" . $podcast->getTitle() . "]]></name>\n" .
-                        "\t<description><![CDATA[" . $podcast->description . "]]></description>\n" .
-                        "\t<language><![CDATA[" . $podcast->f_language . "]]></language>\n" .
-                        "\t<copyright><![CDATA[" . $podcast->f_copyright . "]]></copyright>\n" .
-                        "\t<feed_url><![CDATA[" . $podcast->feed . "]]></feed_url>\n" .
-                        "\t<generator><![CDATA[" . $podcast->f_generator . "]]></generator>\n" .
-                        "\t<website><![CDATA[" . $podcast->f_website . "]]></website>\n" .
-                        "\t<build_date><![CDATA[" . $podcast->f_lastbuilddate . "]]></build_date>\n" .
-                        "\t<sync_date><![CDATA[" . $podcast->f_lastsync . "]]></sync_date>\n" .
+                        "\t<name><![CDATA[" . $podcast->getTitleFormatted() . "]]></name>\n" .
+                        "\t<description><![CDATA[" . $podcast->getDescription() . "]]></description>\n" .
+                        "\t<language><![CDATA[" . $podcast->getLanguageFormatted() . "]]></language>\n" .
+                        "\t<copyright><![CDATA[" . $podcast->getCopyrightFormatted() . "]]></copyright>\n" .
+                        "\t<feed_url><![CDATA[" . $podcast->getFeed() . "]]></feed_url>\n" .
+                        "\t<generator><![CDATA[" . $podcast->getGeneratorFormatted() . "]]></generator>\n" .
+                        "\t<website><![CDATA[" . $podcast->getWebsiteFormatted() . "]]></website>\n" .
+                        "\t<build_date><![CDATA[" . $podcast->getLastBuildDateFormatted() . "]]></build_date>\n" .
+                        "\t<sync_date><![CDATA[" . $podcast->getLastSyncFormatted() . "]]></sync_date>\n" .
                         "\t<public_url><![CDATA[" . $podcast->getLink() . "]]></public_url>\n";
                     if ($include) {
                         $episodeIds = $this->podcastEpisodeRepository->getEpisodeIds($podcast);

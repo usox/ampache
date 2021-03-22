@@ -32,29 +32,12 @@ class Podcast extends database_object implements library_item
     protected const DB_TABLENAME = 'podcast';
 
     /* Variables from DB */
-    public $id;
-    public $catalog;
-    public $feed;
-    public $title;
-    public $website;
-    public $description;
-    public $language;
-    public $copyright;
-    public $generator;
-    public $lastbuilddate;
-    public $lastsync;
+    public int $id;
 
-    public $episodes;
-    public $f_website;
-    public $f_description;
-    public $f_language;
-    public $f_copyright;
-    public $f_generator;
-    public $f_lastbuilddate;
-    public $f_lastsync;
+    /** @var array<string, mixed> */
+    private array $data = [];
 
     /**
-     * Podcast
      * Takes the ID of the podcast and pulls the info from the db
      * @param integer $podcast_id
      */
@@ -66,18 +49,14 @@ class Podcast extends database_object implements library_item
         }
 
         /* Get the information from the db */
-        $info = $this->get_info($podcast_id);
+        $this->data = $this->get_info($podcast_id);
 
-        foreach ($info as $key => $value) {
-            $this->$key = $value;
-        } // foreach info
-
-        return true;
-    } // constructor
+        $this->id = (int) $this->data['id'];
+    }
 
     public function getId(): int
     {
-        return (int) $this->id;
+        return $this->id;
     }
 
     public function isNew(): bool
@@ -89,11 +68,11 @@ class Podcast extends database_object implements library_item
      * get_catalogs
      *
      * Get all catalog ids related to this item.
-     * @return integer[]
+     * @return int[]
      */
     public function get_catalogs()
     {
-        return array($this->catalog);
+        return [$this->getCatalog()];
     }
 
     /**
@@ -101,17 +80,11 @@ class Podcast extends database_object implements library_item
      * this function takes the object and reformats some values
      * @param boolean $details
      * @return boolean
+     *
+     * @deprecated Not in use
      */
     public function format($details = true)
     {
-        $this->f_description   = scrub_out($this->description);
-        $this->f_language      = scrub_out($this->language);
-        $this->f_copyright     = scrub_out($this->copyright);
-        $this->f_generator     = scrub_out($this->generator);
-        $this->f_website       = scrub_out($this->website);
-        $this->f_lastbuilddate = get_datetime((int)$this->lastbuilddate);
-        $this->f_lastsync      = get_datetime((int)$this->lastsync);
-
         return true;
     }
 
@@ -119,18 +92,55 @@ class Podcast extends database_object implements library_item
     {
         $cache = static::getDatabaseObjectCache();
         // Try to find it in the cache and save ourselves the trouble
-        $cacheItem = $cache->retrieve('podcast_extra', $this->getId());
-        if ($cacheItem !== []) {
-            $row = $cacheItem;
+        $amount = $cache->retrieve('podcast_extra', $this->getId())['amount'] ?? null;
+        if ($amount !== null) {
+            return (int) $amount;
         } else {
-            $sql        = "SELECT COUNT(`podcast_episode`.`id`) AS `episode_count` FROM `podcast_episode` WHERE `podcast_episode`.`podcast` = ?";
-            $db_results = Dba::read($sql, [$this->getId()]);
-            $row        = Dba::fetch_assoc($db_results);
+            $amount = static::getPodcastEpisodeRepository()->getEpisodeCount($this->getId());
 
-            $cache->add('podcast_extra', $this->getId(), $row);
+            $cache->add(
+                'podcast_extra',
+                $this->getId(),
+                ['amount' => $amount]
+            );
+
+            return $amount;
         }
+    }
 
-        return (int) $row['episode_count'];
+    public function getFeed(): string
+    {
+        return (string) ($this->data['feed'] ?? '');
+    }
+
+    public function getTitle(): string
+    {
+        return (string) ($this->data['title'] ?? '');
+    }
+
+    public function getWebsite(): string
+    {
+        return (string) ($this->data['website'] ?? '');
+    }
+
+    public function getDescription(): string
+    {
+        return (string) ($this->data['description'] ?? '');
+    }
+
+    public function getLanguage(): string
+    {
+        return (string) ($this->data['language'] ?? '');
+    }
+
+    public function getGenerator(): string
+    {
+        return (string) ($this->data['generator'] ?? '');
+    }
+
+    public function getCopyright(): string
+    {
+        return (string) ($this->data['copyright'] ?? '');
     }
 
     public function getLink(): string
@@ -154,9 +164,59 @@ class Podcast extends database_object implements library_item
         );
     }
 
+    public function getCatalog(): int
+    {
+        return (int) ($this->data['catalog'] ?? 0);
+    }
+
     public function getTitleFormatted(): string
     {
-        return scrub_out($this->title);
+        return scrub_out($this->getTitle());
+    }
+
+    public function getDescriptionFormatted(): string
+    {
+        return scrub_out($this->getDescription());
+    }
+
+    public function getLanguageFormatted(): string
+    {
+        return scrub_out($this->getLanguage());
+    }
+
+    public function getCopyrightFormatted(): string
+    {
+        return scrub_out($this->getCopyright());
+    }
+
+    public function getGeneratorFormatted(): string
+    {
+        return scrub_out($this->getGenerator());
+    }
+
+    public function getWebsiteFormatted(): string
+    {
+        return scrub_out($this->getWebsite());
+    }
+
+    public function getLastSync(): int
+    {
+        return (int) ($this->data['lastsync'] ?? 0);
+    }
+
+    public function getLastSyncFormatted(): string
+    {
+        return get_datetime($this->getLastSync());
+    }
+
+    public function getLastBuildDate(): int
+    {
+        return (int) ($this->data['lastbuilddate'] ?? 0);
+    }
+
+    public function getLastBuildDateFormatted(): string
+    {
+        return get_datetime($this->getLastBuildDate());
     }
 
     /**
@@ -256,7 +316,7 @@ class Podcast extends database_object implements library_item
      */
     public function get_description()
     {
-        return $this->f_description;
+        return $this->getDescriptionFormatted();
     }
 
     /**
@@ -279,12 +339,12 @@ class Podcast extends database_object implements library_item
      */
     public function update(array $data)
     {
-        $feed        = isset($data['feed']) ? $data['feed'] : $this->feed;
-        $title       = isset($data['title']) ? scrub_in($data['title']) : $this->title;
-        $website     = isset($data['website']) ? scrub_in($data['website']) : $this->website;
-        $description = isset($data['description']) ? scrub_in($data['description']) : $this->description;
-        $generator   = isset($data['generator']) ? scrub_in($data['generator']) : $this->generator;
-        $copyright   = isset($data['copyright']) ? scrub_in($data['copyright']) : $this->copyright;
+        $feed        = isset($data['feed']) ? $data['feed'] : $this->getFeed();
+        $title       = isset($data['title']) ? scrub_in($data['title']) : $this->getTitle();
+        $website     = isset($data['website']) ? scrub_in($data['website']) : $this->getWebsite();
+        $description = isset($data['description']) ? scrub_in($data['description']) : $this->getDescription();
+        $generator   = isset($data['generator']) ? scrub_in($data['generator']) : $this->getGenerator();
+        $copyright   = isset($data['copyright']) ? scrub_in($data['copyright']) : $this->getCopyright();
 
         if (strpos($feed, "http://") !== 0 && strpos($feed, "https://") !== 0) {
             debug_event(self::class, 'Podcast update canceled, bad feed url.', 1);
@@ -311,14 +371,14 @@ class Podcast extends database_object implements library_item
      */
     public function get_root_path()
     {
-        $catalog = Catalog::create_from_id($this->catalog);
+        $catalog = Catalog::create_from_id($this->getCatalog());
         if (!$catalog->get_type() == 'local') {
             debug_event(self::class, 'Bad catalog type.', 1);
 
             return '';
         }
 
-        $dirname = $this->title;
+        $dirname = $this->getTitle();
 
         // create path if it doesn't exist
         if (!is_dir($catalog->path . DIRECTORY_SEPARATOR . $dirname)) {

@@ -88,8 +88,7 @@ $cel_flag  = ($is_table) ? "cel_userflag" : 'grid_userflag'; ?>
         }
 
         foreach ($object_ids as $podcast_id) {
-            $libitem = new Podcast($podcast_id);
-            $libitem->format(); ?>
+            $libitem = new Podcast($podcast_id); ?>
         <tr id="podcast_<?php echo $libitem->id; ?>" class="<?php echo Ui::flip_class(); ?>">
             <?php require Ui::find_template('show_podcast_row.inc.php'); ?>
         </tr>
