@@ -37,13 +37,17 @@ use Ampache\Repository\Model\User;
 use Ampache\Repository\Model\Userflag;
 use Ampache\Repository\PodcastEpisodeRepositoryInterface;
 
+/**
+ * Provides accessors to podcast related data for gui templates
+ * The template for this adapter is `podcast.xhtml`
+ */
 final class PodcastViewAdapter implements PodcastViewAdapterInterface
 {
-    private Podcast $podcast;
-
     private ModelFactoryInterface $modelFactory;
 
     private PodcastEpisodeRepositoryInterface $podcastEpisodeRepository;
+
+    private Podcast $podcast;
 
     public function __construct(
         PodcastEpisodeRepositoryInterface $podcastEpisodeRepository,

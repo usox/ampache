@@ -25,8 +25,12 @@ namespace Ampache\Module\Application\Podcast;
 
 use Ampache\Config\ConfigContainerInterface;
 use Ampache\Config\ConfigurationKeyEnum;
+use Ampache\Gui\TalFactoryInterface;
+use Ampache\Gui\TalViewInterface;
 use Ampache\MockeryTestCase;
 use Ampache\Module\Authorization\GuiGatekeeperInterface;
+use Ampache\Module\Podcast\Gui\PodcastGuiFactoryInterface;
+use Ampache\Module\Podcast\Gui\PodcastViewAdapterInterface;
 use Ampache\Module\Util\UiInterface;
 use Ampache\Repository\Model\ModelFactoryInterface;
 use Ampache\Repository\Model\Podcast;
@@ -48,6 +52,12 @@ class ShowActionTest extends MockeryTestCase
     /** @var PodcastEpisodeRepositoryInterface|MockInterface */
     private MockInterface $podcastEpisodeRepository;
 
+    /** @var MockInterface|TalFactoryInterface */
+    private MockInterface $talFactory;
+
+    /** @var MockInterface|PodcastGuiFactoryInterface */
+    private MockInterface $podcastGuiFactory;
+
     private ShowAction $subject;
 
     public function setUp(): void
@@ -56,12 +66,16 @@ class ShowActionTest extends MockeryTestCase
         $this->ui                       = $this->mock(UiInterface::class);
         $this->modelFactory             = $this->mock(ModelFactoryInterface::class);
         $this->podcastEpisodeRepository = $this->mock(PodcastEpisodeRepositoryInterface::class);
+        $this->talFactory               = $this->mock(TalFactoryInterface::class);
+        $this->podcastGuiFactory        = $this->mock(PodcastGuiFactoryInterface::class);
 
         $this->subject = new ShowAction(
             $this->configContainer,
             $this->ui,
             $this->modelFactory,
-            $this->podcastEpisodeRepository
+            $this->podcastEpisodeRepository,
+            $this->talFactory,
+            $this->podcastGuiFactory
         );
     }
 
@@ -112,17 +126,46 @@ class ShowActionTest extends MockeryTestCase
 
     public function testRunRendersAndReturnsNull(): void
     {
-        $request    = $this->mock(ServerRequestInterface::class);
-        $gatekeeper = $this->mock(GuiGatekeeperInterface::class);
-        $podcast    = $this->mock(Podcast::class);
+        $request            = $this->mock(ServerRequestInterface::class);
+        $gatekeeper         = $this->mock(GuiGatekeeperInterface::class);
+        $podcast            = $this->mock(Podcast::class);
+        $podcastViewAdapter = $this->mock(PodcastViewAdapterInterface::class);
+        $talView            = $this->mock(TalViewInterface::class);
 
-        $podcastId = 666;
-        $episodeId = 42;
+        $podcastId    = 666;
+        $webPath      = 'some-web-path';
+        $renderResult = 'some-result';
 
         $this->configContainer->shouldReceive('isFeatureEnabled')
             ->with(ConfigurationKeyEnum::PODCAST)
             ->once()
             ->andReturnTrue();
+        $this->configContainer->shouldReceive('getWebPath')
+            ->withNoArgs()
+            ->once()
+            ->andReturn($webPath);
+
+        $this->talFactory->shouldReceive('createTalView->setTemplate')
+            ->with('podcast/podcast.xhtml')
+            ->once()
+            ->andReturn($talView);
+
+        $talView->shouldReceive('setContext')
+            ->with('PODCAST', $podcastViewAdapter)
+            ->once()
+            ->andReturnSelf();
+        $talView->shouldReceive('setContext')
+            ->with('PODCAST_ID', $podcastId)
+            ->once()
+            ->andReturnSelf();
+        $talView->shouldReceive('setContext')
+            ->with('WEB_PATH', $webPath)
+            ->once()
+            ->andReturnSelf();
+        $talView->shouldReceive('render')
+            ->withNoArgs()
+            ->once()
+            ->andReturn($renderResult);
 
         $this->ui->shouldReceive('showHeader')
             ->withNoArgs()
@@ -133,15 +176,11 @@ class ShowActionTest extends MockeryTestCase
         $this->ui->shouldReceive('showFooter')
             ->withNoArgs()
             ->once();
-        $this->ui->shouldReceive('show')
-            ->with(
-                'show_podcast.inc.php',
-                [
-                    'podcastEpisodeIds' => [$episodeId],
-                    'podcast' => $podcast
-                ]
-            )
-            ->once();
+
+        $this->podcastGuiFactory->shouldReceive('createPodcastViewAdapter')
+            ->with($podcast)
+            ->once()
+            ->andReturn($podcastViewAdapter);
 
         $request->shouldReceive('getQueryParams')
             ->withNoArgs()
@@ -153,10 +192,7 @@ class ShowActionTest extends MockeryTestCase
             ->once()
             ->andReturn($podcast);
 
-        $this->podcastEpisodeRepository->shouldReceive('getEpisodeIds')
-            ->with($podcast)
-            ->once()
-            ->andReturn([$episodeId]);
+        $this->expectOutputString($renderResult);
 
         $this->assertNull(
             $this->subject->run($request, $gatekeeper)

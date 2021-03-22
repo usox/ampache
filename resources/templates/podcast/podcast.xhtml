@@ -1,6 +1,6 @@
 <html>
 <metal:macro metal:use-macro="macros/macros.xhtml/box">
-    <metal:macro metal:fill-slot="title" tal:content="PODCAST/getTitleFormatted">TITLE</metal:macro>
+    <metal:macro metal:fill-slot="title" tal:content="structure PODCAST/getTitleFormatted">TITLE</metal:macro>
     <metal:macro metal:fill-slot="content">
         <div class="item_right_info" tal:content="structure PODCAST/getArt">ART</div>
         <div id="item_summary" tal:condition="PODCAST/getDescription" tal:content="PODCAST/getDescription">DESCRIPTION</div>

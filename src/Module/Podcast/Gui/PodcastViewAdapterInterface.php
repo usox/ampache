@@ -24,4 +24,43 @@ namespace Ampache\Module\Podcast\Gui;
 
 interface PodcastViewAdapterInterface
 {
+    public function getArt(): ?string;
+
+    public function getDescription(): string;
+
+    public function isRealUser(): bool;
+
+    public function getUserFlags(): string;
+
+    public function getRating(): string;
+
+    public function getDirectplayButton(): string;
+
+    public function canAppendNext(): bool;
+
+    public function getAppendNextButton(): string;
+
+    public function canBeManaged(): bool;
+
+    public function getStatsIcon(): string;
+
+    public function getRssLink(): string;
+
+    public function getWebsite(): string;
+
+    public function getWebsiteIcon(): string;
+
+    public function getEditTitle(): string;
+
+    public function getEditIcon(): string;
+
+    public function getSyncButton(): string;
+
+    public function canDelete(): bool;
+
+    public function getDeleteIcon(): string;
+
+    public function getEpisodeList(): string;
+
+    public function getTitleFormatted(): string;
 }
