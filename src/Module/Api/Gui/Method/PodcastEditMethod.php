@@ -121,12 +121,12 @@ final class PodcastEditMethod implements MethodInterface
             );
         }
 
-        $feed           = filter_var($input['feed'] ?? '', FILTER_VALIDATE_URL) ? $input['feed'] : $podcast->feed;
-        $title          = isset($input['title']) ? $this->ui->scrubIn($input['title']) : $podcast->title;
-        $website        = filter_var($input['website'] ?? '', FILTER_VALIDATE_URL) ? $this->ui->scrubIn($input['website']) : $podcast->website;
-        $description    = isset($input['description']) ? $this->ui->scrubIn($input['description']) : $podcast->description;
-        $generator      = isset($input['generator']) ? $this->ui->scrubIn($input['generator']) : $podcast->generator;
-        $copyright      = isset($input['copyright']) ? $this->ui->scrubIn($input['copyright']) : $podcast->copyright;
+        $feed           = filter_var($input['feed'] ?? '', FILTER_VALIDATE_URL) ? $input['feed'] : $podcast->getFeed();
+        $title          = isset($input['title']) ? $this->ui->scrubIn($input['title']) : $podcast->getTitle();
+        $website        = filter_var($input['website'] ?? '', FILTER_VALIDATE_URL) ? $this->ui->scrubIn($input['website']) : $podcast->getWebsite();
+        $description    = isset($input['description']) ? $this->ui->scrubIn($input['description']) : $podcast->getDescription();
+        $generator      = isset($input['generator']) ? $this->ui->scrubIn($input['generator']) : $podcast->getGenerator();
+        $copyright      = isset($input['copyright']) ? $this->ui->scrubIn($input['copyright']) : $podcast->getCopyright();
         $data           = array(
             'feed' => $feed,
             'title' => $title,

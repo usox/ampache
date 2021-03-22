@@ -746,7 +746,6 @@ class Upnp_Api
                     case 2:
                         $podcast = new Podcast($pathreq[1]);
                         if ($podcast->id) {
-                            $podcast->format();
                             $meta = self::_itemPodcast($podcast, $root . '/podcasts');
                         }
                         break;
@@ -1821,7 +1820,7 @@ class Upnp_Api
     }
 
     /**
-     * @param $podcast
+     * @param Podcast $podcast
      * @param string $parent
      * @return array
      */
@@ -1831,8 +1830,8 @@ class Upnp_Api
             'id' => 'amp://music/podcasts/' . $podcast->id,
             'parentID' => $parent,
             'restricted' => '1',
-            'childCount' => count($podcast->get_episodes()),
-            'dc:title' => self::_replaceSpecialSymbols($podcast->f_title),
+            'childCount' => $podcast->getEpisodeCount(),
+            'dc:title' => self::_replaceSpecialSymbols($podcast->getTitleFormatted()),
             'upnp:class' => 'object.container',
         );
     }

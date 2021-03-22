@@ -100,4 +100,9 @@ interface PodcastEpisodeRepositoryInterface
      * Cleans up the podcast_episode table
      */
     public function collectGarbage(): void;
+
+    /**
+     * Returns the amount of available episodes for a certain podcast
+     */
+    public function getEpisodeCount(int $podcastId): int;
 }

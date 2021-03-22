@@ -75,15 +75,17 @@ final class PodcastSyncer implements PodcastSyncerInterface
         Podcast $podcast,
         $gather = false
     ): bool {
+        $feedUrl = $podcast->getFeed();
+
         $this->logger->info(
-            sprintf('Syncing feed %s ...', $podcast->feed),
+            sprintf('Syncing feed %s ...', $feedUrl),
             [LegacyLogger::CONTEXT_TYPE => __CLASS__]
         );
 
-        $xmlstr = file_get_contents($podcast->feed, false, stream_context_create(Core::requests_options()));
+        $xmlstr = file_get_contents($feedUrl, false, stream_context_create(Core::requests_options()));
         if ($xmlstr === false) {
             $this->logger->critical(
-                sprintf('Cannot access feed %s', $podcast->feed),
+                sprintf('Cannot access feed %s', $feedUrl),
                 [LegacyLogger::CONTEXT_TYPE => __CLASS__]
             );
 
@@ -92,14 +94,14 @@ final class PodcastSyncer implements PodcastSyncerInterface
         $xml = simplexml_load_string($xmlstr);
         if ($xml === false) {
             $this->logger->critical(
-                sprintf('Cannot read feed %s', $podcast->feed),
+                sprintf('Cannot read feed %s', $feedUrl),
                 [LegacyLogger::CONTEXT_TYPE => __CLASS__]
             );
 
             return false;
         }
 
-        $this->addEpisodes($podcast, $xml->channel->item, (int) $podcast->lastsync, $gather);
+        $this->addEpisodes($podcast, $xml->channel->item, $podcast->getLastSync(), $gather);
 
         return true;
     }

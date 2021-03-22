@@ -1459,12 +1459,11 @@ class Subsonic_Xml_Data
     {
         $xpodcasts = $xml->addChild('podcasts');
         foreach ($podcasts as $podcast) {
-            $podcast->format();
             $xchannel = $xpodcasts->addChild('channel');
             $xchannel->addAttribute('id', (string)self::getPodcastId($podcast->id));
-            $xchannel->addAttribute('url', (string)$podcast->feed);
-            $xchannel->addAttribute('title', (string)self::checkName($podcast->f_title));
-            $xchannel->addAttribute('description', (string)$podcast->f_description);
+            $xchannel->addAttribute('url', $podcast->getFeed());
+            $xchannel->addAttribute('title', (string)self::checkName($podcast->getTitleFormatted()));
+            $xchannel->addAttribute('description', (string)$podcast->getDescriptionFormatted());
             if (Art::has_db($podcast->id, 'podcast')) {
                 $xchannel->addAttribute('coverArt', 'pod-' . self::getPodcastId($podcast->id));
             }
