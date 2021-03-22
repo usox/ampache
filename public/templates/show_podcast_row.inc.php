@@ -47,7 +47,7 @@ use Ampache\Module\Util\Ui;
 </td>
 <?php if (Art::is_enabled()) { ?>
 <td class="<?php echo $cel_cover; ?>">
-    <?php Art::display('podcast', $libitem->id, $libitem->getTitleFormatted(), 2, $libitem->getLink()); ?>
+    <?php echo Art::display('podcast', $libitem->id, $libitem->getTitleFormatted(), 2, $libitem->getLink()); ?>
 </td>
 <?php
     } ?>

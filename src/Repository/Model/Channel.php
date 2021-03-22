@@ -429,7 +429,7 @@ class Channel extends database_object implements Media, library_item
     public function display_art($thumb = 2, $force = false)
     {
         if (Art::has_db($this->id, 'channel') || $force) {
-            Art::display('channel', $this->id, $this->get_fullname(), $thumb);
+            echo Art::display('channel', $this->id, $this->get_fullname(), $thumb);
         }
     }
 

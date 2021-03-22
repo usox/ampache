@@ -594,7 +594,7 @@ class Artist extends database_object implements library_item, GarbageCollectible
         }
 
         if ($artist_id !== null && $type !== null) {
-            Art::display($type, $artist_id, $this->get_fullname(), $thumb, $this->link);
+            echo Art::display($type, $artist_id, $this->get_fullname(), $thumb, $this->link);
         }
     }
 

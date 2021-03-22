@@ -20,19 +20,8 @@
  *
  */
 
-declare(strict_types=1);
+namespace Ampache\Module\Podcast\Gui;
 
-namespace Ampache\Module\Podcast;
-
-use function DI\autowire;
-
-return [
-    PodcastCreatorInterface::class => autowire(PodcastCreator::class),
-    PodcastDeleterInterface::class => autowire(PodcastDeleter::class),
-    PodcastSyncerInterface::class => autowire(PodcastSyncer::class),
-    PodcastEpisodeCreatorInterface::class => autowire(PodcastEpisodeCreator::class),
-    PodcastEpisodeDeleterInterface::class => autowire(PodcastEpisodeDeleter::class),
-    PodcastEpisodeDownloaderInterface::class => autowire(PodcastEpisodeDownloader::class),
-    PodcastByCatalogLoaderInterface::class => autowire(PodcastByCatalogLoader::class),
-    Gui\PodcastGuiFactoryInterface::class => autowire(Gui\PodcastGuiFactory::class),
-];
+interface PodcastViewAdapterInterface
+{
+}

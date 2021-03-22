@@ -33,7 +33,7 @@ $album  = scrub_out($song->f_album_full);
 $artist = scrub_out($song->f_artist_full); ?>
 <?php
 if ($album != T_('Unknown (Orphaned)')) {
-    Art::display('album', $song->album, $song->f_album_full, 2);
+    echo Art::display('album', $song->album, $song->f_album_full, 2);
 } ?>
 
 <div class="np_group">

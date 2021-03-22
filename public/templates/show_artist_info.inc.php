@@ -22,14 +22,13 @@
 
 use Ampache\Repository\Model\Art;
 use Ampache\Repository\Model\Artist;
-use Ampache\Module\Util\Ui;
 
 /** @var Artist $artist */
 
 ?>
 
 <div class="item_info">
-    <?php Art::display('artist', $artist->id, $artist->f_name, 2); ?>
+    <?php echo Art::display('artist', $artist->id, $artist->f_name, 2); ?>
     <div class="item_properties">
     <?php if (! empty($biography) && is_array($biography)) {
     $dcol = array();

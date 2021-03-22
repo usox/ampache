@@ -1855,7 +1855,7 @@ class Song extends database_object implements Media, library_item, GarbageCollec
         }
 
         if ($object_id !== null && $type !== null) {
-            Art::display($type, $object_id, $this->get_fullname(), $thumb, $this->link);
+            echo Art::display($type, $object_id, $this->get_fullname(), $thumb, $this->link);
         }
     }
 

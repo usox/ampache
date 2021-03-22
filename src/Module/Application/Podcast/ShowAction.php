@@ -26,8 +26,10 @@ namespace Ampache\Module\Application\Podcast;
 
 use Ampache\Config\ConfigContainerInterface;
 use Ampache\Config\ConfigurationKeyEnum;
+use Ampache\Gui\TalFactoryInterface;
 use Ampache\Module\Application\ApplicationActionInterface;
 use Ampache\Module\Authorization\GuiGatekeeperInterface;
+use Ampache\Module\Podcast\Gui\PodcastGuiFactoryInterface;
 use Ampache\Module\Util\UiInterface;
 use Ampache\Repository\Model\ModelFactoryInterface;
 use Ampache\Repository\PodcastEpisodeRepositoryInterface;
@@ -46,16 +48,24 @@ final class ShowAction implements ApplicationActionInterface
 
     private PodcastEpisodeRepositoryInterface $podcastEpisodeRepository;
 
+    private TalFactoryInterface $talFactory;
+
+    private PodcastGuiFactoryInterface $podcastGuiFactory;
+
     public function __construct(
         ConfigContainerInterface $configContainer,
         UiInterface $ui,
         ModelFactoryInterface $modelFactory,
-        PodcastEpisodeRepositoryInterface $podcastEpisodeRepository
+        PodcastEpisodeRepositoryInterface $podcastEpisodeRepository,
+        TalFactoryInterface $talFactory,
+        PodcastGuiFactoryInterface $podcastGuiFactory
     ) {
         $this->configContainer          = $configContainer;
         $this->ui                       = $ui;
         $this->modelFactory             = $modelFactory;
         $this->podcastEpisodeRepository = $podcastEpisodeRepository;
+        $this->talFactory               = $talFactory;
+        $this->podcastGuiFactory        = $podcastGuiFactory;
     }
 
     public function run(ServerRequestInterface $request, GuiGatekeeperInterface $gatekeeper): ?ResponseInterface
@@ -69,13 +79,13 @@ final class ShowAction implements ApplicationActionInterface
         if ($podcastId > 0) {
             $podcast = $this->modelFactory->createPodcast($podcastId);
 
-            $this->ui->show(
-                'show_podcast.inc.php',
-                [
-                    'podcastEpisodeIds' => $this->podcastEpisodeRepository->getEpisodeIds($podcast),
-                    'podcast' => $podcast
-                ]
-            );
+            echo $this->talFactory
+                ->createTalView()
+                ->setTemplate('podcast/podcast.xhtml')
+                ->setContext('PODCAST', $this->podcastGuiFactory->createPodcastViewAdapter($podcast))
+                ->setContext('PODCAST_ID', $podcastId)
+                ->setContext('WEB_PATH', $this->configContainer->getWebPath())
+                ->render();
         }
 
         $this->ui->showQueryStats();

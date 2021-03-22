@@ -291,7 +291,7 @@ class Podcast_Episode extends database_object implements Media, library_item
         }
 
         if ($episode_id !== null && $type !== null) {
-            Art::display($type, $episode_id, $this->get_fullname(), $thumb, $this->link);
+            echo Art::display($type, $episode_id, $this->get_fullname(), $thumb, $this->link);
         }
     }
 
