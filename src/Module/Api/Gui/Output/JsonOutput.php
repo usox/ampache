@@ -96,6 +96,7 @@ final class JsonOutput implements ApiOutputInterface
      * @param array $include
      * @param int|null $userId
      * @param bool $encode
+     * @param bool $asObject
      * @param int $limit
      * @param int $offset
      *
@@ -106,6 +107,7 @@ final class JsonOutput implements ApiOutputInterface
         array $include = [],
         ?int $userId = null,
         bool $encode = true,
+        bool $asObject = true,
         int $limit = 0,
         int $offset = 0
     ) {
@@ -176,7 +178,7 @@ final class JsonOutput implements ApiOutputInterface
         } // end foreach
 
         if ($encode) {
-            $output = $result[0];
+            $output = ($asObject) ? array("album" => $result) : $result[0];
 
             return json_encode($output, JSON_PRETTY_PRINT);
         }

@@ -122,4 +122,6 @@ final class ConfigurationKeyEnum
     public const AJAX_LOAD                     = 'ajax_load';
     public const PODCAST_NEW_DOWNLOAD          = 'podcast_new_download';
     public const PODCAST_KEEP                  = 'podcast_keep';
+    public const ART_ZIP_ADD                   = 'art_zip_add';
+    public const FILE_ZIP_COMMENT              = 'file_zip_comment';
 }
