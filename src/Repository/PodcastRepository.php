@@ -69,4 +69,19 @@ final class PodcastRepository implements PodcastRepositoryInterface
             [$time, $podcast->getId()]
         );
     }
+
+    public function update(
+        int $podcastId,
+        string $feed,
+        string $title,
+        string $website,
+        string $description,
+        string $generator,
+        string $copyright
+    ): void {
+        Dba::write(
+            'UPDATE `podcast` SET `feed` = ?, `title` = ?, `website` = ?, `description` = ?, `generator` = ?, `copyright` = ? WHERE `id` = ?',
+            [$feed, $title, $website, $description, $generator, $copyright, $podcastId]
+        );
+    }
 }

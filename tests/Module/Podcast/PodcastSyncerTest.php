@@ -26,18 +26,15 @@ namespace Ampache\Module\Podcast;
 use Ampache\Config\ConfigContainerInterface;
 use Ampache\Config\ConfigurationKeyEnum;
 use Ampache\MockeryTestCase;
+use Ampache\Module\Podcast\Exception\PodcastFeedLoadingException;
 use Ampache\Repository\Model\Podcast;
 use Ampache\Repository\Model\Podcast_Episode;
 use Ampache\Repository\PodcastEpisodeRepositoryInterface;
 use Ampache\Repository\PodcastRepositoryInterface;
 use Mockery\MockInterface;
-use Psr\Log\LoggerInterface;
 
 class PodcastSyncerTest extends MockeryTestCase
 {
-    /** @var LoggerInterface|MockInterface */
-    private MockInterface $logger;
-
     /** @var ConfigContainerInterface|MockInterface */
     private MockInterface $configContainer;
 
@@ -56,32 +53,59 @@ class PodcastSyncerTest extends MockeryTestCase
     /** @var PodcastEpisodeDownloaderInterface|MockInterface */
     private MockInterface $podcastEpisodeDownloader;
 
+    /** @var MockInterface|PodcastFeedLoaderInterface */
+    private MockInterface $podcastFeedLoader;
+
     private PodcastSyncer $subject;
 
     public function setUp(): void
     {
-        $this->logger                   = $this->mock(LoggerInterface::class);
         $this->configContainer          = $this->mock(ConfigContainerInterface::class);
         $this->podcastEpisodeRepository = $this->mock(PodcastEpisodeRepositoryInterface::class);
         $this->podcastEpisodeCreator    = $this->mock(PodcastEpisodeCreatorInterface::class);
         $this->podcastRepository        = $this->mock(PodcastRepositoryInterface::class);
         $this->podcastEpisodeDeleter    = $this->mock(PodcastEpisodeDeleterInterface::class);
         $this->podcastEpisodeDownloader = $this->mock(PodcastEpisodeDownloaderInterface::class);
+        $this->podcastFeedLoader        = $this->mock(PodcastFeedLoaderInterface::class);
 
         $this->subject = new PodcastSyncer(
-            $this->logger,
             $this->configContainer,
             $this->podcastEpisodeRepository,
             $this->podcastEpisodeCreator,
             $this->podcastRepository,
             $this->podcastEpisodeDeleter,
-            $this->podcastEpisodeDownloader
+            $this->podcastEpisodeDownloader,
+            $this->podcastFeedLoader
         );
     }
 
-    public function testAddEpisodes(): void
+    public function testSyncReturnsFalseIfLoadingFails(): void
     {
         $podcast = $this->mock(Podcast::class);
+
+        $feedUrl = 'some-feed-url';
+
+        $podcast->shouldReceive('getFeed')
+            ->withNoArgs()
+            ->once()
+            ->andReturn($feedUrl);
+
+        $this->podcastFeedLoader->shouldReceive('load')
+            ->with($feedUrl)
+            ->once()
+            ->andThrow(new PodcastFeedLoadingException());
+
+        $this->assertFalse(
+            $this->subject->sync($podcast, false)
+        );
+    }
+
+    public function testSyncTriesToAddEpisodesAndReturnsTrue(): void
+    {
+        $podcast = $this->mock(Podcast::class);
+
+        $feedUrl   = 'some-feed-url';
+        $afterDate = 666;
 
         $xml = <<<XML
         <rss>
@@ -95,6 +119,15 @@ class PodcastSyncerTest extends MockeryTestCase
 
         $xmlChannel = simplexml_load_string($xml);
 
+        $podcast->shouldReceive('getFeed')
+            ->withNoArgs()
+            ->once()
+            ->andReturn($feedUrl);
+        $podcast->shouldReceive('getLastSync')
+            ->withNoArgs()
+            ->once()
+            ->andReturn($afterDate);
+
         $this->configContainer->shouldReceive('get')
             ->with(ConfigurationKeyEnum::PODCAST_NEW_DOWNLOAD)
             ->once()
@@ -103,6 +136,11 @@ class PodcastSyncerTest extends MockeryTestCase
             ->with(ConfigurationKeyEnum::PODCAST_KEEP)
             ->once()
             ->andReturn('0');
+
+        $this->podcastFeedLoader->shouldReceive('load')
+            ->with($feedUrl)
+            ->once()
+            ->andReturn($xmlChannel);
 
         $this->podcastEpisodeCreator->shouldReceive('create')
             ->with(
@@ -115,7 +153,7 @@ class PodcastSyncerTest extends MockeryTestCase
 
                     return true;
                 }),
-                0
+                $afterDate
             )
             ->once();
 
@@ -128,9 +166,11 @@ class PodcastSyncerTest extends MockeryTestCase
             )
             ->once();
 
-        $this->subject->addEpisodes(
-            $podcast,
-            $xmlChannel->channel->item
+        $this->assertTrue(
+            $this->subject->sync(
+                $podcast,
+                false
+            )
         );
     }
 

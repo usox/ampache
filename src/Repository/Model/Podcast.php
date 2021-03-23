@@ -24,15 +24,17 @@ declare(strict_types=0);
 namespace Ampache\Repository\Model;
 
 use Ampache\Config\AmpConfig;
-use Ampache\Module\System\Dba;
+use Ampache\Module\Podcast\Exception\PodcastFeedLoadingException;
+use Ampache\Module\Podcast\PodcastFeedLoaderInterface;
 use Ampache\Repository\PodcastEpisodeRepositoryInterface;
+use Ampache\Repository\PodcastRepositoryInterface;
 
 class Podcast extends database_object implements library_item
 {
     protected const DB_TABLENAME = 'podcast';
 
     /* Variables from DB */
-    public int $id;
+    public $id;
 
     /** @var array<string, mixed> */
     private array $data = [];
@@ -339,21 +341,31 @@ class Podcast extends database_object implements library_item
      */
     public function update(array $data)
     {
-        $feed        = isset($data['feed']) ? $data['feed'] : $this->getFeed();
+        $feed = $data['feed'] ?? $this->getFeed();
+
+        try {
+            $this->getPodcastFeedLoader()->load($feed);
+        } catch (PodcastFeedLoadingException $e) {
+            debug_event(self::class, 'Podcast update canceled, bad feed url.', 1);
+
+            return $this->getId();
+        }
+
         $title       = isset($data['title']) ? scrub_in($data['title']) : $this->getTitle();
         $website     = isset($data['website']) ? scrub_in($data['website']) : $this->getWebsite();
         $description = isset($data['description']) ? scrub_in($data['description']) : $this->getDescription();
         $generator   = isset($data['generator']) ? scrub_in($data['generator']) : $this->getGenerator();
         $copyright   = isset($data['copyright']) ? scrub_in($data['copyright']) : $this->getCopyright();
 
-        if (strpos($feed, "http://") !== 0 && strpos($feed, "https://") !== 0) {
-            debug_event(self::class, 'Podcast update canceled, bad feed url.', 1);
-
-            return $this->id;
-        }
-
-        $sql = 'UPDATE `podcast` SET `feed` = ?, `title` = ?, `website` = ?, `description` = ?, `generator` = ?, `copyright` = ? WHERE `id` = ?';
-        Dba::write($sql, array($feed, $title, $website, $description, $generator, $copyright, $this->id));
+        $this->getPodastRepository()->update(
+            $this->getId(),
+            $feed,
+            $title,
+            $website,
+            $description,
+            $generator,
+            $copyright
+        );
 
         $this->feed        = $feed;
         $this->title       = $title;
@@ -401,5 +413,25 @@ class Podcast extends database_object implements library_item
         global $dic;
 
         return $dic->get(PodcastEpisodeRepositoryInterface::class);
+    }
+
+    /**
+     * @deprecated Inject by constructor
+     */
+    private function getPodastRepository(): PodcastRepositoryInterface
+    {
+        global $dic;
+
+        return $dic->get(PodcastRepositoryInterface::class);
+    }
+
+    /**
+     * @deprecated Inject by constructor
+     */
+    private function getPodcastFeedLoader(): PodcastFeedLoaderInterface
+    {
+        global $dic;
+
+        return $dic->get(PodcastFeedLoaderInterface::class);
     }
 }

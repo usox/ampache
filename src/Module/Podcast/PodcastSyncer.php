@@ -26,12 +26,10 @@ namespace Ampache\Module\Podcast;
 
 use Ampache\Config\ConfigContainerInterface;
 use Ampache\Config\ConfigurationKeyEnum;
-use Ampache\Module\System\Core;
-use Ampache\Module\System\LegacyLogger;
+use Ampache\Module\Podcast\Exception\PodcastFeedLoadingException;
 use Ampache\Repository\Model\Podcast;
 use Ampache\Repository\PodcastEpisodeRepositoryInterface;
 use Ampache\Repository\PodcastRepositoryInterface;
-use Psr\Log\LoggerInterface;
 use SimpleXMLElement;
 
 /**
@@ -39,8 +37,6 @@ use SimpleXMLElement;
  */
 final class PodcastSyncer implements PodcastSyncerInterface
 {
-    private LoggerInterface $logger;
-
     private ConfigContainerInterface $configContainer;
 
     private PodcastEpisodeRepositoryInterface $podcastEpisodeRepository;
@@ -53,51 +49,33 @@ final class PodcastSyncer implements PodcastSyncerInterface
 
     private PodcastEpisodeDownloaderInterface $podcastEpisodeDownloader;
 
+    private PodcastFeedLoaderInterface $podcastFeedLoader;
+
     public function __construct(
-        LoggerInterface $logger,
         ConfigContainerInterface $configContainer,
         PodcastEpisodeRepositoryInterface $podcastEpisodeRepository,
         PodcastEpisodeCreatorInterface $podcastEpisodeCreator,
         PodcastRepositoryInterface $podcastRepository,
         PodcastEpisodeDeleterInterface $podcastEpisodeDeleter,
-        PodcastEpisodeDownloaderInterface $podcastEpisodeDownloader
+        PodcastEpisodeDownloaderInterface $podcastEpisodeDownloader,
+        PodcastFeedLoaderInterface $podcastFeedLoader
     ) {
-        $this->logger                   = $logger;
         $this->configContainer          = $configContainer;
         $this->podcastEpisodeRepository = $podcastEpisodeRepository;
         $this->podcastEpisodeCreator    = $podcastEpisodeCreator;
         $this->podcastRepository        = $podcastRepository;
         $this->podcastEpisodeDeleter    = $podcastEpisodeDeleter;
         $this->podcastEpisodeDownloader = $podcastEpisodeDownloader;
+        $this->podcastFeedLoader        = $podcastFeedLoader;
     }
 
     public function sync(
         Podcast $podcast,
-        $gather = false
+        bool $gather = false
     ): bool {
-        $feedUrl = $podcast->getFeed();
-
-        $this->logger->info(
-            sprintf('Syncing feed %s ...', $feedUrl),
-            [LegacyLogger::CONTEXT_TYPE => __CLASS__]
-        );
-
-        $xmlstr = file_get_contents($feedUrl, false, stream_context_create(Core::requests_options()));
-        if ($xmlstr === false) {
-            $this->logger->critical(
-                sprintf('Cannot access feed %s', $feedUrl),
-                [LegacyLogger::CONTEXT_TYPE => __CLASS__]
-            );
-
-            return false;
-        }
-        $xml = simplexml_load_string($xmlstr);
-        if ($xml === false) {
-            $this->logger->critical(
-                sprintf('Cannot read feed %s', $feedUrl),
-                [LegacyLogger::CONTEXT_TYPE => __CLASS__]
-            );
-
+        try {
+            $xml = $this->podcastFeedLoader->load($podcast->getFeed());
+        } catch (PodcastFeedLoadingException $e) {
             return false;
         }
 

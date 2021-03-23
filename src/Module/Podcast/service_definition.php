@@ -35,4 +35,5 @@ return [
     PodcastEpisodeDownloaderInterface::class => autowire(PodcastEpisodeDownloader::class),
     PodcastByCatalogLoaderInterface::class => autowire(PodcastByCatalogLoader::class),
     Gui\PodcastGuiFactoryInterface::class => autowire(Gui\PodcastGuiFactory::class),
+    PodcastFeedLoaderInterface::class => autowire(PodcastFeedLoader::class),
 ];

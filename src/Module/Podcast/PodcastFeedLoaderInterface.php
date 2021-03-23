@@ -19,35 +19,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Ampache\Repository;
+namespace Ampache\Module\Podcast;
 
-use Ampache\Repository\Model\Podcast;
+use SimpleXMLElement;
 
-interface PodcastRepositoryInterface
+interface PodcastFeedLoaderInterface
 {
     /**
-     * This returns an array of ids of podcasts in this catalog
-     *
-     * @return int[]
+     * @throws Exception\PodcastFeedLoadingException
      */
-    public function getPodcastIds(int $catalogId): array;
-
-    public function remove(
-        Podcast $podcast
-    ): bool;
-
-    public function updateLastsync(
-        Podcast $podcast,
-        int $time
-    ): void;
-
-    public function update(
-        int $podcastId,
-        string $feed,
-        string $title,
-        string $website,
-        string $description,
-        string $generator,
-        string $copyright
-    ): void;
+    public function load(string $feedUrl): SimpleXMLElement;
 }

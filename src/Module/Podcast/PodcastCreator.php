@@ -24,8 +24,8 @@ declare(strict_types=1);
 namespace Ampache\Module\Podcast;
 
 use Ampache\Module\Catalog\Loader\CatalogLoaderInterface;
+use Ampache\Module\Podcast\Exception\PodcastFeedLoadingException;
 use Ampache\Module\System\AmpError;
-use Ampache\Module\System\Core;
 use Ampache\Module\System\Dba;
 use Ampache\Repository\Model\Art;
 use Ampache\Repository\Model\ModelFactoryInterface;
@@ -39,14 +39,18 @@ final class PodcastCreator implements PodcastCreatorInterface
 
     private CatalogLoaderInterface $catalogLoader;
 
+    private PodcastFeedLoaderInterface $podcastFeedLoader;
+
     public function __construct(
         ModelFactoryInterface $modelFactory,
         PodcastSyncerInterface $podcastSyncer,
-        CatalogLoaderInterface $catalogLoader
+        CatalogLoaderInterface $catalogLoader,
+        PodcastFeedLoaderInterface $podcastFeedLoader
     ) {
-        $this->modelFactory  = $modelFactory;
-        $this->podcastSyncer = $podcastSyncer;
-        $this->catalogLoader = $catalogLoader;
+        $this->modelFactory      = $modelFactory;
+        $this->podcastSyncer     = $podcastSyncer;
+        $this->catalogLoader     = $catalogLoader;
+        $this->podcastFeedLoader = $podcastFeedLoader;
     }
 
     public function create(
@@ -71,16 +75,6 @@ final class PodcastCreator implements PodcastCreatorInterface
             return null;
         }
 
-        $title         = T_('Unknown');
-        $website       = null;
-        $description   = null;
-        $language      = null;
-        $copyright     = null;
-        $generator     = null;
-        $lastbuilddate = 0;
-        $episodes      = false;
-        $arturl        = '';
-
         // don't allow duplicate podcasts
         $sql        = "SELECT `id` FROM `podcast` WHERE `feed`= '" . Dba::escape($feedUrl) . "'";
         $db_results = Dba::read($sql);
@@ -90,36 +84,34 @@ final class PodcastCreator implements PodcastCreatorInterface
             }
         }
 
-        $xmlstr = file_get_contents($feedUrl, false, stream_context_create(Core::requests_options()));
-        if ($xmlstr === false) {
-            AmpError::add('feed', T_('Can not access the feed'));
-        } else {
-            $xml = simplexml_load_string($xmlstr);
-            if ($xml === false) {
-                AmpError::add('feed', T_('Can not read the feed'));
-            } else {
-                $title            = html_entity_decode((string)$xml->channel->title);
-                $website          = (string)$xml->channel->link;
-                $description      = html_entity_decode((string)$xml->channel->description);
-                $language         = (string)$xml->channel->language;
-                $copyright        = html_entity_decode((string)$xml->channel->copyright);
-                $generator        = html_entity_decode((string)$xml->channel->generator);
-                $lastbuilddatestr = (string)$xml->channel->lastBuildDate;
-                if ($lastbuilddatestr) {
-                    $lastbuilddate = strtotime($lastbuilddatestr);
-                }
+        try {
+            $xml = $this->podcastFeedLoader->load($feedUrl);
+        } catch (PodcastFeedLoadingException $e) {
+            AmpError::add('feed', T_('Can not read the feed'));
 
-                if ($xml->channel->image) {
-                    $arturl = (string)$xml->channel->image->url;
-                }
-
-                $episodes = $xml->channel->item;
-            }
-        }
-
-        if (AmpError::occurred()) {
             return null;
         }
+
+        $title            = html_entity_decode((string)$xml->channel->title);
+        $website          = (string)$xml->channel->link;
+        $description      = html_entity_decode((string)$xml->channel->description);
+        $language         = (string)$xml->channel->language;
+        $copyright        = html_entity_decode((string)$xml->channel->copyright);
+        $generator        = html_entity_decode((string)$xml->channel->generator);
+        $lastbuilddatestr = (string)$xml->channel->lastBuildDate;
+        if ($lastbuilddatestr) {
+            $lastbuilddate = strtotime($lastbuilddatestr);
+        } else {
+            $lastbuilddate = 0;
+        }
+
+        if ($xml->channel->image) {
+            $arturl = (string)$xml->channel->image->url;
+        } else {
+            $arturl = '';
+        }
+
+        $episodes = $xml->channel->item;
 
         $sql        = "INSERT INTO `podcast` (`feed`, `catalog`, `title`, `website`, `description`, `language`, `copyright`, `generator`, `lastbuilddate`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $db_results = Dba::write($sql, array(

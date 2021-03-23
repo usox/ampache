@@ -19,35 +19,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Ampache\Repository;
+declare(strict_types=1);
 
-use Ampache\Repository\Model\Podcast;
+namespace Ampache\Module\Podcast\Exception;
 
-interface PodcastRepositoryInterface
+use Exception;
+
+class PodcastFeedLoadingException extends Exception
 {
-    /**
-     * This returns an array of ids of podcasts in this catalog
-     *
-     * @return int[]
-     */
-    public function getPodcastIds(int $catalogId): array;
-
-    public function remove(
-        Podcast $podcast
-    ): bool;
-
-    public function updateLastsync(
-        Podcast $podcast,
-        int $time
-    ): void;
-
-    public function update(
-        int $podcastId,
-        string $feed,
-        string $title,
-        string $website,
-        string $description,
-        string $generator,
-        string $copyright
-    ): void;
 }
