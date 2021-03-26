@@ -84,4 +84,65 @@ final class PodcastRepository implements PodcastRepositoryInterface
             [$feed, $title, $website, $description, $generator, $copyright, $podcastId]
         );
     }
+
+    public function insert(
+        string $feedUrl,
+        int $catalogId,
+        string $title,
+        string $website,
+        string $description,
+        string $language,
+        string $copyright,
+        string $generator,
+        int $lastBuildDate
+    ): ?int {
+        $sql = <<<SQL
+        INSERT INTO
+            `podcast`
+        (`feed`, `catalog`, `title`, `website`, `description`, `language`, `copyright`, `generator`, `lastbuilddate`)
+        VALUES
+        (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        SQL;
+
+        $result = Dba::write(
+            $sql,
+            [
+                $feedUrl,
+                $catalogId,
+                $title,
+                $website,
+                $description,
+                $language,
+                $copyright,
+                $generator,
+                $lastBuildDate
+            ]
+        );
+
+        if (!$result) {
+            return null;
+        }
+
+        return (int) Dba::insert_id();
+    }
+
+    /**
+     * Looks for existing podcast having a certain feed url to detect duplicated
+     */
+    public function findByFeedUrl(
+        string $feedUrl
+    ): ?int {
+        $db_results = Dba::read(
+            "SELECT `id` FROM `podcast` WHERE `feed`= ?",
+            [$feedUrl]
+        );
+
+        $podcastId = Dba::fetch_assoc($db_results)['id'] ?? null;
+
+        if ($podcastId === null) {
+            return null;
+        }
+
+        return (int) $podcastId;
+    }
 }

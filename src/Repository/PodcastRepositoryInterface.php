@@ -50,4 +50,23 @@ interface PodcastRepositoryInterface
         string $generator,
         string $copyright
     ): void;
+
+    public function insert(
+        string $feedUrl,
+        int $catalogId,
+        string $title,
+        string $website,
+        string $description,
+        string $language,
+        string $copyright,
+        string $generator,
+        int $lastBuildDate
+    ): ?int;
+
+    /**
+     * Looks for existing podcast having a certain feed url to detect duplicated
+     */
+    public function findByFeedUrl(
+        string $feedUrl
+    ): ?int;
 }

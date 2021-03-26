@@ -26,10 +26,12 @@ namespace Ampache\Module\Podcast;
 use Ampache\Module\Catalog\Loader\CatalogLoaderInterface;
 use Ampache\Module\Podcast\Exception\PodcastFeedLoadingException;
 use Ampache\Module\System\AmpError;
-use Ampache\Module\System\Dba;
+use Ampache\Module\System\LegacyLogger;
 use Ampache\Repository\Model\Art;
 use Ampache\Repository\Model\ModelFactoryInterface;
 use Ampache\Repository\Model\Podcast;
+use Ampache\Repository\PodcastRepositoryInterface;
+use Psr\Log\LoggerInterface;
 
 final class PodcastCreator implements PodcastCreatorInterface
 {
@@ -41,16 +43,24 @@ final class PodcastCreator implements PodcastCreatorInterface
 
     private PodcastFeedLoaderInterface $podcastFeedLoader;
 
+    private PodcastRepositoryInterface $podcastRepository;
+
+    private LoggerInterface $logger;
+
     public function __construct(
         ModelFactoryInterface $modelFactory,
         PodcastSyncerInterface $podcastSyncer,
         CatalogLoaderInterface $catalogLoader,
-        PodcastFeedLoaderInterface $podcastFeedLoader
+        PodcastFeedLoaderInterface $podcastFeedLoader,
+        PodcastRepositoryInterface $podcastRepository,
+        LoggerInterface $logger
     ) {
         $this->modelFactory      = $modelFactory;
         $this->podcastSyncer     = $podcastSyncer;
         $this->catalogLoader     = $catalogLoader;
         $this->podcastFeedLoader = $podcastFeedLoader;
+        $this->podcastRepository = $podcastRepository;
+        $this->logger            = $logger;
     }
 
     public function create(
@@ -76,12 +86,9 @@ final class PodcastCreator implements PodcastCreatorInterface
         }
 
         // don't allow duplicate podcasts
-        $sql        = "SELECT `id` FROM `podcast` WHERE `feed`= '" . Dba::escape($feedUrl) . "'";
-        $db_results = Dba::read($sql);
-        while ($row = Dba::fetch_assoc($db_results, false)) {
-            if ((int) $row['id'] > 0) {
-                return $this->modelFactory->createPodcast((int) $row['id']);
-            }
+        $podcastId = $this->podcastRepository->findByFeedUrl($feedUrl);
+        if ($podcastId !== null) {
+            return $this->modelFactory->createPodcast($podcastId);
         }
 
         try {
@@ -113,8 +120,7 @@ final class PodcastCreator implements PodcastCreatorInterface
 
         $episodes = $xml->channel->item;
 
-        $sql        = "INSERT INTO `podcast` (`feed`, `catalog`, `title`, `website`, `description`, `language`, `copyright`, `generator`, `lastbuilddate`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        $db_results = Dba::write($sql, array(
+        $podcastId = $this->podcastRepository->insert(
             $feedUrl,
             $catalog_id,
             $title,
@@ -124,20 +130,15 @@ final class PodcastCreator implements PodcastCreatorInterface
             $copyright,
             $generator,
             $lastbuilddate
-        ));
-        if (!$db_results) {
+        );
+
+        if ($podcastId === null) {
             return null;
         }
-        $podcast_id = (int)Dba::insert_id();
-        $podcast    = new Podcast($podcast_id);
-        $dirpath    = $podcast->get_root_path();
-        if (!is_dir($dirpath)) {
-            if (mkdir($dirpath) === false) {
-                debug_event(self::class, 'Cannot create directory ' . $dirpath, 1);
-            }
-        }
+
+        $podcast = $this->modelFactory->createPodcast($podcastId);
         if (!empty($arturl)) {
-            $art = new Art((int)$podcast_id, 'podcast');
+            $art = new Art((int)$podcastId, 'podcast');
             $art->insert_url($arturl);
         }
         if ($episodes) {

@@ -152,7 +152,7 @@ final class PodcastEpisodeRepository implements PodcastEpisodeRepositoryInterfac
                 $title,
                 $guid,
                 $podcastId,
-                'pending',
+                PodcastStateEnum::PENDING,
                 $source,
                 $website,
                 $description,

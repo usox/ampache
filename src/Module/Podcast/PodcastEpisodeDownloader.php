@@ -24,9 +24,11 @@ declare(strict_types=1);
 
 namespace Ampache\Module\Podcast;
 
+use Ampache\Module\Catalog\Loader\CatalogLoaderInterface;
 use Ampache\Module\System\LegacyLogger;
 use Ampache\Module\Util\UtilityFactoryInterface;
 use Ampache\Repository\Model\ModelFactoryInterface;
+use Ampache\Repository\Model\Podcast;
 use Ampache\Repository\Model\Podcast_Episode;
 use Ampache\Repository\PodcastEpisodeRepositoryInterface;
 use Psr\Log\LoggerInterface;
@@ -41,16 +43,20 @@ final class PodcastEpisodeDownloader implements PodcastEpisodeDownloaderInterfac
 
     private UtilityFactoryInterface $utilityFactory;
 
+    private CatalogLoaderInterface $catalogLoader;
+
     public function __construct(
         PodcastEpisodeRepositoryInterface $podcastEpisodeRepository,
         LoggerInterface $logger,
         ModelFactoryInterface $modelFactory,
-        UtilityFactoryInterface $utilityFactory
+        UtilityFactoryInterface $utilityFactory,
+        CatalogLoaderInterface $catalogLoader
     ) {
         $this->podcastEpisodeRepository = $podcastEpisodeRepository;
         $this->logger                   = $logger;
         $this->modelFactory             = $modelFactory;
         $this->utilityFactory           = $utilityFactory;
+        $this->catalogLoader            = $catalogLoader;
     }
 
     /**
@@ -60,7 +66,7 @@ final class PodcastEpisodeDownloader implements PodcastEpisodeDownloaderInterfac
     {
         if (!empty($podcastEpisode->source)) {
             $podcast = $this->modelFactory->createPodcast((int) $podcastEpisode->podcast);
-            $file    = $podcast->get_root_path();
+            $file    = $this->getRootPath($podcast);
             if (!empty($file)) {
                 $pinfo = pathinfo($podcastEpisode->source);
 
@@ -117,5 +123,33 @@ final class PodcastEpisodeDownloader implements PodcastEpisodeDownloaderInterfac
                 [LegacyLogger::CONTEXT_TYPE => __CLASS__]
             );
         }
+    }
+
+    private function getRootPath(
+        Podcast $podcast
+    ): string {
+        $catalog = $this->catalogLoader->byId($podcast->getCatalog());
+        if (!$catalog->get_type() == 'local') {
+            $this->logger->critical(
+                'Bad catalog type.',
+                [LegacyLogger::CONTEXT_TYPE => __CLASS__]
+            );
+
+            return '';
+        }
+
+        $path = $catalog->path . DIRECTORY_SEPARATOR . $podcast->getTitle();
+
+        // create path if it doesn't exist
+        if (!is_dir($path)) {
+            if (@mkdir($path) === false) {
+                $this->logger->error(
+                    sprintf('Podcast directory is not writable: %s', $path),
+                    [LegacyLogger::CONTEXT_TYPE => __CLASS__]
+                );
+            }
+        }
+
+        return $path;
     }
 }

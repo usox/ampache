@@ -378,34 +378,6 @@ class Podcast extends database_object implements library_item
     }
 
     /**
-     * get_root_path
-     * @return string
-     */
-    public function get_root_path()
-    {
-        $catalog = Catalog::create_from_id($this->getCatalog());
-        if (!$catalog->get_type() == 'local') {
-            debug_event(self::class, 'Bad catalog type.', 1);
-
-            return '';
-        }
-
-        $dirname = $this->getTitle();
-
-        // create path if it doesn't exist
-        if (!is_dir($catalog->path . DIRECTORY_SEPARATOR . $dirname)) {
-            $path = $catalog->path . DIRECTORY_SEPARATOR . $dirname;
-            if (!is_dir($path)) {
-                if (mkdir($path) === false) {
-                    debug_event(__CLASS__, 'Cannot create directory ' . $path, 2);
-                }
-            }
-        }
-
-        return $catalog->path . DIRECTORY_SEPARATOR . $dirname;
-    }
-
-    /**
      * @deprecated Inject by constructor
      */
     private function getPodcastEpisodeRepository(): PodcastEpisodeRepositoryInterface
