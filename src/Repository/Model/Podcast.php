@@ -29,7 +29,7 @@ use Ampache\Module\Podcast\PodcastFeedLoaderInterface;
 use Ampache\Repository\PodcastEpisodeRepositoryInterface;
 use Ampache\Repository\PodcastRepositoryInterface;
 
-class Podcast extends database_object implements library_item
+class Podcast extends database_object implements library_item, PodcastInterface
 {
     protected const DB_TABLENAME = 'podcast';
 

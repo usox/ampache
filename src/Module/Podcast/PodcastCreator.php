@@ -26,7 +26,6 @@ namespace Ampache\Module\Podcast;
 use Ampache\Module\Catalog\Loader\CatalogLoaderInterface;
 use Ampache\Module\Podcast\Exception\PodcastFeedLoadingException;
 use Ampache\Module\System\AmpError;
-use Ampache\Module\System\LegacyLogger;
 use Ampache\Repository\Model\Art;
 use Ampache\Repository\Model\ModelFactoryInterface;
 use Ampache\Repository\Model\Podcast;
