@@ -26,4 +26,7 @@ final class ErrorCodeEnum
 {
     public const SORT_ORDER_INVALID = 1001;
     public const OBJECT_NOT_FOUND   = 1002;
+    public const LOGIN_RESTRICTED   = 1003;
+    public const LOGIN_FAILED       = 1004;
+    public const AUTH_FAILED        = 1005;
 }

@@ -22,11 +22,30 @@
 
 declare(strict_types=1);
 
-use Ampache\Module\Api\Json\ApiHandler;
-use Ampache\Module\Api\Json\Route;
-use Psr\Container\ContainerInterface;
+namespace Ampache\Module\Authentication\Jwt;
 
-/** @var ContainerInterface $dic */
-$dic = require __DIR__ . '/../../../src/Config/Init.php';
+use Ahc\Jwt\JWT;
+use Ampache\Config\ConfigContainerInterface;
 
-$dic->get(ApiHandler::class)->handle();
+/**
+ * Factory for creating jwt related class instances
+ */
+final class JwtFactory implements JwtFactoryInterface
+{
+    private ConfigContainerInterface $configContainer;
+
+    public function __construct(
+        ConfigContainerInterface $configContainer
+    ) {
+        $this->configContainer = $configContainer;
+    }
+
+    public function createJwt(): Jwt
+    {
+        return new JWT(
+            $this->configContainer->getJwtSecret(),
+            'HS256',
+            $this->configContainer->getJwtTimeout()
+        );
+    }
+}

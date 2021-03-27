@@ -114,4 +114,14 @@ interface ConfigContainerInterface
      * Returns the access level needed for localplay control
      */
     public function getLocalplayLevel(): int;
+
+    /**
+     * Returns the secret used to cypher jwt
+     */
+    public function getJwtSecret(): string;
+
+    /**
+     * Returns the validity period of an issued jwt
+     */
+    public function getJwtTimeout(): int;
 }

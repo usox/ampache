@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-/* vim:set softtabstop=4 shiftwidth=4 expandtab: */
 /**
+ * vim:set softtabstop=4 shiftwidth=4 expandtab:
  *
  * LICENSE: GNU Affero General Public License, version 3 (AGPL-3.0-or-later)
  * Copyright 2001 - 2020 Ampache.org
@@ -150,5 +150,17 @@ final class ConfigContainer implements ConfigContainerInterface
         }
 
         return (int) $value;
+    }
+
+    public function getJwtSecret(): string
+    {
+        /** @todo change it */
+        return 'changeme';
+    }
+
+    public function getJwtTimeout(): int
+    {
+        /** @todo change it */
+        return 86400;
     }
 }

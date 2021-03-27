@@ -20,13 +20,11 @@
  *
  */
 
-declare(strict_types=1);
+namespace Ampache\Module\Api\Json\ErrorHandling\Exception;
 
-use Ampache\Module\Api\Json\ApiHandler;
-use Ampache\Module\Api\Json\Route;
-use Psr\Container\ContainerInterface;
+use Ampache\Module\Api\Json\ErrorHandling\ErrorCodeEnum;
 
-/** @var ContainerInterface $dic */
-$dic = require __DIR__ . '/../../../src/Config/Init.php';
-
-$dic->get(ApiHandler::class)->handle();
+final class LoginRestrictedException extends \Exception
+{
+    protected $code = ErrorCodeEnum::LOGIN_RESTRICTED;
+}

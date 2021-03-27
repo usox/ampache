@@ -45,6 +45,7 @@
         "ext-simplexml": "*",
         "ext-xml": "*",
         "adhocore/cli": "^0.8.3",
+        "adhocore/jwt": "^1.1",
         "aehlke/tag-it": "2.*",
         "ampache/ampacheapi-php": "^1.0",
         "aterrien/jquery-knob": "1.2.*",
@@ -93,6 +94,7 @@
         "symfony/process": "^3.0",
         "symfony/routing": "^3.0",
         "tightenco/collect": "5.2.*",
+        "tuupola/slim-jwt-auth": "^3.5",
         "vakata/jstree": "3.*",
         "xdan/datetimepicker": "2.*"
     },

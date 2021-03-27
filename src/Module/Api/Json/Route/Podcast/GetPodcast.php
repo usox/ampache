@@ -22,7 +22,7 @@
 
 declare(strict_types=1);
 
-namespace Ampache\Module\Api\Json\Podcast;
+namespace Ampache\Module\Api\Json\Route\Podcast;
 
 use Ampache\Config\ConfigContainerInterface;
 use Ampache\Config\ConfigurationKeyEnum;
@@ -36,7 +36,7 @@ use Psr\Http\Message\ServerRequestInterface;
 /**
  * Provides detail of a certain podcast
  *
- * Example: /podcast/123/?sortField=title&sortOrder=DESC&limit=666&offset=42
+ * Example: GET /podcast/123
  */
 final class GetPodcast extends AbstractApiMethod
 {

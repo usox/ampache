@@ -22,11 +22,11 @@
 
 declare(strict_types=1);
 
-use Ampache\Module\Api\Json\ApiHandler;
-use Ampache\Module\Api\Json\Route;
-use Psr\Container\ContainerInterface;
+namespace Ampache\Module\Api\Json\ErrorHandling\Exception;
 
-/** @var ContainerInterface $dic */
-$dic = require __DIR__ . '/../../../src/Config/Init.php';
+use Ampache\Module\Api\Json\ErrorHandling\ErrorCodeEnum;
 
-$dic->get(ApiHandler::class)->handle();
+final class LoginFailedException extends \Exception
+{
+    protected $code = ErrorCodeEnum::LOGIN_FAILED;
+}

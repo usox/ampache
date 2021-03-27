@@ -125,4 +125,5 @@ final class ConfigurationKeyEnum
     public const ART_ZIP_ADD                   = 'art_zip_add';
     public const FILE_ZIP_COMMENT              = 'file_zip_comment';
     public const OFFSET_LIMIT                  = 'offset_limit';
+    public const JWT_INSECURE                  = 'jwt_insecure';
 }

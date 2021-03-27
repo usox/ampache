@@ -20,13 +20,11 @@
  *
  */
 
-declare(strict_types=1);
+namespace Ampache\Module\Authentication\Jwt;
 
-use Ampache\Module\Api\Json\ApiHandler;
-use Ampache\Module\Api\Json\Route;
-use Psr\Container\ContainerInterface;
+use Ahc\Jwt\JWT;
 
-/** @var ContainerInterface $dic */
-$dic = require __DIR__ . '/../../../src/Config/Init.php';
-
-$dic->get(ApiHandler::class)->handle();
+interface JwtFactoryInterface
+{
+    public function createJwt(): Jwt;
+}
