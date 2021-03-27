@@ -50,7 +50,7 @@ $podcast = $libitem->getPodcast();
         } ?>
     </div>
 </td>
-<td class="cel_title"><?php echo $libitem->f_link; ?></td>
+<td class="cel_title"><?php echo $libitem->getLinkFormatted(); ?></td>
 <td class="cel_add">
     <span class="cel_item_add">
 <?php
@@ -69,8 +69,8 @@ $podcast = $libitem->getPodcast();
     <td class="<?php echo $cel_counter; ?> optional"><?php echo $libitem->object_cnt; ?></td>
     <?php
 } ?>
-<td class="cel_pubdate"><?php echo $libitem->f_pubdate; ?></td>
-<td class="cel_state"><?php echo $libitem->f_state; ?></td>
+<td class="cel_pubdate"><?php echo $libitem->getPublicationDateFormatted(); ?></td>
+<td class="cel_state"><?php echo $libitem->getStateFormatted(); ?></td>
 <?php
     if (User::is_registered()) {
         if (AmpConfig::get('ratings')) { ?>

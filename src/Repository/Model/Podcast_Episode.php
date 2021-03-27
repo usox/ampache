@@ -61,19 +61,10 @@ class Podcast_Episode extends database_object implements
     public $enabled;
     public $object_cnt;
     public $catalog;
-    public $f_title;
-    public $f_size;
     public $f_time;
     public $f_time_h;
-    public $f_description;
-    public $f_author;
     public $f_artist_full;
-    public $f_category;
-    public $f_website;
-    public $f_pubdate;
-    public $f_state;
     public $link;
-    public $f_link;
 
     private ?PodcastInterface $podcastObj = null;
 
@@ -130,7 +121,7 @@ class Podcast_Episode extends database_object implements
      */
     public function get_catalogs()
     {
-        return array($this->catalog);
+        return array($this->getPodcast()->getCatalog());
     }
 
     /**
@@ -141,14 +132,7 @@ class Podcast_Episode extends database_object implements
      */
     public function format($details = true)
     {
-        $this->f_title       = scrub_out($this->title);
-        $this->f_description = scrub_out($this->description);
-        $this->f_category    = scrub_out($this->category);
-        $this->f_author      = scrub_out($this->author);
-        $this->f_artist_full = $this->f_author;
-        $this->f_website     = scrub_out($this->website);
-        $this->f_pubdate     = get_datetime((int)$this->pubdate);
-        $this->f_state       = ucfirst($this->state);
+        $this->f_artist_full = scrub_out($this->author);
 
         // Format the Time
         $min            = floor($this->time / 60);
@@ -157,15 +141,11 @@ class Podcast_Episode extends database_object implements
         $hour           = sprintf("%02d", floor($min / 60));
         $min_h          = sprintf("%02d", ($min % 60));
         $this->f_time_h = $hour . ":" . $min_h . ":" . $sec;
-        // Format the Size
-        $this->f_size = Ui::format_bytes($this->size);
 
         $this->link   = AmpConfig::get('web_path') . '/podcast_episode.php?action=show&podcast_episode=' . $this->id;
-        $this->f_link = '<a href="' . $this->link . '" title="' . $this->f_title . '">' . $this->f_title . '</a>';
 
         if ($details) {
-            $podcast              = new Podcast($this->podcast);
-            $this->catalog        = $podcast->getCatalog();
+            $this->catalog = $this->getPodcast()->getCatalog();
         }
         if (AmpConfig::get('show_played_times')) {
             $this->object_cnt = Stats::get_object_count('podcast_episode', $this->id);
@@ -183,6 +163,65 @@ class Podcast_Episode extends database_object implements
         return $this->podcastObj;
     }
 
+    public function getLink(): string
+    {
+        return sprintf(
+            '%s/podcast_episode.php?action=show&podcast_episode=%d',
+            AmpConfig::get('web_path'),
+            $this->getId()
+        );
+    }
+
+    public function getLinkFormatted(): string
+    {
+        return sprintf(
+            "<a href=\"%s\" title=\"%s\">%s</a>",
+            $this->getLink(),
+            $this->getTitleFormatted(),
+            $this->getTitleFormatted()
+        );
+    }
+
+    public function getStateFormatted(): string
+    {
+        return ucfirst($this->state);
+    }
+
+    public function getPublicationDateFormatted(): string
+    {
+        return get_datetime((int)$this->pubdate);
+    }
+
+    public function getAuthorFormatted(): string
+    {
+        return scrub_out($this->author);
+    }
+
+    public function getWebsiteFormatted(): string
+    {
+        return scrub_out($this->website);
+    }
+
+    public function getSizeFormatted(): string
+    {
+        return Ui::format_bytes($this->size);
+    }
+
+    public function getCategoryFormatted(): string
+    {
+        return scrub_out($this->category);
+    }
+
+    public function getDescriptionFormatted(): string
+    {
+        return scrub_out($this->description);
+    }
+
+    public function getTitleFormatted(): string
+    {
+        return scrub_out($this->title);
+    }
+
     /**
      * @return array|mixed
      */
@@ -197,7 +236,7 @@ class Podcast_Episode extends database_object implements
         $keywords['title'] = array(
             'important' => true,
             'label' => T_('Title'),
-            'value' => $this->f_title
+            'value' => $this->getTitleFormatted()
         );
 
         return $keywords;
@@ -208,7 +247,7 @@ class Podcast_Episode extends database_object implements
      */
     public function get_fullname()
     {
-        return $this->f_title;
+        return $this->getTitleFormatted();
     }
 
     /**
@@ -276,7 +315,7 @@ class Podcast_Episode extends database_object implements
      */
     public function get_description()
     {
-        return $this->f_description;
+        return $this->getDescriptionFormatted();
     }
 
     /**
@@ -300,7 +339,7 @@ class Podcast_Episode extends database_object implements
         }
 
         if ($episode_id !== null && $type !== null) {
-            echo Art::display($type, $episode_id, $this->get_fullname(), $thumb, $this->link);
+            echo Art::display($type, $episode_id, $this->get_fullname(), $thumb, $this->getLink());
         }
     }
 
@@ -378,7 +417,11 @@ class Podcast_Episode extends database_object implements
      */
     public function get_stream_name()
     {
-        return $this->getPodcast()->getTitleFormatted() . " - " . $this->f_title;
+        return sprintf(
+            '%s - %s',
+            $this->getPodcast()->getTitleFormatted(),
+            $this->getTitleFormatted()
+        );
     }
 
     /**

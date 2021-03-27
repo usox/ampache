@@ -35,7 +35,7 @@ use Ampache\Module\Util\Ui;
 /** @var Podcast_Episode $episode */
 $podcast = $episode->getPodcast();
 ?>
-<?php Ui::show_box_top($episode->f_title . ' - ' . $podcast->getLinkFormatted(), 'box box_podcast_episode_details'); ?>
+<?php Ui::show_box_top($episode->getTitleFormatted() . ' - ' . $podcast->getLinkFormatted(), 'box box_podcast_episode_details'); ?>
 <dl class="media_details">
 
 <?php if (User::is_registered()) { ?>
@@ -120,20 +120,20 @@ $podcast = $episode->getPodcast();
     } ?>
     </dd>
 <?php
-    $songprops[T_('Title')]                  = $episode->f_title;
-    $songprops[T_('Description')]            = $episode->f_description;
-    $songprops[T_('Category')]               = $episode->f_category;
-    $songprops[T_('Author')]                 = $episode->f_author;
-    $songprops[T_('Publication Date')]       = $episode->f_pubdate;
-    $songprops[T_('State')]                  = $episode->f_state;
-    $songprops[T_('Website')]                = $episode->f_website;
+    $songprops[T_('Title')]                  = $episode->getTitleFormatted();
+    $songprops[T_('Description')]            = $episode->getDescriptionFormatted();
+    $songprops[T_('Category')]               = $episode->getCategoryFormatted();
+    $songprops[T_('Author')]                 = $episode->getAuthorFormatted();
+    $songprops[T_('Publication Date')]       = $episode->getPublicationDateFormatted();
+    $songprops[T_('State')]                  = $episode->getStateFormatted();
+    $songprops[T_('Website')]                = $episode->getWebsiteFormatted();
     if ($episode->time > 0) {
         $songprops[T_('Length')]           = $episode->f_time;
     }
 
     if (!empty($episode->file)) {
         $songprops[T_('File')] = $episode->file;
-        $songprops[T_('Size')] = $episode->f_size;
+        $songprops[T_('Size')] = $episode->getSizeFormatted();
     }
 
     foreach ($songprops as $key => $value) {

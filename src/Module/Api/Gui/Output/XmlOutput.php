@@ -680,22 +680,22 @@ final class XmlOutput implements ApiOutputInterface
             $flag    = new Userflag($episodeId, 'podcast_episode');
             $art_url = Art::url($episode->podcast, 'podcast', Core::get_request('auth'));
             $string .= "\t<podcast_episode id=\"$episodeId\">\n" .
-                "\t\t<title><![CDATA[" . $episode->f_title . "]]></title>\n" .
-                "\t\t<name><![CDATA[" . $episode->f_title . "]]></name>\n" .
-                "\t\t<description><![CDATA[" . $episode->f_description . "]]></description>\n" .
-                "\t\t<category><![CDATA[" . $episode->f_category . "]]></category>\n" .
-                "\t\t<author><![CDATA[" . $episode->f_author . "]]></author>\n" .
-                "\t\t<author_full><![CDATA[" . $episode->f_artist_full . "]]></author_full>\n" .
-                "\t\t<website><![CDATA[" . $episode->f_website . "]]></website>\n" .
-                "\t\t<pubdate><![CDATA[" . $episode->f_pubdate . "]]></pubdate>\n" .
-                "\t\t<state><![CDATA[" . $episode->f_state . "]]></state>\n" .
+                "\t\t<title><![CDATA[" . $episode->getTitleFormatted() . "]]></title>\n" .
+                "\t\t<name><![CDATA[" . $episode->getTitleFormatted() . "]]></name>\n" .
+                "\t\t<description><![CDATA[" . $episode->getDescriptionFormatted() . "]]></description>\n" .
+                "\t\t<category><![CDATA[" . $episode->getCategoryFormatted() . "]]></category>\n" .
+                "\t\t<author><![CDATA[" . $episode->getAuthorFormatted() . "]]></author>\n" .
+                "\t\t<author_full><![CDATA[" . $episode->getAuthorFormatted() . "]]></author_full>\n" .
+                "\t\t<website><![CDATA[" . $episode->getWebsiteFormatted() . "]]></website>\n" .
+                "\t\t<pubdate><![CDATA[" . $episode->getPublicationDateFormatted() . "]]></pubdate>\n" .
+                "\t\t<state><![CDATA[" . $episode->getStateFormatted() . "]]></state>\n" .
                 "\t\t<filelength><![CDATA[" . $episode->f_time_h . "]]></filelength>\n" .
-                "\t\t<filesize><![CDATA[" . $episode->f_size . "]]></filesize>\n" .
+                "\t\t<filesize><![CDATA[" . $episode->getSizeFormatted() . "]]></filesize>\n" .
                 "\t\t<filename><![CDATA[" . $episode->getFilename() . "]]></filename>\n" .
                 "\t\t<mime><![CDATA[" . $episode->mime . "]]></mime>\n" .
-                "\t\t<public_url><![CDATA[" . $episode->link . "]]></public_url>\n" .
+                "\t\t<public_url><![CDATA[" . $episode->getLink() . "]]></public_url>\n" .
                 "\t\t<url><![CDATA[" . $episode->play_url('', 'api', false, $userId) . "]]></url>\n" .
-                "\t\t<catalog><![CDATA[" . $episode->catalog . "]]></catalog>\n" .
+                "\t\t<catalog><![CDATA[" . $episode->getPodcast()->getCatalog() . "]]></catalog>\n" .
                 "\t\t<art><![CDATA[" . $art_url . "]]></art>\n" .
                 "\t\t<flag>" . (!$flag->get_flag($userId, false) ? 0 : 1) . "</flag>\n" .
                 "\t\t<preciserating>" . ($rating->get_user_rating($userId) ?: null) . "</preciserating>\n" .

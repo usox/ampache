@@ -1853,7 +1853,7 @@ class Upnp_Api
             'id' => 'amp://music/podcasts/' . $episode->podcast . '/' . $episode->id,
             'parentID' => $parent,
             'restricted' => '1',
-            'dc:title' => self::_replaceSpecialSymbols($episode->f_title),
+            'dc:title' => self::_replaceSpecialSymbols($episode->getTitleFormatted()),
             'upnp:album' => self::_replaceSpecialSymbols($episode->getPodcast()->getTitleFormatted()),
             'upnp:class' => (isset($arrFileType['class'])) ? $arrFileType['class'] : 'object.item.unknownItem',
             'upnp:albumArtURI' => $art_url

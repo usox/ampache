@@ -1490,9 +1490,9 @@ class Subsonic_Xml_Data
         $xepisode = $xml->addChild($elementName);
         $xepisode->addAttribute('id', (string)self::getPodcastEpId($episode->id));
         $xepisode->addAttribute('channelId', (string)self::getPodcastId($episode->podcast));
-        $xepisode->addAttribute('title', (string)self::checkName($episode->f_title));
+        $xepisode->addAttribute('title', (string)self::checkName($episode->getTitleFormatted()));
         $xepisode->addAttribute('album', (string)$episode->getPodcast()->getTitleFormatted());
-        $xepisode->addAttribute('description', (string)self::checkName($episode->f_description));
+        $xepisode->addAttribute('description', (string)self::checkName($episode->getDescriptionFormatted()));
         $xepisode->addAttribute('duration', (string)$episode->time);
         $xepisode->addAttribute('genre', "Podcast");
         $xepisode->addAttribute('isDir', "false");
