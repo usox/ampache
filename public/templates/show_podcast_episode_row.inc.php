@@ -32,6 +32,7 @@ use Ampache\Module\Playback\Stream_Playlist;
 use Ampache\Module\Util\Ui;
 
 /** @var Podcast_Episode $libitem */
+$podcast = $libitem->getPodcast();
 
 ?>
 <td class="cel_play">
@@ -62,7 +63,7 @@ use Ampache\Module\Util\Ui;
     } ?>
     </span>
 </td>
-<td class="cel_podcast"><?php echo $libitem->f_podcast_link; ?></td>
+<td class="cel_podcast"><?php echo $podcast->getLinkFormatted(); ?></td>
 <td class="<?php echo $cel_time; ?>"><?php echo $libitem->f_time; ?></td>
 <?php if (AmpConfig::get('show_played_times')) { ?>
     <td class="<?php echo $cel_counter; ?> optional"><?php echo $libitem->object_cnt; ?></td>

@@ -691,7 +691,7 @@ final class XmlOutput implements ApiOutputInterface
                 "\t\t<state><![CDATA[" . $episode->f_state . "]]></state>\n" .
                 "\t\t<filelength><![CDATA[" . $episode->f_time_h . "]]></filelength>\n" .
                 "\t\t<filesize><![CDATA[" . $episode->f_size . "]]></filesize>\n" .
-                "\t\t<filename><![CDATA[" . $episode->f_file . "]]></filename>\n" .
+                "\t\t<filename><![CDATA[" . $episode->getFilename() . "]]></filename>\n" .
                 "\t\t<mime><![CDATA[" . $episode->mime . "]]></mime>\n" .
                 "\t\t<public_url><![CDATA[" . $episode->link . "]]></public_url>\n" .
                 "\t\t<url><![CDATA[" . $episode->play_url('', 'api', false, $userId) . "]]></url>\n" .

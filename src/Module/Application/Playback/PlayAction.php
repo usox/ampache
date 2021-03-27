@@ -533,7 +533,7 @@ final class PlayAction implements ApplicationActionInterface
         } elseif ($action == 'download' && AmpConfig::get('download')) {
             debug_event('play/index', 'Downloading raw file...', 4);
             // STUPID IE
-            $media_name = str_replace(array('?', '/', '\\'), "_", $media->f_file);
+            $media_name = str_replace(array('?', '/', '\\'), "_", $media->getFilename());
 
             $headers = $this->browser->getDownloadHeaders($media_name, $media->mime, false, $media->size);
 

@@ -1854,7 +1854,7 @@ class Upnp_Api
             'parentID' => $parent,
             'restricted' => '1',
             'dc:title' => self::_replaceSpecialSymbols($episode->f_title),
-            'upnp:album' => self::_replaceSpecialSymbols($episode->f_podcast),
+            'upnp:album' => self::_replaceSpecialSymbols($episode->getPodcast()->getTitleFormatted()),
             'upnp:class' => (isset($arrFileType['class'])) ? $arrFileType['class'] : 'object.item.unknownItem',
             'upnp:albumArtURI' => $art_url
         );

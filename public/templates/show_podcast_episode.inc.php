@@ -33,8 +33,9 @@ use Ampache\Module\Playback\Stream_Playlist;
 use Ampache\Module\Util\Ui;
 
 /** @var Podcast_Episode $episode */
+$podcast = $episode->getPodcast();
 ?>
-<?php Ui::show_box_top($episode->f_title . ' - ' . $episode->f_podcast_link, 'box box_podcast_episode_details'); ?>
+<?php Ui::show_box_top($episode->f_title . ' - ' . $podcast->getLinkFormatted(), 'box box_podcast_episode_details'); ?>
 <dl class="media_details">
 
 <?php if (User::is_registered()) { ?>

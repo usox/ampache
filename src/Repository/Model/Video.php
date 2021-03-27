@@ -205,10 +205,6 @@ class Video extends database_object implements
      */
     public $f_length;
     /**
-     * @var string $f_file
-     */
-    public $f_file;
-    /**
      * @var string $f_release_date
      */
     public $f_release_date;
@@ -336,7 +332,6 @@ class Video extends database_object implements
         }
 
         $this->f_length = floor($this->time / 60) . ' ' . T_('minutes');
-        $this->f_file   = $this->f_title . '.' . $this->type;
         if ($this->release_date) {
             $this->f_release_date = get_datetime((int) $this->release_date, 'short', 'none');
         }

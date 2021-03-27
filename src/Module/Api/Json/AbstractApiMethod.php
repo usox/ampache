@@ -39,6 +39,7 @@ abstract class AbstractApiMethod
                 'data' => $this->handle($request, $response, $arguments)
             ], JSON_PRETTY_PRINT)
         );
+
         return $response->withHeader('Content-Type', 'application/json');
     }
 

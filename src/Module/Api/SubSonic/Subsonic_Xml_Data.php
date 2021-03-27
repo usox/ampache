@@ -1491,7 +1491,7 @@ class Subsonic_Xml_Data
         $xepisode->addAttribute('id', (string)self::getPodcastEpId($episode->id));
         $xepisode->addAttribute('channelId', (string)self::getPodcastId($episode->podcast));
         $xepisode->addAttribute('title', (string)self::checkName($episode->f_title));
-        $xepisode->addAttribute('album', (string)$episode->f_podcast);
+        $xepisode->addAttribute('album', (string)$episode->getPodcast()->getTitleFormatted());
         $xepisode->addAttribute('description', (string)self::checkName($episode->f_description));
         $xepisode->addAttribute('duration', (string)$episode->time);
         $xepisode->addAttribute('genre', "Podcast");

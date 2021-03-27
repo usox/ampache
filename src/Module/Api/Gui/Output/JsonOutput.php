@@ -782,7 +782,7 @@ final class JsonOutput implements ApiOutputInterface
                 'state' => $episode->f_state,
                 'filelength' => $episode->f_time_h,
                 'filesize' => $episode->f_size,
-                'filename' => $episode->f_file,
+                'filename' => $episode->getFilename(),
                 'mime' => $episode->mime,
                 'public_url' => $episode->link,
                 'url' => $episode->play_url('', 'api', false, $userId),

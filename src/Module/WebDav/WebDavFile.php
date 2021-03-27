@@ -27,6 +27,7 @@ namespace Ampache\Module\WebDav;
 use Ampache\Repository\Model\Media;
 use Ampache\Repository\Model\Catalog;
 use Ampache\Module\Util\ObjectTypeToClassNameMapper;
+use Ampache\Repository\Model\MediaFileInterface;
 use Sabre\DAV;
 
 /**
@@ -37,7 +38,7 @@ class WebDavFile extends DAV\File
     private $libitem;
 
     /**
-     * @param Media $libitem
+     * @param Media&MediaFileInterface $libitem
      */
     public function __construct(Media $libitem)
     {
@@ -51,7 +52,7 @@ class WebDavFile extends DAV\File
      */
     public function getName()
     {
-        return $this->libitem->f_file;
+        return $this->libitem->getFilename();
     }
 
     /**

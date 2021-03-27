@@ -32,6 +32,7 @@ use Ampache\Module\System\Session;
 use Ampache\Module\Util\ObjectTypeToClassNameMapper;
 use Ampache\Repository\Model\Art;
 use Ampache\Repository\Model\Media;
+use Ampache\Repository\Model\Podcast_Episode;
 use PDOStatement;
 use Psr\Http\Message\ResponseInterface;
 
@@ -282,8 +283,9 @@ class Stream_Playlist
                     $url['codec'] = $object->stream_type;
                     break;
                 case 'podcast_episode':
+                    /** @var Podcast_Episode $object */
                     $url['title']     = $object->f_title;
-                    $url['author']    = $object->f_podcast;
+                    $url['author']    = $object->getPodcast()->getTitleFormatted();
                     $url['info_url']  = $object->f_link;
                     $url['image_url'] = Art::url($object->podcast, 'podcast', $api_session, (AmpConfig::get('ajax_load') ? 3 : 4));
                     $url['codec']     = $object->type;

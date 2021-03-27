@@ -268,10 +268,6 @@ class Song extends database_object implements
      */
     public $link;
     /**
-     * @var string $f_file
-     */
-    public $f_file;
-    /**
      * @var string $f_title_full
      */
     public $f_title_full;
@@ -1685,12 +1681,6 @@ class Song extends database_object implements
 
         $this->f_lyrics = "<a title=\"" . scrub_out($this->title) . "\" href=\"" . AmpConfig::get('web_path') . "/song.php?action=show_lyrics&song_id=" . $this->id . "\">" . T_('Show Lyrics') . "</a>";
 
-        $this->f_file = $this->f_artist . ' - ';
-        if ($this->track) {
-            $this->f_file .= $this->track . ' - ';
-        }
-        $this->f_file .= $this->f_title . '.' . $this->type;
-
         $this->f_publisher = $this->label;
         $this->f_composer  = $this->composer;
 
@@ -2295,6 +2285,7 @@ class Song extends database_object implements
             }
             $this->filename .= $this->title . '.' . $this->type;
         }
+
         return $this->filename;
     }
 

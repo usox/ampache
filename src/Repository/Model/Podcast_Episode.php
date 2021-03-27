@@ -62,7 +62,6 @@ class Podcast_Episode extends database_object implements
     public $object_cnt;
     public $catalog;
     public $f_title;
-    public $f_file;
     public $f_size;
     public $f_time;
     public $f_time_h;
@@ -75,8 +74,8 @@ class Podcast_Episode extends database_object implements
     public $f_state;
     public $link;
     public $f_link;
-    public $f_podcast;
-    public $f_podcast_link;
+
+    private ?PodcastInterface $podcastObj = null;
 
     private ?string $filename = null;
 
@@ -160,7 +159,6 @@ class Podcast_Episode extends database_object implements
         $this->f_time_h = $hour . ":" . $min_h . ":" . $sec;
         // Format the Size
         $this->f_size = Ui::format_bytes($this->size);
-        $this->f_file = $this->f_title . '.' . $this->type;
 
         $this->link   = AmpConfig::get('web_path') . '/podcast_episode.php?action=show&podcast_episode=' . $this->id;
         $this->f_link = '<a href="' . $this->link . '" title="' . $this->f_title . '">' . $this->f_title . '</a>';
@@ -168,15 +166,21 @@ class Podcast_Episode extends database_object implements
         if ($details) {
             $podcast              = new Podcast($this->podcast);
             $this->catalog        = $podcast->getCatalog();
-            $this->f_podcast      = $podcast->getTitleFormatted();
-            $this->f_podcast_link = $podcast->getLinkFormatted();
-            $this->f_file         = $this->f_podcast . ' - ' . $this->f_file;
         }
         if (AmpConfig::get('show_played_times')) {
             $this->object_cnt = Stats::get_object_count('podcast_episode', $this->id);
         }
 
         return true;
+    }
+
+    public function getPodcast(): PodcastInterface
+    {
+        if ($this->podcastObj === null) {
+            $this->podcastObj = new Podcast((int) $this->podcast);
+        }
+
+        return $this->podcastObj;
     }
 
     /**
@@ -188,7 +192,7 @@ class Podcast_Episode extends database_object implements
         $keywords['podcast'] = array(
             'important' => true,
             'label' => T_('Podcast'),
-            'value' => $this->f_podcast
+            'value' => $this->getPodcast()->getTitleFormatted()
         );
         $keywords['title'] = array(
             'important' => true,
@@ -374,7 +378,7 @@ class Podcast_Episode extends database_object implements
      */
     public function get_stream_name()
     {
-        return $this->f_podcast . " - " . $this->f_title;
+        return $this->getPodcast()->getTitleFormatted() . " - " . $this->f_title;
     }
 
     /**
@@ -444,9 +448,10 @@ class Podcast_Episode extends database_object implements
     {
         if ($this->filename === null) {
             $this->filename = sprintf(
-                '%s.%s',
-                scrub_out($this->title),
-                $this->type
+            '%s - %s.%s',
+            $this->getPodcast()->getTitleFormatted(),
+            scrub_out($this->title),
+            $this->type
             );
         }
 
