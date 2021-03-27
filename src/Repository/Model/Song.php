@@ -41,7 +41,11 @@ use Ampache\Module\System\Core;
 use Ampache\Repository\LicenseRepositoryInterface;
 use PDOStatement;
 
-class Song extends database_object implements Media, library_item, GarbageCollectibleInterface
+class Song extends database_object implements
+    Media,
+    library_item,
+    GarbageCollectibleInterface,
+    MediaFileInterface
 {
     use Metadata;
 
@@ -337,6 +341,8 @@ class Song extends database_object implements Media, library_item, GarbageCollec
      * @var boolean $_fake
      */
     public $_fake = false; // If this is a 'construct_from_array' object
+
+    private ?string $filename = null;
 
     /**
      * Aliases used in insert function
@@ -2278,6 +2284,23 @@ class Song extends database_object implements Media, library_item, GarbageCollec
     public function remove()
     {
         return $this->getSongDeleter()->delete($this);
+    }
+
+    public function getFilename(): string
+    {
+        if ($this->filename === null) {
+            $this->filename = $this->get_artist_name() . ' - ';
+            if ($this->track) {
+                $this->filename .= $this->track . ' - ';
+            }
+            $this->filename .= $this->title . '.' . $this->type;
+        }
+        return $this->filename;
+    }
+
+    public function setFilename(string $filename): void
+    {
+        $this->filename = $filename;
     }
 
     /**

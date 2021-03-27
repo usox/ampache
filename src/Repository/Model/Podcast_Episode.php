@@ -34,7 +34,10 @@ use Ampache\Config\AmpConfig;
 use Ampache\Module\System\Core;
 use PDOStatement;
 
-class Podcast_Episode extends database_object implements Media, library_item
+class Podcast_Episode extends database_object implements
+    Media,
+    library_item,
+    MediaFileInterface
 {
     protected const DB_TABLENAME = 'podcast_episode';
 
@@ -74,6 +77,8 @@ class Podcast_Episode extends database_object implements Media, library_item
     public $f_link;
     public $f_podcast;
     public $f_podcast_link;
+
+    private ?string $filename = null;
 
     /**
      * Constructor
@@ -433,6 +438,24 @@ class Podcast_Episode extends database_object implements Media, library_item
     public function get_stream_types($player = null)
     {
         return Song::get_stream_types_for_type($this->type, $player);
+    }
+
+    public function getFilename(): string
+    {
+        if ($this->filename === null) {
+            $this->filename = sprintf(
+                '%s.%s',
+                scrub_out($this->title),
+                $this->type
+            );
+        }
+
+        return $this->filename;
+    }
+
+    public function setFilename(string $filename): void
+    {
+        $this->filename = $filename;
     }
 
     /**

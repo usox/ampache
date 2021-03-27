@@ -35,7 +35,11 @@ use Ampache\Module\System\Core;
 use Ampache\Repository\ShoutRepositoryInterface;
 use Ampache\Repository\UserActivityRepositoryInterface;
 
-class Video extends database_object implements Media, library_item, GarbageCollectibleInterface
+class Video extends database_object implements
+    Media,
+    library_item,
+    GarbageCollectibleInterface,
+    MediaFileInterface
 {
     protected const DB_TABLENAME = 'video';
 
@@ -208,6 +212,8 @@ class Video extends database_object implements Media, library_item, GarbageColle
      * @var string $f_release_date
      */
     public $f_release_date;
+
+    private ?string $filename = null;
 
     /**
      * Constructor
@@ -1072,6 +1078,27 @@ class Video extends database_object implements Media, library_item, GarbageColle
 
         return Song::compare_media_information($video, $new_video, $string_array, $skip_array);
     } // compare_video_information
+
+    public function getFilename(): string
+    {
+        if ($this->filename === null) {
+            $this->filename = sprintf(
+                '%s.%s',
+                filter_var($this->title,
+                    FILTER_SANITIZE_STRING,
+                    FILTER_FLAG_NO_ENCODE_QUOTES
+                ),
+                $this->type
+            );
+        }
+
+        return $this->filename;
+    }
+
+    public function setFilename(string $filename): void
+    {
+        $this->filename = $filename;
+    }
 
     /**
      * @deprecated
