@@ -86,6 +86,14 @@ final class GetPodcastIds extends AbstractApiMethod
             );
         }
 
-        return $browse->get_objects();
+        return array_map(
+            static function ($podcastId): array {
+                return [
+                    'id' => (int) $podcastId,
+                    'cacheKey' => null
+                ];
+            },
+            $browse->get_objects()
+        );
     }
 }
