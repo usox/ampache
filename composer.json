@@ -86,6 +86,7 @@
         "scaron/prettyphoto": "3.*",
         "scn/phptal": "dev-master",
         "shrikeh/teapot": "^2.3",
+        "slim/slim": "^4.0",
         "swisnl/jquery-contextmenu": "2.1.*",
         "symfony/event-dispatcher": "^3.0",
         "symfony/http-foundation": "^3.0",

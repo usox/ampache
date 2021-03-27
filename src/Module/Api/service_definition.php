@@ -143,4 +143,7 @@ return [
     SubSonic\Method\DownloadPodcastEpisodeMethod::class => autowire(),
     SubSonic\Method\DeletePodcastEpisode::class => autowire(),
     SubSonic\Method\RefreshPodcastsMethod::class => autowire(),
+    Json\Podcast\GetPodcastIds::class => autowire(),
+    Json\Podcast\GetPodcast::class => autowire(),
+    Json\Middleware\AuthenticationMiddleware::class => autowire(),
 ];
