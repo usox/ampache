@@ -23,11 +23,19 @@ declare(strict_types=1);
 
 namespace Ampache\Repository;
 
-use Ampache\Module\System\Dba;
 use Ampache\Repository\Model\Podcast;
+use Doctrine\DBAL\Connection;
 
 final class PodcastRepository implements PodcastRepositoryInterface
 {
+    private Connection $connection;
+
+    public function __construct(
+        Connection $connection
+    ) {
+        $this->connection = $connection;
+    }
+
     /**
      * This returns an array of ids of podcasts in this catalog
      *
@@ -36,35 +44,35 @@ final class PodcastRepository implements PodcastRepositoryInterface
     public function getPodcastIds(
         int $catalogId
     ): array {
-        $results = array();
-
-        $db_results = Dba::read(
-            'SELECT `podcast`.`id` FROM `podcast` WHERE `podcast`.`catalog` = ?',
+        $result = $this->connection->executeQuery(
+            'SELECT `id` FROM `podcast` WHERE `catalog` = ?',
             [$catalogId]
         );
-        while ($row = Dba::fetch_assoc($db_results)) {
-            $results[] = (int) $row['id'];
+        $podcastIds = [];
+
+        while ($row = $result->fetchOne()) {
+            $podcastIds[] = (int) $row;
         }
 
-        return $results;
+        return $podcastIds;
     }
 
     public function remove(
         Podcast $podcast
     ): bool {
-        $result = Dba::write(
+        $result = $this->connection->executeQuery(
             'DELETE FROM `podcast` WHERE `id` = ?',
             [$podcast->getId()]
         );
 
-        return $result !== false;
+        return $result->rowCount() !== 0;
     }
 
     public function updateLastsync(
         Podcast $podcast,
         int $time
     ): void {
-        Dba::write(
+        $this->connection->executeQuery(
             'UPDATE `podcast` SET `lastsync` = ? WHERE `id` = ?',
             [$time, $podcast->getId()]
         );
@@ -79,7 +87,7 @@ final class PodcastRepository implements PodcastRepositoryInterface
         string $generator,
         string $copyright
     ): void {
-        Dba::write(
+        $this->connection->executeQuery(
             'UPDATE `podcast` SET `feed` = ?, `title` = ?, `website` = ?, `description` = ?, `generator` = ?, `copyright` = ? WHERE `id` = ?',
             [$feed, $title, $website, $description, $generator, $copyright, $podcastId]
         );
@@ -99,12 +107,12 @@ final class PodcastRepository implements PodcastRepositoryInterface
         $sql = <<<SQL
         INSERT INTO
             `podcast`
-        (`feed`, `catalog`, `title`, `website`, `description`, `language`, `copyright`, `generator`, `lastbuilddate`)
+            (`feed`, `catalog`, `title`, `website`, `description`, `language`, `copyright`, `generator`, `lastbuilddate`)
         VALUES
-        (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (?, ?, ?, ?, ?, ?, ?, ?, ?)
         SQL;
 
-        $result = Dba::write(
+        $result = $this->connection->executeQuery(
             $sql,
             [
                 $feedUrl,
@@ -119,11 +127,11 @@ final class PodcastRepository implements PodcastRepositoryInterface
             ]
         );
 
-        if (!$result) {
+        if ($result->rowCount() === 0) {
             return null;
         }
 
-        return (int) Dba::insert_id();
+        return (int) $this->connection->lastInsertId();
     }
 
     /**
@@ -132,14 +140,13 @@ final class PodcastRepository implements PodcastRepositoryInterface
     public function findByFeedUrl(
         string $feedUrl
     ): ?int {
-        $db_results = Dba::read(
-            "SELECT `id` FROM `podcast` WHERE `feed`= ?",
+        $result = $this->connection->executeQuery(
+            'SELECT `id` FROM `podcast` WHERE `feed`= ?',
             [$feedUrl]
         );
+        $podcastId = $result->fetchOne();
 
-        $podcastId = Dba::fetch_assoc($db_results)['id'] ?? null;
-
-        if ($podcastId === null) {
+        if ($podcastId === false) {
             return null;
         }
 
