@@ -1535,9 +1535,9 @@ abstract class Catalog extends database_object
         $sort_pattern = '',
         $rename_pattern = ''
     ) {
-        $catalog = self::create_from_id($media->catalog);
+        $catalog = self::create_from_id($media->getCatalogId());
         if ($catalog === null) {
-            debug_event(self::class, 'update_media_from_tags: Error loading catalog ' . $media->catalog, 2);
+            debug_event(self::class, 'update_media_from_tags: Error loading catalog ' . $media->getCatalogId(), 2);
 
             return array();
         }
@@ -2504,7 +2504,7 @@ abstract class Catalog extends database_object
                 while ($results = Dba::fetch_assoc($db_results)) {
                     $song = new Song($results['id']);
                     $song->format();
-                    echo '"' . $song->id . '","' . $song->title . '","' . $song->getFullArtistNameFormatted() . '","' . $song->f_album_full . '","' . $song->f_time . '","' . $song->f_track . '","' . $song->year . '","' . get_datetime((int)$song->addition_time) . '","' . $song->f_bitrate . '","' . $song->played . '","' . $song->file . '"' . "\n";
+                    echo '"' . $song->id . '","' . $song->title . '","' . $song->getFullArtistNameFormatted() . '","' . $song->f_album_full . '","' . $song->getDurationFormatted() . '","' . $song->f_track . '","' . $song->year . '","' . get_datetime((int)$song->addition_time) . '","' . $song->f_bitrate . '","' . $song->played . '","' . $song->file . '"' . "\n";
                 }
                 break;
         } // end switch

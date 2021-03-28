@@ -76,10 +76,6 @@ class ShowActionTest extends MockeryTestCase
             ->once()
             ->andReturn($episode);
 
-        $episode->shouldReceive('format')
-            ->withNoArgs()
-            ->once();
-
         $this->ui->shouldReceive('showHeader')
             ->withNoArgs()
             ->once();

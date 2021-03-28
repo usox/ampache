@@ -28,4 +28,10 @@ namespace Ampache\Repository\Model;
 interface PlayableMediaInterface
 {
     public function getFullArtistNameFormatted(): string;
+
+    public function getFullDurationFormatted(): string;
+
+    public function getDurationFormatted(): string;
+
+    public function getCatalogId(): int;
 }

@@ -67,6 +67,8 @@ class Channel extends database_object implements Media, library_item
     private $playlist;
     private $song_pos;
     private $songs;
+
+    /** @var Song|null */
     public $media;
     private $media_bytes_streamed;
     private $transcoder;
@@ -593,8 +595,9 @@ class Channel extends database_object implements Media, library_item
                 }
                 $this->media->format();
 
-                if ($this->media->catalog) {
-                    $catalog = Catalog::create_from_id($this->media->catalog);
+                $mediaCatalogId = $this->media->getCatalogId();
+                if ($mediaCatalogId) {
+                    $catalog = Catalog::create_from_id($mediaCatalogId);
                     if (make_bool($this->media->enabled)) {
                         if (AmpConfig::get('lock_songs')) {
                             if (!Stream::check_lock_media($this->media->id, 'song')) {

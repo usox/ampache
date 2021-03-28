@@ -445,9 +445,10 @@ final class PlayAction implements ApplicationActionInterface
             );
         }
 
-        if ($media->catalog) {
+        $mediaCatalogId = $media->getCatalogId();
+        if ($mediaCatalogId) {
             // Build up the catalog for our current object
-            $catalog = Catalog::create_from_id($media->catalog);
+            $catalog = Catalog::create_from_id($mediaCatalogId);
 
             /* If the media is disabled */
             if (isset($media->enabled) && !make_bool($media->enabled)) {

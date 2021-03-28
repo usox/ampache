@@ -154,14 +154,6 @@ class Video extends database_object implements
      */
     public $f_full_title;
     /**
-     * @var string $f_time
-     */
-    public $f_time;
-    /**
-     * @var string $f_time_h
-     */
-    public $f_time_h;
-    /**
      * @var string $link
      */
     public $link;
@@ -314,14 +306,6 @@ class Video extends database_object implements
             $this->f_frame_rate = $this->frame_rate . ' fps';
         }
 
-        // Format the Time
-        $min            = floor($this->time / 60);
-        $sec            = sprintf("%02d", ($this->time % 60));
-        $this->f_time   = $min . ":" . $sec;
-        $hour           = sprintf("%02d", floor($min / 60));
-        $min_h          = sprintf("%02d", ($min % 60));
-        $this->f_time_h = $hour . ":" . $min_h . ":" . $sec;
-
         if ($details) {
             // Get the top tags
             $this->tags   = Tag::get_top_tags('video', $this->id);
@@ -413,7 +397,7 @@ class Video extends database_object implements
      */
     public function get_catalogs()
     {
-        return array($this->catalog);
+        return [$this->getCatalogId()];
     }
 
     /**
@@ -1095,6 +1079,27 @@ class Video extends database_object implements
     public function getFullArtistNameFormatted(): string
     {
         return '';
+    }
+
+    public function getFullDurationFormatted(): string
+    {
+        $min   = floor($this->time / 60);
+        $sec   = sprintf("%02d", ($this->time % 60));
+        $hour  = sprintf("%02d", floor($min / 60));
+        $min_h = sprintf("%02d", ($min % 60));
+        return sprintf('%s:%s:%s', $hour, $min_h, $sec);
+    }
+
+    public function getDurationFormatted(): string
+    {
+        $min = floor($this->time / 60);
+        $sec = sprintf("%02d", ($this->time % 60));
+        return sprintf('%s:%s', $min, $sec);
+    }
+
+    public function getCatalogId(): int
+    {
+        return (int) $this->catalog;
     }
 
     /**

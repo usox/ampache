@@ -362,7 +362,7 @@ final class JsonOutput implements ApiOutputInterface
             $ourSong['rating']                = ($rating->get_user_rating() ?: null);
             $ourSong['averagerating']         = ($rating->get_average_rating() ?: null);
             $ourSong['playcount']             = (int)$song->played;
-            $ourSong['catalog']               = (int)$song->catalog;
+            $ourSong['catalog']               = $song->getCatalogId();
             $ourSong['composer']              = $song->composer;
             $ourSong['channels']              = $song->channels;
             $ourSong['comment']               = $song->comment;
@@ -766,7 +766,6 @@ final class JsonOutput implements ApiOutputInterface
 
         foreach ($podcastEpisodeIds as $episode_id) {
             $episode = new Podcast_Episode($episode_id);
-            $episode->format();
             $rating  = new Rating($episode_id, 'podcast_episode');
             $flag    = new Userflag($episode_id, 'podcast_episode');
             $art_url = Art::url($episode->podcast, 'podcast', Core::get_request('auth'));
@@ -782,7 +781,7 @@ final class JsonOutput implements ApiOutputInterface
                 'website' => $episode->getWebsiteFormatted(),
                 'pubdate' => $episode->getPublicationDateFormatted(),
                 'state' => $episode->getStateFormatted(),
-                'filelength' => $episode->f_time_h,
+                'filelength' => $episode->getFullDurationFormatted(),
                 'filesize' => $episode->getSizeFormatted(),
                 'filename' => $episode->getFilename(),
                 'mime' => $episode->mime,

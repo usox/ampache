@@ -33,6 +33,9 @@ use Ampache\Repository\Model\Album;
 use Ampache\Repository\Model\Art;
 use Ampache\Repository\Model\Artist;
 use Ampache\Repository\Model\library_item;
+use Ampache\Repository\Model\Media;
+use Ampache\Repository\Model\PlayableMediaInterface;
+use Ampache\Repository\Model\Podcast_Episode;
 use Ampache\Repository\Model\Shoutbox;
 use Ampache\Repository\Model\Song;
 use Ampache\Repository\Model\User;
@@ -493,8 +496,8 @@ class AmpacheRss
         $medias = $libitem->get_medias();
         foreach ($medias as $media_info) {
             $class_name = ObjectTypeToClassNameMapper::map($media_info['object_type']);
-            $media      = new $class_name($media_info['object_id']);
-            $media->format();
+            /** @var Podcast_Episode $media */
+            $media = new $class_name($media_info['object_id']);
             $xitem = $xchannel->addChild("item");
             $xitem->addChild("title", htmlentities($media->get_fullname()));
             if ($media->f_artist) {
@@ -509,7 +512,7 @@ class AmpacheRss
             if (!empty($description)) {
                 $xitem->addChild("description", htmlentities($description));
             }
-            $xitem->addChild("xmlns:itunes:duration", $media->f_time);
+            $xitem->addChild("xmlns:itunes:duration", $media->getDurationFormatted());
             if ($media->mime) {
                 $surl  = $media->play_url('', 'api', false, $user_id);
                 $xencl = $xitem->addChild("enclosure");

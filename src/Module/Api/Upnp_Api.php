@@ -752,7 +752,6 @@ class Upnp_Api
                     case 3:
                         $episode = new Podcast_Episode($pathreq[2]);
                         if ($episode->id !== null) {
-                            $episode->format();
                             $meta = self::_itemPodcastEpisode($episode, $root . '/podcasts/' . $pathreq[1]);
                         }
                         break;
@@ -964,7 +963,6 @@ class Upnp_Api
                             [$maxCount, $episodes]     = self::_slice($episodes, $start, $count);
                             foreach ($episodes as $episode_id) {
                                 $episode = new Podcast_Episode($episode_id);
-                                $episode->format();
                                 $mediaItems[] = self::_itemPodcastEpisode($episode, $parent);
                             }
                         }
@@ -1722,7 +1720,7 @@ class Upnp_Api
             'res' => $song->play_url('', 'api', true), // For upnp, use local
             'protocolInfo' => $arrFileType['mime'],
             'size' => $song->size,
-            'duration' => $song->f_time_h . '.0',
+            'duration' => $song->getFullDurationFormatted() . '.0',
             'bitrate' => $song->bitrate,
             'sampleFrequency' => $song->rate,
             'nrAudioChannels' => '2',  // Just say its stereo as we don't have the real info
@@ -1791,7 +1789,7 @@ class Upnp_Api
     }
 
     /**
-     * @param $video
+     * @param Video $video
      * @param string $parent
      * @return array
      */
@@ -1815,7 +1813,7 @@ class Upnp_Api
             'res' => $video->play_url('', 'api'),
             'protocolInfo' => $arrFileType['mime'],
             'size' => $video->size,
-            'duration' => $video->f_time_h . '.0',
+            'duration' => $video->getFullDurationFormatted() . '.0',
         );
     }
 
@@ -1862,7 +1860,7 @@ class Upnp_Api
             $ret['res']          = $episode->play_url('', 'api');
             $ret['protocolInfo'] = $arrFileType['mime'];
             $ret['size']         = $episode->size;
-            $ret['duration']     = $episode->f_time_h . '.0';
+            $ret['duration']     = $episode->getFullDurationFormatted() . '.0';
         }
 
         return $ret;

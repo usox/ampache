@@ -472,6 +472,21 @@ class Song_Preview extends database_object implements
         }
     }
 
+    public function getFullDurationFormatted(): string
+    {
+        return '';
+    }
+
+    public function getDurationFormatted(): string
+    {
+        return '';
+    }
+
+    public function getCatalogId(): int
+    {
+        return 0;
+    }
+
     /**
      * @deprecated Inject by constructor
      */

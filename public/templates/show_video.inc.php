@@ -141,7 +141,7 @@ $subtitles = $video->get_subtitles();
     </dd>
 <?php
   $videoprops[T_('Title')]   = scrub_out($video->f_title);
-  $videoprops[T_('Length')]  = scrub_out($video->f_time);
+  $videoprops[T_('Length')]  = scrub_out($video->getDurationFormatted());
 if (get_class($video) != Video::class) {
     require Ui::find_template('show_partial_' . ObjectTypeToClassNameMapper::reverseMap(get_class($video)) . '.inc.php');
 }

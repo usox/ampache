@@ -60,11 +60,6 @@ class Podcast_Episode extends database_object implements
     public $category;
     public $pubdate;
     public $enabled;
-    public $object_cnt;
-    public $catalog;
-    public $f_time;
-    public $f_time_h;
-    public $link;
 
     private ?PodcastInterface $podcastObj = null;
 
@@ -125,30 +120,14 @@ class Podcast_Episode extends database_object implements
     }
 
     /**
-     * format
+     * @todo remove
+     *
      * this function takes the object and reformats some values
      * @param boolean $details
      * @return boolean
      */
     public function format($details = true)
     {
-        // Format the Time
-        $min            = floor($this->time / 60);
-        $sec            = sprintf("%02d", ($this->time % 60));
-        $this->f_time   = $min . ":" . $sec;
-        $hour           = sprintf("%02d", floor($min / 60));
-        $min_h          = sprintf("%02d", ($min % 60));
-        $this->f_time_h = $hour . ":" . $min_h . ":" . $sec;
-
-        $this->link   = AmpConfig::get('web_path') . '/podcast_episode.php?action=show&podcast_episode=' . $this->id;
-
-        if ($details) {
-            $this->catalog = $this->getPodcast()->getCatalog();
-        }
-        if (AmpConfig::get('show_played_times')) {
-            $this->object_cnt = Stats::get_object_count('podcast_episode', $this->id);
-        }
-
         return true;
     }
 
@@ -461,7 +440,6 @@ class Podcast_Episode extends database_object implements
 
         $type = $this->type;
 
-        $this->format();
         $media_name = $this->get_stream_name() . "." . $type;
         $media_name = preg_replace("/[^a-zA-Z0-9\. ]+/", "-", $media_name);
         $media_name = rawurlencode($media_name);
@@ -516,6 +494,35 @@ class Podcast_Episode extends database_object implements
     public function getFullArtistNameFormatted(): string
     {
         return scrub_out($this->author);
+    }
+
+    public function getFullDurationFormatted(): string
+    {
+        $min   = floor($this->time / 60);
+        $sec   = sprintf("%02d", ($this->time % 60));
+        $hour  = sprintf("%02d", floor($min / 60));
+        $min_h = sprintf("%02d", ($min % 60));
+        return sprintf('%s:%s:%s', $hour, $min_h, $sec);
+    }
+
+    public function getDurationFormatted(): string
+    {
+        $min = floor($this->time / 60);
+        $sec = sprintf("%02d", ($this->time % 60));
+        return sprintf('%s:%s', $min, $sec);
+    }
+
+    public function getObjectCount(): ?int
+    {
+        if (AmpConfig::get('show_played_times')) {
+            return (int) Stats::get_object_count('podcast_episode', $this->id);
+        }
+        return null;
+    }
+
+    public function getCatalogId(): int
+    {
+        return $this->getPodcast()->getCatalog();
     }
 
     /**

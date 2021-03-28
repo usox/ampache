@@ -108,7 +108,7 @@ final class UpdateSingleCatalogFile extends AbstractCatalogUpdater implements Up
                 );
                 if ($media->id && $verificationMode == 1) {
                     // Verify Existing files
-                    $catalog = $media->catalog;
+                    $catalog = $media->getCatalogId();
                     Catalog::update_media_from_tags($media);
                 }
                 // new files don't have an ID

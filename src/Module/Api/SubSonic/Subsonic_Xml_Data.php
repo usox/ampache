@@ -1486,7 +1486,6 @@ class Subsonic_Xml_Data
      */
     private static function addPodcastEpisode($xml, $episode, $elementName = 'episode')
     {
-        $episode->format();
         $xepisode = $xml->addChild($elementName);
         $xepisode->addAttribute('id', (string)self::getPodcastEpId($episode->id));
         $xepisode->addAttribute('channelId', (string)self::getPodcastId($episode->podcast));
@@ -1525,7 +1524,6 @@ class Subsonic_Xml_Data
     {
         $xpodcasts = $xml->addChild('newestPodcasts');
         foreach ($episodes as $episode) {
-            $episode->format();
             self::addPodcastEpisode($xpodcasts, $episode);
         }
     }

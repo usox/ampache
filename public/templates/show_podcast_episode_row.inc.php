@@ -64,9 +64,10 @@ $podcast = $libitem->getPodcast();
     </span>
 </td>
 <td class="cel_podcast"><?php echo $podcast->getLinkFormatted(); ?></td>
-<td class="<?php echo $cel_time; ?>"><?php echo $libitem->f_time; ?></td>
-<?php if (AmpConfig::get('show_played_times')) { ?>
-    <td class="<?php echo $cel_counter; ?> optional"><?php echo $libitem->object_cnt; ?></td>
+<td class="<?php echo $cel_time; ?>"><?php echo $libitem->getDurationFormatted(); ?></td>
+<?php $played_times = $libitem->getObjectCount();
+if ($played_times !== null) { ?>
+    <td class="<?php echo $cel_counter; ?> optional"><?php echo $played_times ?></td>
     <?php
 } ?>
 <td class="cel_pubdate"><?php echo $libitem->getPublicationDateFormatted(); ?></td>

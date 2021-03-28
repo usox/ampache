@@ -22,6 +22,8 @@
 
 use Ampache\Config\AmpConfig;
 use Ampache\Repository\Model\Democratic;
+use Ampache\Repository\Model\Media;
+use Ampache\Repository\Model\PlayableMediaInterface;
 use Ampache\Repository\Model\Playlist;
 use Ampache\Module\Authorization\Access;
 use Ampache\Module\Api\Ajax;
@@ -78,6 +80,7 @@ $democratic = Democratic::get_current_playlist();
             $item = (array) $item;
         }
         $class_name = ObjectTypeToClassNameMapper::map($item['object_type']);
+        /** @var Media&PlayableMediaInterface $media */
         $media      = new $class_name($item['object_id']);
         $media->format(); ?>
 <tr class="<?php echo Ui::flip_class(); ?>">
@@ -94,7 +97,7 @@ $democratic = Democratic::get_current_playlist();
     <td class="cel_title"><?php echo $media->f_link; ?></td>
     <td class="cel_album"><?php echo $media->f_album_link; ?></td>
     <td class="cel_artist"><?php echo $media->f_artist_link; ?></td>
-    <td class="cel_time"><?php echo $media->f_time; ?></td>
+    <td class="cel_time"><?php echo $media->getDurationFormatted(); ?></td>
     <?php if (Access::check('interface', 100)) { ?>
     <td class="cel_admin">
     <?php echo Ajax::button('?page=democratic&action=delete&row_id=' . $item['id'], 'disable', T_('Delete'), 'delete_row_' . $item['id']); ?>

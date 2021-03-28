@@ -241,14 +241,6 @@ class Song extends database_object implements
      */
     public $f_album_full;
     /**
-     * @var string $f_time
-     */
-    public $f_time;
-    /**
-     * @var string $f_time_h
-     */
-    public $f_time_h;
-    /**
      * @var string $f_track
      */
     public $f_track;
@@ -1661,14 +1653,6 @@ class Song extends database_object implements
         // Format the Bitrate
         $this->f_bitrate = (int)($this->bitrate / 1000) . "-" . strtoupper((string)$this->mode);
 
-        // Format the Time
-        $min            = floor($this->time / 60);
-        $sec            = sprintf("%02d", ($this->time % 60));
-        $this->f_time   = $min . ":" . $sec;
-        $hour           = sprintf("%02d", floor($min / 60));
-        $min_h          = sprintf("%02d", ($min % 60));
-        $this->f_time_h = $hour . ":" . $min_h . ":" . $sec;
-
         // Format the track (there isn't really anything to do here)
         $this->f_track = (string)$this->track;
 
@@ -1781,7 +1765,7 @@ class Song extends database_object implements
      */
     public function get_catalogs()
     {
-        return array($this->catalog);
+        return array($this->getCatalogId());
     }
 
     /**
@@ -2293,6 +2277,27 @@ class Song extends database_object implements
     public function getFullArtistNameFormatted(): string
     {
         return $this->get_artist_name();
+    }
+
+    public function getFullDurationFormatted(): string
+    {
+        $min   = floor($this->time / 60);
+        $sec   = sprintf("%02d", ($this->time % 60));
+        $hour  = sprintf("%02d", floor($min / 60));
+        $min_h = sprintf("%02d", ($min % 60));
+        return sprintf('%s:%s:%s', $hour, $min_h, $sec);
+    }
+
+    public function getDurationFormatted(): string
+    {
+        $min = floor($this->time / 60);
+        $sec = sprintf("%02d", ($this->time % 60));
+        return sprintf('%s:%s', $min, $sec);
+    }
+
+    public function getCatalogId(): int
+    {
+        return (int) $this->catalog;
     }
 
     /**

@@ -120,15 +120,15 @@ $podcast = $episode->getPodcast();
     } ?>
     </dd>
 <?php
-    $songprops[T_('Title')]                  = $episode->getTitleFormatted();
-    $songprops[T_('Description')]            = $episode->getDescriptionFormatted();
-    $songprops[T_('Category')]               = $episode->getCategoryFormatted();
-    $songprops[T_('Author')]                 = $episode->getAuthorFormatted();
-    $songprops[T_('Publication Date')]       = $episode->getPublicationDateFormatted();
-    $songprops[T_('State')]                  = $episode->getStateFormatted();
-    $songprops[T_('Website')]                = $episode->getWebsiteFormatted();
+    $songprops[T_('Title')]            = $episode->getTitleFormatted();
+    $songprops[T_('Description')]      = $episode->getDescriptionFormatted();
+    $songprops[T_('Category')]         = $episode->getCategoryFormatted();
+    $songprops[T_('Author')]           = $episode->getAuthorFormatted();
+    $songprops[T_('Publication Date')] = $episode->getPublicationDateFormatted();
+    $songprops[T_('State')]            = $episode->getStateFormatted();
+    $songprops[T_('Website')]          = $episode->getWebsiteFormatted();
     if ($episode->time > 0) {
-        $songprops[T_('Length')]           = $episode->f_time;
+        $songprops[T_('Length')] = $episode->getDurationFormatted();
     }
 
     if (!empty($episode->file)) {

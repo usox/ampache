@@ -336,7 +336,7 @@ final class XmlOutput implements ApiOutputInterface
                 "\t<rating>" . ($rating->get_user_rating($userId) ?: null) . "</rating>\n" .
                 "\t<averagerating>" . (string) ($rating->get_average_rating() ?: null) . "</averagerating>\n" .
                 "\t<playcount>" . $song->played . "</playcount>\n" .
-                "\t<catalog>" . $song->catalog . "</catalog>\n" .
+                "\t<catalog>" . $song->getCatalogId() . "</catalog>\n" .
                 "\t<composer><![CDATA[" . $song->composer . "]]></composer>\n" .
                 "\t<channels>" . $song->channels . "</channels>\n" .
                 "\t<comment><![CDATA[" . $song->comment . "]]></comment>\n" .
@@ -677,7 +677,6 @@ final class XmlOutput implements ApiOutputInterface
 
         foreach ($podcastEpisodeIds as $episodeId) {
             $episode = new Podcast_Episode($episodeId);
-            $episode->format();
             $rating  = new Rating($episodeId, 'podcast_episode');
             $flag    = new Userflag($episodeId, 'podcast_episode');
             $art_url = Art::url($episode->podcast, 'podcast', Core::get_request('auth'));
@@ -691,7 +690,7 @@ final class XmlOutput implements ApiOutputInterface
                 "\t\t<website><![CDATA[" . $episode->getWebsiteFormatted() . "]]></website>\n" .
                 "\t\t<pubdate><![CDATA[" . $episode->getPublicationDateFormatted() . "]]></pubdate>\n" .
                 "\t\t<state><![CDATA[" . $episode->getStateFormatted() . "]]></state>\n" .
-                "\t\t<filelength><![CDATA[" . $episode->f_time_h . "]]></filelength>\n" .
+                "\t\t<filelength><![CDATA[" . $episode->getFullDurationFormatted() . "]]></filelength>\n" .
                 "\t\t<filesize><![CDATA[" . $episode->getSizeFormatted() . "]]></filesize>\n" .
                 "\t\t<filename><![CDATA[" . $episode->getFilename() . "]]></filename>\n" .
                 "\t\t<mime><![CDATA[" . $episode->mime . "]]></mime>\n" .

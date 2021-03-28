@@ -57,7 +57,6 @@ final class ShowAction implements ApplicationActionInterface
         $episode = $this->modelFactory->createPodcastEpisode(
             (int) ($request->getQueryParams()['podcast_episode'] ?? 0)
         );
-        $episode->format();
 
         $this->ui->showHeader();
         $this->ui->show(
