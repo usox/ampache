@@ -34,11 +34,7 @@ use Ampache\Config\AmpConfig;
 use Ampache\Module\System\Core;
 use PDOStatement;
 
-class Podcast_Episode extends database_object implements
-    Media,
-    library_item,
-    MediaFileInterface,
-    PlayableMediaInterface
+class Podcast_Episode extends database_object implements PodcastEpisodeInterface
 {
     protected const DB_TABLENAME = 'podcast_episode';
 
@@ -502,6 +498,7 @@ class Podcast_Episode extends database_object implements
         $sec   = sprintf("%02d", ($this->time % 60));
         $hour  = sprintf("%02d", floor($min / 60));
         $min_h = sprintf("%02d", ($min % 60));
+
         return sprintf('%s:%s:%s', $hour, $min_h, $sec);
     }
 
@@ -509,6 +506,7 @@ class Podcast_Episode extends database_object implements
     {
         $min = floor($this->time / 60);
         $sec = sprintf("%02d", ($this->time % 60));
+
         return sprintf('%s:%s', $min, $sec);
     }
 
@@ -517,6 +515,7 @@ class Podcast_Episode extends database_object implements
         if (AmpConfig::get('show_played_times')) {
             return (int) Stats::get_object_count('podcast_episode', $this->id);
         }
+
         return null;
     }
 

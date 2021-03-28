@@ -21,9 +21,8 @@
 
 namespace Ampache\Repository;
 
-use Ampache\Module\Podcast\PodcastStateEnum;
-use Ampache\Repository\Model\Podcast;
 use Ampache\Repository\Model\Podcast_Episode;
+use Ampache\Repository\Model\PodcastEpisodeInterface;
 use Ampache\Repository\Model\PodcastInterface;
 
 interface PodcastEpisodeRepositoryInterface
@@ -42,7 +41,7 @@ interface PodcastEpisodeRepositoryInterface
      * @return iterable<Podcast_Episode>
      */
     public function getDownloadableEpisodes(
-        Podcast $podcast,
+        PodcastInterface $podcast,
         int $limit
     ): iterable;
 
@@ -50,12 +49,12 @@ interface PodcastEpisodeRepositoryInterface
      * @return iterable<Podcast_Episode>
      */
     public function getDeletableEpisodes(
-        Podcast $podcast,
+        PodcastInterface $podcast,
         int $limit
     ): iterable;
 
     public function create(
-        int $podcastId,
+        PodcastInterface $podcast,
         string $title,
         string $guid,
         string $source,
@@ -73,17 +72,14 @@ interface PodcastEpisodeRepositoryInterface
      * @return int[]
      */
     public function getEpisodeIds(
-        Podcast $podcast,
+        PodcastInterface $podcast,
         ?string $state_filter = null
     ): array;
 
-    public function remove(Podcast_Episode $podcastEpisode): bool;
+    public function remove(PodcastEpisodeInterface $podcastEpisode): bool;
 
-    /**
-     * @see PodcastStateEnum
-     */
     public function changeState(
-        Podcast_Episode $podcastEpisode,
+        PodcastEpisodeInterface $podcastEpisode,
         string $state
     ): void;
 
@@ -91,7 +87,7 @@ interface PodcastEpisodeRepositoryInterface
      * Sets the vital meta informations after the episode has been downloaded
      */
     public function updateDownloadState(
-        Podcast_Episode $podcastEpisode,
+        PodcastEpisodeInterface $podcastEpisode,
         string $filePath,
         int $size,
         int $duration

@@ -47,12 +47,10 @@ final class PodcastEpisodeCreator implements PodcastEpisodeCreatorInterface
     public function create(
         Podcast $podcast,
         SimpleXMLElement $episode,
-        $afterdate = 0
+        int $afterdate = 0
     ): bool {
-        $podcastId = $podcast->getId();
-
         $this->logger->info(
-            sprintf('Adding new episode to podcast %d...', $podcastId),
+            sprintf('Adding new episode to podcast %d...', $podcast->getId()),
             [LegacyLogger::CONTEXT_TYPE => __CLASS__]
         );
 
@@ -92,7 +90,7 @@ final class PodcastEpisodeCreator implements PodcastEpisodeCreatorInterface
 
         if ($pubdate > $afterdate) {
             return $this->podcastEpisodeRepository->create(
-                $podcastId,
+                $podcast,
                 html_entity_decode((string) $episode->title),
                 (string) $episode->guid,
                 $source,

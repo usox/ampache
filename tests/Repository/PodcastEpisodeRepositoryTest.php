@@ -28,8 +28,7 @@ use Ampache\Config\ConfigurationKeyEnum;
 use Ampache\MockeryTestCase;
 use Ampache\Module\Podcast\PodcastStateEnum;
 use Ampache\Repository\Model\ModelFactoryInterface;
-use Ampache\Repository\Model\Podcast;
-use Ampache\Repository\Model\Podcast_Episode;
+use Ampache\Repository\Model\PodcastEpisodeInterface;
 use Ampache\Repository\Model\PodcastInterface;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Result;
@@ -67,7 +66,7 @@ class PodcastEpisodeRepositoryTest extends MockeryTestCase
         $count     = 42;
         $episodeId = 33;
 
-        $episode = $this->mock(Podcast_Episode::class);
+        $episode = $this->mock(PodcastEpisodeInterface::class);
         $result  = $this->mock(Result::class);
 
         $sql = <<<SQL
@@ -115,9 +114,9 @@ class PodcastEpisodeRepositoryTest extends MockeryTestCase
 
     public function testGetDownloadableEpisodesReturnsData(): void
     {
-        $podcast = $this->mock(Podcast::class);
+        $podcast = $this->mock(PodcastInterface::class);
         $result  = $this->mock(Result::class);
-        $episode = $this->mock(Podcast_Episode::class);
+        $episode = $this->mock(PodcastEpisodeInterface::class);
 
         $episodeId = 666;
         $limit     = 42;
@@ -172,8 +171,8 @@ class PodcastEpisodeRepositoryTest extends MockeryTestCase
 
     public function testGetDeletableEpisodesReturnsData(): void
     {
-        $podcast = $this->mock(Podcast::class);
-        $episode = $this->mock(Podcast_Episode::class);
+        $podcast = $this->mock(PodcastInterface::class);
+        $episode = $this->mock(PodcastEpisodeInterface::class);
         $result  = $this->mock(Result::class);
 
         $podcastId = 666;
@@ -237,7 +236,13 @@ class PodcastEpisodeRepositoryTest extends MockeryTestCase
         $time            = 42;
         $publicationDate = 33;
 
-        $result = $this->mock(Result::class);
+        $result  = $this->mock(Result::class);
+        $podcast = $this->mock(PodcastInterface::class);
+
+        $podcast->shouldReceive('getId')
+            ->withNoArgs()
+            ->once()
+            ->andReturn($podcastId);
 
         $sql = <<<SQL
         INSERT INTO
@@ -274,7 +279,7 @@ class PodcastEpisodeRepositoryTest extends MockeryTestCase
 
         $this->assertTrue(
             $this->subject->create(
-                $podcastId,
+                $podcast,
                 $title,
                 $guid,
                 $source,
@@ -290,7 +295,7 @@ class PodcastEpisodeRepositoryTest extends MockeryTestCase
 
     public function testGetEpisodeIdsReturnsData(): void
     {
-        $podcast = $this->mock(Podcast::class);
+        $podcast = $this->mock(PodcastInterface::class);
         $result  = $this->mock(Result::class);
 
         $episodeId = 666;
@@ -330,7 +335,7 @@ class PodcastEpisodeRepositoryTest extends MockeryTestCase
 
     public function testRemoveReturnsTrueIfSuccessFul(): void
     {
-        $episode = $this->mock(Podcast_Episode::class);
+        $episode = $this->mock(PodcastEpisodeInterface::class);
         $result  = $this->mock(Result::class);
 
         $episodeId = 666;
@@ -360,7 +365,7 @@ class PodcastEpisodeRepositoryTest extends MockeryTestCase
 
     public function testChangeStateUpdates(): void
     {
-        $episode = $this->mock(Podcast_Episode::class);
+        $episode = $this->mock(PodcastEpisodeInterface::class);
 
         $episodeId = 666;
         $state     = 'some-state';
@@ -385,7 +390,7 @@ class PodcastEpisodeRepositoryTest extends MockeryTestCase
 
     public function testUpdateDownloadStateSetsData(): void
     {
-        $episode = $this->mock(Podcast_Episode::class);
+        $episode = $this->mock(PodcastEpisodeInterface::class);
 
         $filePath  = 'some-path';
         $size      = 666;

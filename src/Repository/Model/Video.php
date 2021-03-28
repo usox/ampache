@@ -1087,6 +1087,7 @@ class Video extends database_object implements
         $sec   = sprintf("%02d", ($this->time % 60));
         $hour  = sprintf("%02d", floor($min / 60));
         $min_h = sprintf("%02d", ($min % 60));
+
         return sprintf('%s:%s:%s', $hour, $min_h, $sec);
     }
 
@@ -1094,6 +1095,7 @@ class Video extends database_object implements
     {
         $min = floor($this->time / 60);
         $sec = sprintf("%02d", ($this->time % 60));
+
         return sprintf('%s:%s', $min, $sec);
     }
 

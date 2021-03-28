@@ -27,8 +27,8 @@ use Ampache\Config\ConfigContainerInterface;
 use Ampache\Config\ConfigurationKeyEnum;
 use Ampache\Module\Podcast\PodcastStateEnum;
 use Ampache\Repository\Model\ModelFactoryInterface;
-use Ampache\Repository\Model\Podcast;
 use Ampache\Repository\Model\Podcast_Episode;
+use Ampache\Repository\Model\PodcastEpisodeInterface;
 use Ampache\Repository\Model\PodcastInterface;
 use Doctrine\DBAL\Connection;
 
@@ -92,7 +92,7 @@ final class PodcastEpisodeRepository implements PodcastEpisodeRepositoryInterfac
      * @return iterable<Podcast_Episode>
      */
     public function getDownloadableEpisodes(
-        Podcast $podcast,
+        PodcastInterface $podcast,
         int $limit
     ): iterable {
         $sql = <<<SQL
@@ -125,7 +125,7 @@ final class PodcastEpisodeRepository implements PodcastEpisodeRepositoryInterfac
      * @return iterable<Podcast_Episode>
      */
     public function getDeletableEpisodes(
-        Podcast $podcast,
+        PodcastInterface $podcast,
         int $limit
     ): iterable {
         $sql = <<<SQL
@@ -152,7 +152,7 @@ final class PodcastEpisodeRepository implements PodcastEpisodeRepositoryInterfac
     }
 
     public function create(
-        int $podcastId,
+        PodcastInterface $podcast,
         string $title,
         string $guid,
         string $source,
@@ -176,7 +176,7 @@ final class PodcastEpisodeRepository implements PodcastEpisodeRepositoryInterfac
             [
                 $title,
                 $guid,
-                $podcastId,
+                $podcast->getId(),
                 PodcastStateEnum::PENDING,
                 $source,
                 $website,
@@ -197,7 +197,7 @@ final class PodcastEpisodeRepository implements PodcastEpisodeRepositoryInterfac
      * @return int[]
      */
     public function getEpisodeIds(
-        Podcast $podcast,
+        PodcastInterface $podcast,
         ?string $state_filter = null
     ): array {
         $catalogDisabled = $this->configContainer->isFeatureEnabled(ConfigurationKeyEnum::CATALOG_DISABLE);
@@ -232,7 +232,7 @@ final class PodcastEpisodeRepository implements PodcastEpisodeRepositoryInterfac
         return $episodeIds;
     }
 
-    public function remove(Podcast_Episode $podcastEpisode): bool
+    public function remove(PodcastEpisodeInterface $podcastEpisode): bool
     {
         $result = $this->connection->executeQuery(
             'DELETE FROM `podcast_episode` WHERE `id` = ?',
@@ -243,7 +243,7 @@ final class PodcastEpisodeRepository implements PodcastEpisodeRepositoryInterfac
     }
 
     public function changeState(
-        Podcast_Episode $podcastEpisode,
+        PodcastEpisodeInterface $podcastEpisode,
         string $state
     ): void {
         $this->connection->executeQuery(
@@ -256,7 +256,7 @@ final class PodcastEpisodeRepository implements PodcastEpisodeRepositoryInterfac
      * Sets the vital meta informations after the episode has been downloaded
      */
     public function updateDownloadState(
-        Podcast_Episode $podcastEpisode,
+        PodcastEpisodeInterface $podcastEpisode,
         string $filePath,
         int $size,
         int $duration

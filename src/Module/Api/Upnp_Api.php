@@ -962,7 +962,7 @@ class Upnp_Api
                             $episodes                  = static::getPodcastEpisodeRepository()->getEpisodeIds($podcast);
                             [$maxCount, $episodes]     = self::_slice($episodes, $start, $count);
                             foreach ($episodes as $episode_id) {
-                                $episode = new Podcast_Episode($episode_id);
+                                $episode      = new Podcast_Episode($episode_id);
                                 $mediaItems[] = self::_itemPodcastEpisode($episode, $parent);
                             }
                         }

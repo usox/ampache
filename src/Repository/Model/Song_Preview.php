@@ -267,6 +267,7 @@ class Song_Preview extends database_object implements
         if ($this->missingArtistLookupResult === null) {
             $this->missingArtistLookupResult = $this->getMissingArtistLookup()->lookup($this->artist_mbid);
         }
+
         return $this->missingArtistLookupResult;
     }
 

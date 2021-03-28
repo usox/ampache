@@ -17,19 +17,37 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *
  */
 
-namespace Ampache\Module\Podcast;
+namespace Ampache\Repository\Model;
 
-use Ampache\Repository\Model\Podcast;
-use SimpleXMLElement;
-
-interface PodcastEpisodeCreatorInterface
+interface PodcastEpisodeInterface extends
+    Media,
+    library_item,
+    MediaFileInterface,
+    PlayableMediaInterface
 {
-    public function create(
-        Podcast $podcast,
-        SimpleXMLElement $episode,
-        int $afterdate = 0
-    ): bool;
+    public function getPodcast(): PodcastInterface;
+
+    public function getLink(): string;
+
+    public function getLinkFormatted(): string;
+
+    public function getStateFormatted(): string;
+
+    public function getPublicationDateFormatted(): string;
+
+    public function getAuthorFormatted(): string;
+
+    public function getWebsiteFormatted(): string;
+
+    public function getSizeFormatted(): string;
+
+    public function getCategoryFormatted(): string;
+
+    public function getDescriptionFormatted(): string;
+
+    public function getTitleFormatted(): string;
+
+    public function getObjectCount(): ?int;
 }
