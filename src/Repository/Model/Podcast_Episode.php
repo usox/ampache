@@ -564,6 +564,21 @@ class Podcast_Episode extends database_object implements PodcastEpisodeInterface
         return null;
     }
 
+    public function getTime(): int
+    {
+        return (int) $this->time;
+    }
+
+    public function hasFile(): bool
+    {
+        return !empty($this->file);
+    }
+
+    public function getFile(): string
+    {
+        return $this->file;
+    }
+
     public function getCatalogId(): int
     {
         return $this->getPodcast()->getCatalog();

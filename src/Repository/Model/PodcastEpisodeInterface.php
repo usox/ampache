@@ -68,4 +68,10 @@ interface PodcastEpisodeInterface extends
     public function getPlayed(): int;
 
     public function getObjectCount(): ?int;
+
+    public function getTime(): int;
+
+    public function hasFile(): bool;
+
+    public function getFile(): string;
 }

@@ -2532,7 +2532,7 @@ abstract class Catalog extends database_object
     }
 
     /**
-     * @param Artist|Album|Song|Video|Podcast_Episode|TvShow|TVShow_Episode|Label|TVShow_Season $libitem
+     * @param Artist|Album|Song|Video|Podcast_Episode|TvShow|TVShow_Episode|Label|TVShow_Season|media $libitem
      * @param integer|null $user_id
      * @return boolean
      *

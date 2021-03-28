@@ -26,6 +26,7 @@ namespace Ampache\Module\Podcast\Gui;
 use Ampache\MockeryTestCase;
 use Ampache\Repository\Model\ModelFactoryInterface;
 use Ampache\Repository\Model\Podcast;
+use Ampache\Repository\Model\PodcastEpisodeInterface;
 use Ampache\Repository\Model\PodcastInterface;
 use Ampache\Repository\PodcastEpisodeRepositoryInterface;
 use Mockery\MockInterface;
@@ -57,6 +58,16 @@ class PodcastGuiFactoryTest extends MockeryTestCase
             PodcastViewAdapter::class,
             $this->subject->createPodcastViewAdapter(
                 $this->mock(PodcastInterface::class)
+            )
+        );
+    }
+
+    public function testCreatePodcastEpisodeViewAdapterReturnsInstance(): void
+    {
+        $this->assertInstanceOf(
+            PodcastEpisodeViewAdapter::class,
+            $this->subject->createPodcastEpisodeViewAdapter(
+                $this->mock(PodcastEpisodeInterface::class)
             )
         );
     }

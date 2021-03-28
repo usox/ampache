@@ -22,12 +22,16 @@
 
 use Ampache\Config\AmpConfig;
 use Ampache\Repository\Model\Art;
+use Ampache\Repository\Model\Browse;
 use Ampache\Repository\Model\Podcast_Episode;
 use Ampache\Repository\Model\Rating;
 use Ampache\Repository\Model\User;
 use Ampache\Repository\Model\Userflag;
 use Ampache\Module\Api\Ajax;
 use Ampache\Module\Util\Ui;
+
+/** @var Browse $browse */
+/** @var int[] $object_ids */
 
 $thcount  = 7;
 $is_table = $browse->is_grid_view();

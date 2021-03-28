@@ -26,6 +26,7 @@ namespace Ampache\Module\Podcast\Gui;
 
 use Ampache\Repository\Model\ModelFactoryInterface;
 use Ampache\Repository\Model\Podcast;
+use Ampache\Repository\Model\PodcastEpisodeInterface;
 use Ampache\Repository\Model\PodcastInterface;
 use Ampache\Repository\PodcastEpisodeRepositoryInterface;
 
@@ -53,6 +54,14 @@ final class PodcastGuiFactory implements PodcastGuiFactoryInterface
             $this->podcastEpisodeRepository,
             $this->modelFactory,
             $podcast
+        );
+    }
+
+    public function createPodcastEpisodeViewAdapter(
+        PodcastEpisodeInterface $podcastEpisode
+    ): PodcastEpisodeViewAdapterInterface {
+        return new PodcastEpisodeViewAdapter(
+            $podcastEpisode
         );
     }
 }

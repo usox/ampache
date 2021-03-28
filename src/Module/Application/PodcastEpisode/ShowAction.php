@@ -25,8 +25,10 @@ declare(strict_types=1);
 namespace Ampache\Module\Application\PodcastEpisode;
 
 use Ampache\Config\ConfigContainerInterface;
+use Ampache\Gui\TalFactoryInterface;
 use Ampache\Module\Application\ApplicationActionInterface;
 use Ampache\Module\Authorization\GuiGatekeeperInterface;
+use Ampache\Module\Podcast\Gui\PodcastGuiFactoryInterface;
 use Ampache\Module\Util\UiInterface;
 use Ampache\Repository\Model\ModelFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -42,14 +44,22 @@ final class ShowAction implements ApplicationActionInterface
 
     private ModelFactoryInterface $modelFactory;
 
+    private TalFactoryInterface $talFactory;
+
+    private PodcastGuiFactoryInterface $podcastGuiFactory;
+
     public function __construct(
         ConfigContainerInterface $configContainer,
         UiInterface $ui,
-        ModelFactoryInterface $modelFactory
+        ModelFactoryInterface $modelFactory,
+        TalFactoryInterface $talFactory,
+        PodcastGuiFactoryInterface $podcastGuiFactory
     ) {
-        $this->configContainer = $configContainer;
-        $this->ui              = $ui;
-        $this->modelFactory    = $modelFactory;
+        $this->configContainer   = $configContainer;
+        $this->ui                = $ui;
+        $this->modelFactory      = $modelFactory;
+        $this->talFactory        = $talFactory;
+        $this->podcastGuiFactory = $podcastGuiFactory;
     }
 
     public function run(ServerRequestInterface $request, GuiGatekeeperInterface $gatekeeper): ?ResponseInterface
@@ -59,12 +69,13 @@ final class ShowAction implements ApplicationActionInterface
         );
 
         $this->ui->showHeader();
-        $this->ui->show(
-            'show_podcast_episode.inc.php',
-            [
-                'episode' => $episode
-            ]
-        );
+        echo $this->talFactory
+            ->createTalView()
+            ->setTemplate('podcast/podcast_episode.xhtml')
+            ->setContext('EPISODE', $this->podcastGuiFactory->createPodcastEpisodeViewAdapter($episode))
+            ->setContext('EPISODE_ID', $episode->getId())
+            ->setContext('WEB_PATH', $this->configContainer->getWebPath())
+            ->render();
         $this->ui->showQueryStats();
         $this->ui->showFooter();
 
