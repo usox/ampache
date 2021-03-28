@@ -26,41 +26,66 @@ namespace Ampache\Repository;
 use Ampache\Config\ConfigContainerInterface;
 use Ampache\Config\ConfigurationKeyEnum;
 use Ampache\Module\Podcast\PodcastStateEnum;
-use Ampache\Module\System\Dba;
+use Ampache\Repository\Model\ModelFactoryInterface;
 use Ampache\Repository\Model\Podcast;
 use Ampache\Repository\Model\Podcast_Episode;
+use Ampache\Repository\Model\PodcastInterface;
+use Doctrine\DBAL\Connection;
 
 final class PodcastEpisodeRepository implements PodcastEpisodeRepositoryInterface
 {
     private ConfigContainerInterface $configContainer;
 
+    private Connection $connection;
+
+    private ModelFactoryInterface $modelFactory;
+
     public function __construct(
-        ConfigContainerInterface $configContainer
+        ConfigContainerInterface $configContainer,
+        Connection $connection,
+        ModelFactoryInterface $modelFactory
     ) {
         $this->configContainer = $configContainer;
+        $this->connection      = $connection;
+        $this->modelFactory    = $modelFactory;
     }
 
     /**
-     * This returns an array of ids of latest podcast episodes in this catalog
+     * This returns the latest podcast episodes in this catalog
      *
-     * @return int[]
+     * @return iterable<Podcast_Episode>
      */
-    public function getNewestPodcastsIds(
+    public function getNewestPodcastEpisodes(
         int $catalogId,
         int $count
-    ): array {
-        $results = array();
+    ): iterable {
+        $sql = <<<SQL
+        SELECT
+            `podcast_episode`.`id`
+        FROM
+            `podcast_episode`
+        INNER JOIN
+            `podcast`
+        ON
+            `podcast`.`id` = `podcast_episode`.`podcast`
+        WHERE
+            `podcast`.`catalog` = ? 
+        ORDER BY
+            `podcast_episode`.`pubdate` DESC
+        SQL;
 
-        $sql = 'SELECT `podcast_episode`.`id` FROM `podcast_episode` ' . 'INNER JOIN `podcast` ON `podcast`.`id` = `podcast_episode`.`podcast` ' . 'WHERE `podcast`.`catalog` = ? ' . 'ORDER BY `podcast_episode`.`pubdate` DESC';
         if ($count > 0) {
             $sql .= sprintf(' LIMIT %d', $count);
         }
-        $db_results = Dba::read($sql, [$catalogId]);
-        while ($row = Dba::fetch_assoc($db_results)) {
-            $results[] = (int) $row['id'];
-        }
 
-        return $results;
+        $result = $this->connection->executeQuery(
+            $sql,
+            [$catalogId]
+        );
+
+        while ($episodeId = $result->fetchOne()) {
+            yield $this->modelFactory->createPodcastEpisode((int) $episodeId);
+        }
     }
 
     /**
@@ -72,28 +97,27 @@ final class PodcastEpisodeRepository implements PodcastEpisodeRepositoryInterfac
     ): iterable {
         $sql = <<<SQL
         SELECT
-             `podcast_episode`.`id`
+            `podcast_episode`.`id`
         FROM
-             `podcast_episode`
+            `podcast_episode`
             INNER JOIN 
                 `podcast`
             ON
                 `podcast`.`id` = `podcast_episode`.`podcast`
         WHERE
-              `podcast`.`id` = ?
-          AND
-              `podcast_episode`.`addition_time` > `podcast`.`lastsync`
+            `podcast`.`id` = ? AND `podcast_episode`.`addition_time` > `podcast`.`lastsync`
         ORDER BY
               `podcast_episode`.`pubdate` DESC
         LIMIT %d;
         SQL;
 
-        $db_results = Dba::read(
+        $result = $this->connection->executeQuery(
             sprintf($sql, $limit),
-           [$podcast->getId()]
+            [$podcast->getId()]
         );
-        while ($row = Dba::fetch_row($db_results)) {
-            yield new Podcast_Episode((int) $row[0]);
+
+        while ($episodeId = $result->fetchOne()) {
+            yield $this->modelFactory->createPodcastEpisode((int) $episodeId);
         }
     }
 
@@ -117,12 +141,13 @@ final class PodcastEpisodeRepository implements PodcastEpisodeRepositoryInterfac
             %d,18446744073709551615
         SQL;
 
-        $db_results = Dba::read(
+        $result = $this->connection->executeQuery(
             sprintf($sql, $limit),
             [$podcast->getId()]
         );
-        while ($row = Dba::fetch_row($db_results)) {
-            yield new Podcast_Episode((int) $row[0]);
+
+        while ($episodeId = $result->fetchOne()) {
+            yield $this->modelFactory->createPodcastEpisode((int) $episodeId);
         }
     }
 
@@ -136,17 +161,17 @@ final class PodcastEpisodeRepository implements PodcastEpisodeRepositoryInterfac
         string $author,
         string $category,
         int $time,
-        int $pubdate
+        int $publicationDate
     ): bool {
         $sql = <<<SQL
         INSERT INTO
             `podcast_episode`
             (`title`, `guid`, `podcast`, `state`, `source`, `website`, `description`, `author`, `category`, `time`, `pubdate`, `addition_time`)
         VALUES
-            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, UNIX_TIMESTAMP())
         SQL;
 
-        $result = Dba::write(
+        $result = $this->connection->executeQuery(
             $sql,
             [
                 $title,
@@ -159,12 +184,11 @@ final class PodcastEpisodeRepository implements PodcastEpisodeRepositoryInterfac
                 $author,
                 $category,
                 $time,
-                $pubdate,
-                time()
+                $publicationDate,
             ]
         );
 
-        return $result !== false;
+        return $result->rowCount() > 0;
     }
 
     /**
@@ -195,31 +219,34 @@ final class PodcastEpisodeRepository implements PodcastEpisodeRepositoryInterfac
         }
         $sql .= 'ORDER BY `podcast_episode`.`pubdate` DESC';
 
-        $db_results = Dba::read($sql, $params);
+        $result = $this->connection->executeQuery(
+            $sql,
+            $params
+        );
 
-        $results = [];
-        while ($row = Dba::fetch_assoc($db_results)) {
-            $results[] = (int) $row['id'];
+        $episodeIds = [];
+        while ($episodeId = $result->fetchOne()) {
+            $episodeIds[] = (int) $episodeId;
         }
 
-        return $results;
+        return $episodeIds;
     }
 
     public function remove(Podcast_Episode $podcastEpisode): bool
     {
-        $result = Dba::write(
+        $result = $this->connection->executeQuery(
             'DELETE FROM `podcast_episode` WHERE `id` = ?',
             [$podcastEpisode->getId()]
         );
 
-        return $result !== false;
+        return $result->rowCount() > 0;
     }
 
     public function changeState(
         Podcast_Episode $podcastEpisode,
         string $state
     ): void {
-        Dba::write(
+        $this->connection->executeQuery(
             'UPDATE `podcast_episode` SET `state` = ? WHERE `id` = ?',
             [$state, $podcastEpisode->getId()]
         );
@@ -234,7 +261,7 @@ final class PodcastEpisodeRepository implements PodcastEpisodeRepositoryInterfac
         int $size,
         int $duration
     ): void {
-        Dba::write(
+        $this->connection->executeQuery(
             'UPDATE `podcast_episode` SET `file` = ?, `size` = ?, `time` = ?, `state` = ? WHERE `id` = ?',
             [
                 $filePath,
@@ -264,19 +291,26 @@ final class PodcastEpisodeRepository implements PodcastEpisodeRepositoryInterfac
             `podcast`.`id` IS NULL
         SQL;
 
-        Dba::write($sql);
+        $this->connection->executeQuery($sql);
     }
 
     /**
      * Returns the amount of available episodes for a certain podcast
      */
-    public function getEpisodeCount(int $podcastId): int
+    public function getEpisodeCount(PodcastInterface $podcast): int
     {
-        $db_results = Dba::read(
-            'SELECT COUNT(`podcast_episode`.`id`) AS `episode_count` FROM `podcast_episode` WHERE `podcast_episode`.`podcast` = ?',
-            [$podcastId]
-        );
+        $sql = <<<SQL
+        SELECT
+            COUNT(`podcast_episode`.`id`) AS `episode_count`
+        FROM
+            `podcast_episode`
+        WHERE
+            `podcast_episode`.`podcast` = ?
+        SQL;
 
-        return (int) Dba::fetch_assoc($db_results)['episode_count'];
+        return (int) $this->connection->fetchOne(
+            $sql,
+            [$podcast->getId()]
+        );
     }
 }

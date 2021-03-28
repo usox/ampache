@@ -73,12 +73,12 @@ final class GetNewestPodcastsMethod implements SubsonicApiMethodInterface
             $episodes   = [];
 
             foreach ($catalogIds as $catalogId) {
-                $episodeIds = $this->podcastEpisodeRepository->getNewestPodcastsIds(
+                $newestEpisodes = $this->podcastEpisodeRepository->getNewestPodcastEpisodes(
                     (int) $catalogId,
                     $count
                 );
-                foreach ($episodeIds as $episodeId) {
-                    $episodes[] = $this->modelFactory->createPodcastEpisode($episodeId);
+                foreach ($newestEpisodes as $episode) {
+                    $episodes[] = $episode;
                 }
             }
 

@@ -24,18 +24,19 @@ namespace Ampache\Repository;
 use Ampache\Module\Podcast\PodcastStateEnum;
 use Ampache\Repository\Model\Podcast;
 use Ampache\Repository\Model\Podcast_Episode;
+use Ampache\Repository\Model\PodcastInterface;
 
 interface PodcastEpisodeRepositoryInterface
 {
     /**
      * This returns an array of ids of latest podcast episodes in this catalog
      *
-     * @return int[]
+     * @return iterable<Podcast_Episode>
      */
-    public function getNewestPodcastsIds(
+    public function getNewestPodcastEpisodes(
         int $catalogId,
         int $count
-    ): array;
+    ): iterable;
 
     /**
      * @return iterable<Podcast_Episode>
@@ -63,7 +64,7 @@ interface PodcastEpisodeRepositoryInterface
         string $author,
         string $category,
         int $time,
-        int $pubdate
+        int $publicationDate
     ): bool;
 
     /**
@@ -104,5 +105,5 @@ interface PodcastEpisodeRepositoryInterface
     /**
      * Returns the amount of available episodes for a certain podcast
      */
-    public function getEpisodeCount(int $podcastId): int;
+    public function getEpisodeCount(PodcastInterface $podcast): int;
 }
