@@ -282,9 +282,11 @@ class Artist extends database_object implements library_item, GarbageCollectible
             //debug_event("artist.class", "build_cache sql: " . $sql, 5);
             $db_results = Dba::read($sql);
 
+            $cache = static::getDatabaseObjectCache();
+
             while ($row = Dba::fetch_assoc($db_results)) {
                 $row['object_cnt'] = Stats::get_object_count('artist', $row['artist'], $limit_threshold);
-                parent::add_to_cache('artist_extra', $row['artist'], $row);
+                $cache->add('artist_extra', $row['artist'], $row);
             }
         } // end if extra
 
