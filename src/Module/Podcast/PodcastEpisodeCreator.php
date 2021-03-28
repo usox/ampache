@@ -26,6 +26,7 @@ namespace Ampache\Module\Podcast;
 
 use Ampache\Module\System\LegacyLogger;
 use Ampache\Repository\Model\Podcast;
+use Ampache\Repository\Model\PodcastInterface;
 use Ampache\Repository\PodcastEpisodeRepositoryInterface;
 use Psr\Log\LoggerInterface;
 use SimpleXMLElement;
@@ -45,7 +46,7 @@ final class PodcastEpisodeCreator implements PodcastEpisodeCreatorInterface
     }
 
     public function create(
-        Podcast $podcast,
+        PodcastInterface $podcast,
         SimpleXMLElement $episode,
         int $afterdate = 0
     ): bool {

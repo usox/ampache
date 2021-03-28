@@ -66,7 +66,7 @@ final class PodcastAjaxHandler implements AjaxHandlerInterface
                     }
                 } elseif (isset($_REQUEST['podcast_episode_id'])) {
                     $episode = new Podcast_Episode($_REQUEST['podcast_episode_id']);
-                    if ($episode->id !== null) {
+                    if ($episode->isNew() === false) {
                         $this->podcastEpisodeDownloader->download($episode);
                     } else {
                         debug_event('podcast.ajax', 'Cannot find podcast episode', 1);

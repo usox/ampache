@@ -22,9 +22,11 @@
 
 namespace Ampache\Module\Podcast;
 
-use Ampache\Repository\Model\Podcast_Episode;
+use Ampache\Repository\Model\PodcastEpisodeInterface;
 
 interface PodcastEpisodeDeleterInterface
 {
-    public function delete(Podcast_Episode $podcastEpisode): bool;
+    public function delete(
+        PodcastEpisodeInterface $podcastEpisode
+    ): bool;
 }

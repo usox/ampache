@@ -22,13 +22,14 @@
 
 namespace Ampache\Module\Podcast\Gui;
 
-use Ampache\Module\Podcast\Gui\PodcastViewAdapterInterface;
-use Ampache\Repository\Model\Podcast;
+use Ampache\Repository\Model\PodcastInterface;
 
 /**
  * Creates podcast related gui views
  */
 interface PodcastGuiFactoryInterface
 {
-    public function createPodcastViewAdapter(Podcast $podcast): PodcastViewAdapterInterface;
+    public function createPodcastViewAdapter(
+        PodcastInterface $podcast
+    ): PodcastViewAdapterInterface;
 }

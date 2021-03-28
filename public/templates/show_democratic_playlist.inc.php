@@ -89,7 +89,7 @@ $democratic = Democratic::get_current_playlist();
     <?php echo Ajax::button('?page=democratic&action=delete_vote&row_id=' . $item['id'], 'delete', T_('Remove Vote'), 'remove_vote_' . $item['id']); ?>
     <?php
         } else { ?>
-    <?php echo Ajax::button('?page=democratic&action=add_vote&object_id=' . $media->id . '&type=' . scrub_out($item['object_type']), 'tick', T_('Add Vote'), 'remove_vote_' . $item['id']); ?>
+    <?php echo Ajax::button('?page=democratic&action=add_vote&object_id=' . $media->getId() . '&type=' . scrub_out($item['object_type']), 'tick', T_('Add Vote'), 'remove_vote_' . $item['id']); ?>
     <?php
         } ?>
     </td>

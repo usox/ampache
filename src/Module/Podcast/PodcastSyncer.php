@@ -28,6 +28,7 @@ use Ampache\Config\ConfigContainerInterface;
 use Ampache\Config\ConfigurationKeyEnum;
 use Ampache\Module\Podcast\Exception\PodcastFeedLoadingException;
 use Ampache\Repository\Model\Podcast;
+use Ampache\Repository\Model\PodcastInterface;
 use Ampache\Repository\PodcastEpisodeRepositoryInterface;
 use Ampache\Repository\PodcastRepositoryInterface;
 use SimpleXMLElement;
@@ -70,7 +71,7 @@ final class PodcastSyncer implements PodcastSyncerInterface
     }
 
     public function sync(
-        Podcast $podcast,
+        PodcastInterface $podcast,
         bool $gather = false
     ): bool {
         try {
@@ -85,7 +86,7 @@ final class PodcastSyncer implements PodcastSyncerInterface
     }
 
     public function addEpisodes(
-        Podcast $podcast,
+        PodcastInterface $podcast,
         SimpleXMLElement $episodes,
         int $afterdate = 0,
         bool $gather = false

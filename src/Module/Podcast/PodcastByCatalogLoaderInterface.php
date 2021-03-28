@@ -22,14 +22,14 @@
 
 namespace Ampache\Module\Podcast;
 
-use Ampache\Repository\Model\Podcast;
+use Ampache\Repository\Model\PodcastInterface;
 
 interface PodcastByCatalogLoaderInterface
 {
     /**
      * @param int[]|null $catalogIds
      *
-     * @return Podcast[]
+     * @return PodcastInterface[]
      */
     public function load(?array $catalogIds = null): array;
 }

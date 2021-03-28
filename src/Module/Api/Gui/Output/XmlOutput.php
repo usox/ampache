@@ -679,7 +679,7 @@ final class XmlOutput implements ApiOutputInterface
             $episode = new Podcast_Episode($episodeId);
             $rating  = new Rating($episodeId, 'podcast_episode');
             $flag    = new Userflag($episodeId, 'podcast_episode');
-            $art_url = Art::url($episode->podcast, 'podcast', Core::get_request('auth'));
+            $art_url = Art::url($episode->getPodcast()->getId(), 'podcast', Core::get_request('auth'));
             $string .= "\t<podcast_episode id=\"$episodeId\">\n" .
                 "\t\t<title><![CDATA[" . $episode->getTitleFormatted() . "]]></title>\n" .
                 "\t\t<name><![CDATA[" . $episode->getTitleFormatted() . "]]></name>\n" .
@@ -702,7 +702,7 @@ final class XmlOutput implements ApiOutputInterface
                 "\t\t<preciserating>" . ($rating->get_user_rating($userId) ?: null) . "</preciserating>\n" .
                 "\t\t<rating>" . ($rating->get_user_rating($userId) ?: null) . "</rating>\n" .
                 "\t\t<averagerating>" . (string) ($rating->get_average_rating() ?: null) . "</averagerating>\n" .
-                "\t\t<played>" . $episode->played . "</played>\n";
+                "\t\t<played>" . $episode->getPlayed() . "</played>\n";
             $string .= "\t</podcast_episode>\n";
         }
 

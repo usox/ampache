@@ -473,9 +473,9 @@ class AmpacheRss
         $xchannel->addChild("title", htmlspecialchars($libitem->get_fullname() . " Podcast"));
         //$xlink = $xchannel->addChild("atom:link", htmlentities($libitem->link));
         $libitem_type = ObjectTypeToClassNameMapper::reverseMap(get_class($libitem));
-        if (Art::has_db($libitem->id, $libitem_type)) {
+        if (Art::has_db($libitem->getId(), $libitem_type)) {
             $ximg = $xchannel->addChild("xmlns:itunes:image");
-            $ximg->addAttribute("href", Art::url($libitem->id, $libitem_type));
+            $ximg->addAttribute("href", Art::url($libitem->getId(), $libitem_type));
         }
         $summary = $libitem->get_description();
         if (!empty($summary)) {

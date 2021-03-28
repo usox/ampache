@@ -28,8 +28,8 @@ use Ampache\Module\Catalog\Loader\CatalogLoaderInterface;
 use Ampache\Module\System\LegacyLogger;
 use Ampache\Module\Util\UtilityFactoryInterface;
 use Ampache\Repository\Model\ModelFactoryInterface;
-use Ampache\Repository\Model\Podcast;
 use Ampache\Repository\Model\Podcast_Episode;
+use Ampache\Repository\Model\PodcastInterface;
 use Ampache\Repository\PodcastEpisodeRepositoryInterface;
 use Psr\Log\LoggerInterface;
 
@@ -64,26 +64,28 @@ final class PodcastEpisodeDownloader implements PodcastEpisodeDownloaderInterfac
      */
     public function download(Podcast_Episode $podcastEpisode): void
     {
-        if (!empty($podcastEpisode->source)) {
-            $podcast = $this->modelFactory->createPodcast((int) $podcastEpisode->podcast);
+        $source = $podcastEpisode->getSource();
+
+        if (!empty($source)) {
+            $podcast = $this->modelFactory->createPodcast($podcastEpisode->getPodcast()->getId());
             $file    = $this->getRootPath($podcast);
             if (!empty($file)) {
-                $pinfo = pathinfo($podcastEpisode->source);
+                $pinfo = pathinfo($source);
 
                 $file .= sprintf(
                     '%s%s-%s-%s',
                     DIRECTORY_SEPARATOR,
-                    $podcastEpisode->pubdate,
+                    $podcastEpisode->getPublicationDate(),
                     str_replace(['?', '<', '>', '\\', '/'], '_', $podcastEpisode->title),
                     strtok($pinfo['basename'], '?')
                 );
 
                 $this->logger->info(
-                    sprintf('Downloading %s to %s ...', $podcastEpisode->source, $file),
+                    sprintf('Downloading %s to %s ...', $source, $file),
                     [LegacyLogger::CONTEXT_TYPE => __CLASS__]
                 );
 
-                if (file_put_contents($file, fopen($podcastEpisode->source, 'r')) !== false) {
+                if (file_put_contents($file, fopen($source, 'r')) !== false) {
                     $this->logger->info(
                         'Download completed.',
                         [LegacyLogger::CONTEXT_TYPE => __CLASS__]
@@ -126,7 +128,7 @@ final class PodcastEpisodeDownloader implements PodcastEpisodeDownloaderInterfac
     }
 
     private function getRootPath(
-        Podcast $podcast
+        PodcastInterface $podcast
     ): string {
         $catalog = $this->catalogLoader->byId($podcast->getCatalog());
         if (!$catalog->get_type() == 'local') {

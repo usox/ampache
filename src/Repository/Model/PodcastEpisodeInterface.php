@@ -31,23 +31,41 @@ interface PodcastEpisodeInterface extends
 
     public function getLink(): string;
 
+    public function getSource(): string;
+
     public function getLinkFormatted(): string;
 
     public function getStateFormatted(): string;
 
+    public function getPublicationDate(): int;
+
     public function getPublicationDateFormatted(): string;
+
+    public function getAuthor(): string;
 
     public function getAuthorFormatted(): string;
 
+    public function getWebsite(): string;
+
     public function getWebsiteFormatted(): string;
+
+    public function getGuid(): string;
+
+    public function getState(): string;
 
     public function getSizeFormatted(): string;
 
+    public function getCategory(): string;
+
     public function getCategoryFormatted(): string;
+
+    public function getDescription(): string;
 
     public function getDescriptionFormatted(): string;
 
     public function getTitleFormatted(): string;
+
+    public function getPlayed(): int;
 
     public function getObjectCount(): ?int;
 }

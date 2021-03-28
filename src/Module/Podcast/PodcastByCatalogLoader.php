@@ -26,7 +26,7 @@ namespace Ampache\Module\Podcast;
 
 use Ampache\Repository\CatalogRepositoryInterface;
 use Ampache\Repository\Model\ModelFactoryInterface;
-use Ampache\Repository\Model\Podcast;
+use Ampache\Repository\Model\PodcastInterface;
 use Ampache\Repository\PodcastRepositoryInterface;
 
 final class PodcastByCatalogLoader implements PodcastByCatalogLoaderInterface
@@ -50,7 +50,7 @@ final class PodcastByCatalogLoader implements PodcastByCatalogLoaderInterface
     /**
      * @param int[]|null $catalogIds
      *
-     * @return Podcast[]
+     * @return PodcastInterface[]
      */
     public function load(?array $catalogIds = null): array
     {

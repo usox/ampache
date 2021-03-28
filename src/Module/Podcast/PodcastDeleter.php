@@ -24,7 +24,7 @@ declare(strict_types=1);
 namespace Ampache\Module\Podcast;
 
 use Ampache\Repository\Model\ModelFactoryInterface;
-use Ampache\Repository\Model\Podcast;
+use Ampache\Repository\Model\PodcastInterface;
 use Ampache\Repository\PodcastEpisodeRepositoryInterface;
 use Ampache\Repository\PodcastRepositoryInterface;
 
@@ -54,7 +54,7 @@ final class PodcastDeleter implements PodcastDeleterInterface
     }
 
     public function delete(
-        Podcast $podcast
+        PodcastInterface $podcast
     ): bool {
         $episodeIds = $this->podcastEpisodeRepository->getEpisodeIds($podcast);
 

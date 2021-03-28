@@ -40,21 +40,21 @@ class Podcast_Episode extends database_object implements PodcastEpisodeInterface
 
     public $id;
     public $title;
-    public $guid;
-    public $podcast;
-    public $state;
+    private string $guid;
+    private int $podcast;
+    private string $state;
     public $file;
-    public $source;
+    private string $source;
     public $size;
     public $time;
-    public $played;
+    private int $played;
     public $type;
     public $mime;
-    public $website;
-    public $description;
-    public $author;
-    public $category;
-    public $pubdate;
+    private string $website;
+    private string $description;
+    private string $author;
+    private string $category;
+    private string $pubdate;
     public $enabled;
 
     private ?PodcastInterface $podcastObj = null;
@@ -145,6 +145,11 @@ class Podcast_Episode extends database_object implements PodcastEpisodeInterface
         );
     }
 
+    public function getSource(): string
+    {
+        return $this->source;
+    }
+
     public function getLinkFormatted(): string
     {
         return sprintf(
@@ -157,12 +162,22 @@ class Podcast_Episode extends database_object implements PodcastEpisodeInterface
 
     public function getStateFormatted(): string
     {
-        return ucfirst($this->state);
+        return ucfirst($this->getState());
+    }
+
+    public function getPublicationDate(): int
+    {
+        return (int) $this->pubdate;
     }
 
     public function getPublicationDateFormatted(): string
     {
-        return get_datetime((int)$this->pubdate);
+        return get_datetime($this->getPublicationDate());
+    }
+
+    public function getAuthor(): string
+    {
+        return $this->author;
     }
 
     public function getAuthorFormatted(): string
@@ -170,9 +185,24 @@ class Podcast_Episode extends database_object implements PodcastEpisodeInterface
         return scrub_out($this->author);
     }
 
+    public function getWebsite(): string
+    {
+        return $this->website;
+    }
+
     public function getWebsiteFormatted(): string
     {
         return scrub_out($this->website);
+    }
+
+    public function getGuid(): string
+    {
+        return $this->guid;
+    }
+
+    public function getState(): string
+    {
+        return $this->state;
     }
 
     public function getSizeFormatted(): string
@@ -180,9 +210,19 @@ class Podcast_Episode extends database_object implements PodcastEpisodeInterface
         return Ui::format_bytes($this->size);
     }
 
+    public function getCategory(): string
+    {
+        return $this->category;
+    }
+
     public function getCategoryFormatted(): string
     {
         return scrub_out($this->category);
+    }
+
+    public function getDescription(): string
+    {
+        return $this->description;
     }
 
     public function getDescriptionFormatted(): string
@@ -193,6 +233,11 @@ class Podcast_Episode extends database_object implements PodcastEpisodeInterface
     public function getTitleFormatted(): string
     {
         return scrub_out($this->title);
+    }
+
+    public function getPlayed(): int
+    {
+        return $this->played;
     }
 
     /**

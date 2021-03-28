@@ -22,18 +22,18 @@
 
 namespace Ampache\Module\Podcast;
 
-use Ampache\Repository\Model\Podcast;
+use Ampache\Repository\Model\PodcastInterface;
 use SimpleXMLElement;
 
 interface PodcastSyncerInterface
 {
     public function sync(
-        Podcast $podcast,
+        PodcastInterface $podcast,
         bool $gather = false
     ): bool;
 
     public function addEpisodes(
-        Podcast $podcast,
+        PodcastInterface $podcast,
         SimpleXMLElement $episodes,
         int $afterdate = 0,
         bool $gather = false

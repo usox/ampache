@@ -55,7 +55,7 @@ final class DeletePodcastEpisode implements SubsonicApiMethodInterface
 
         if (AmpConfig::get('podcast') && Access::check('interface', 75)) {
             $episode = $this->modelFactory->createPodcastEpisode((int) Subsonic_Xml_Data::getAmpacheId($id));
-            if ($episode->id !== null) {
+            if (!$episode->isNew()) {
                 if ($this->podcastEpisodeDeleter->delete($episode)) {
                     $response = Subsonic_Xml_Data::createSuccessResponse('deletepodcastepisode');
                 } else {

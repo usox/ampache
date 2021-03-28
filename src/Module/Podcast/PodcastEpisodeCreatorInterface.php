@@ -22,13 +22,13 @@
 
 namespace Ampache\Module\Podcast;
 
-use Ampache\Repository\Model\Podcast;
+use Ampache\Repository\Model\PodcastInterface;
 use SimpleXMLElement;
 
 interface PodcastEpisodeCreatorInterface
 {
     public function create(
-        Podcast $podcast,
+        PodcastInterface $podcast,
         SimpleXMLElement $episode,
         int $afterdate = 0
     ): bool;

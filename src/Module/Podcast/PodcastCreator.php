@@ -29,6 +29,7 @@ use Ampache\Module\System\AmpError;
 use Ampache\Repository\Model\Art;
 use Ampache\Repository\Model\ModelFactoryInterface;
 use Ampache\Repository\Model\Podcast;
+use Ampache\Repository\Model\PodcastInterface;
 use Ampache\Repository\PodcastRepositoryInterface;
 use Psr\Log\LoggerInterface;
 
@@ -65,7 +66,7 @@ final class PodcastCreator implements PodcastCreatorInterface
     public function create(
         string $feedUrl,
         int $catalog_id
-    ): ?Podcast {
+    ): ?PodcastInterface {
         // Feed must be http/https
         if (strpos($feedUrl, "http://") !== 0 && strpos($feedUrl, "https://") !== 0) {
             AmpError::add('feed', T_('Feed URL is invalid'));

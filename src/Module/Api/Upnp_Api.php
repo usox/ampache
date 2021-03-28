@@ -751,7 +751,7 @@ class Upnp_Api
                         break;
                     case 3:
                         $episode = new Podcast_Episode($pathreq[2]);
-                        if ($episode->id !== null) {
+                        if (!$episode->isNew()) {
                             $meta = self::_itemPodcastEpisode($episode, $root . '/podcasts/' . $pathreq[1]);
                         }
                         break;
@@ -1842,13 +1842,13 @@ class Upnp_Api
     private static function _itemPodcastEpisode($episode, $parent)
     {
         $api_session = (AmpConfig::get('require_session')) ? Stream::get_session() : false;
-        $art_url     = Art::url($episode->podcast, 'podcast', $api_session);
+        $art_url     = Art::url($episode->getPodcast()->getId(), 'podcast', $api_session);
 
         $fileTypesByExt = self::_getFileTypes();
         $arrFileType    = (!empty($episode->type)) ? $fileTypesByExt[$episode->type] : array();
 
         $ret = array(
-            'id' => 'amp://music/podcasts/' . $episode->podcast . '/' . $episode->id,
+            'id' => 'amp://music/podcasts/' . $episode->getPodcast()->getId() . '/' . $episode->getId(),
             'parentID' => $parent,
             'restricted' => '1',
             'dc:title' => self::_replaceSpecialSymbols($episode->getTitleFormatted()),

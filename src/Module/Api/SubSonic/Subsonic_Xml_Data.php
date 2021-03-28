@@ -1486,26 +1486,29 @@ class Subsonic_Xml_Data
      */
     private static function addPodcastEpisode($xml, $episode, $elementName = 'episode')
     {
+        $podcastId = $episode->getPodcast()->getId();
+        $episodeId = $episode->getId();
+
         $xepisode = $xml->addChild($elementName);
-        $xepisode->addAttribute('id', (string)self::getPodcastEpId($episode->id));
-        $xepisode->addAttribute('channelId', (string)self::getPodcastId($episode->podcast));
+        $xepisode->addAttribute('id', (string)self::getPodcastEpId($episodeId));
+        $xepisode->addAttribute('channelId', (string)self::getPodcastId($podcastId));
         $xepisode->addAttribute('title', (string)self::checkName($episode->getTitleFormatted()));
         $xepisode->addAttribute('album', (string)$episode->getPodcast()->getTitleFormatted());
         $xepisode->addAttribute('description', (string)self::checkName($episode->getDescriptionFormatted()));
         $xepisode->addAttribute('duration', (string)$episode->time);
         $xepisode->addAttribute('genre', "Podcast");
         $xepisode->addAttribute('isDir', "false");
-        $xepisode->addAttribute('publishDate', date("c", (int)$episode->pubdate));
-        $xepisode->addAttribute('status', (string)$episode->state);
-        $xepisode->addAttribute('parent', (string)self::getPodcastId($episode->podcast));
-        if (Art::has_db($episode->podcast, 'podcast')) {
-            $xepisode->addAttribute('coverArt', (string)self::getPodcastId($episode->podcast));
+        $xepisode->addAttribute('publishDate', date("c", $episode->getPublicationDate()));
+        $xepisode->addAttribute('status', $episode->getState());
+        $xepisode->addAttribute('parent', (string)self::getPodcastId($podcastId));
+        if (Art::has_db($podcastId, 'podcast')) {
+            $xepisode->addAttribute('coverArt', (string)self::getPodcastId($podcastId));
         }
 
-        self::setIfStarred($xepisode, 'podcast_episode', $episode->id);
+        self::setIfStarred($xepisode, 'podcast_episode', $episodeId);
 
         if ($episode->file) {
-            $xepisode->addAttribute('streamId', (string)self::getPodcastEpId($episode->id));
+            $xepisode->addAttribute('streamId', (string)self::getPodcastEpId($episodeId));
             $xepisode->addAttribute('size', (string)$episode->size);
             $xepisode->addAttribute('suffix', (string)$episode->type);
             $xepisode->addAttribute('contentType', (string)$episode->mime);

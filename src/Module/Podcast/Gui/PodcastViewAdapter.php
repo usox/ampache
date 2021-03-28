@@ -31,7 +31,7 @@ use Ampache\Module\Util\AmpacheRss;
 use Ampache\Module\Util\Ui;
 use Ampache\Repository\Model\Art;
 use Ampache\Repository\Model\ModelFactoryInterface;
-use Ampache\Repository\Model\Podcast;
+use Ampache\Repository\Model\PodcastInterface;
 use Ampache\Repository\Model\Rating;
 use Ampache\Repository\Model\User;
 use Ampache\Repository\Model\Userflag;
@@ -47,12 +47,12 @@ final class PodcastViewAdapter implements PodcastViewAdapterInterface
 
     private PodcastEpisodeRepositoryInterface $podcastEpisodeRepository;
 
-    private Podcast $podcast;
+    private PodcastInterface $podcast;
 
     public function __construct(
         PodcastEpisodeRepositoryInterface $podcastEpisodeRepository,
         ModelFactoryInterface $modelFactory,
-        Podcast $podcast
+        PodcastInterface $podcast
     ) {
         $this->podcastEpisodeRepository = $podcastEpisodeRepository;
         $this->modelFactory             = $modelFactory;

@@ -768,7 +768,7 @@ final class JsonOutput implements ApiOutputInterface
             $episode = new Podcast_Episode($episode_id);
             $rating  = new Rating($episode_id, 'podcast_episode');
             $flag    = new Userflag($episode_id, 'podcast_episode');
-            $art_url = Art::url($episode->podcast, 'podcast', Core::get_request('auth'));
+            $art_url = Art::url($episode->getPodcast()->getId(), 'podcast', Core::get_request('auth'));
 
             $result[] = [
                 'id' => (string) $episode_id,
@@ -793,7 +793,7 @@ final class JsonOutput implements ApiOutputInterface
                 'preciserating' => ($rating->get_user_rating($userId) ?: null),
                 'rating' => ($rating->get_user_rating($userId) ?: null),
                 'averagerating' => (string) ($rating->get_average_rating() ?: null),
-                'played' => $episode->played
+                'played' => $episode->getPlayed()
             ];
         }
         if (!$encode) {

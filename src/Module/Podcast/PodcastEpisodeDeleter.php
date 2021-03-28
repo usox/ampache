@@ -27,7 +27,7 @@ namespace Ampache\Module\Podcast;
 use Ampache\Config\ConfigContainerInterface;
 use Ampache\Config\ConfigurationKeyEnum;
 use Ampache\Module\System\LegacyLogger;
-use Ampache\Repository\Model\Podcast_Episode;
+use Ampache\Repository\Model\PodcastEpisodeInterface;
 use Ampache\Repository\PodcastEpisodeRepositoryInterface;
 use Psr\Log\LoggerInterface;
 
@@ -53,7 +53,7 @@ final class PodcastEpisodeDeleter implements PodcastEpisodeDeleterInterface
     }
 
     public function delete(
-        Podcast_Episode $podcastEpisode
+        PodcastEpisodeInterface $podcastEpisode
     ): bool {
         $this->logger->debug(
             sprintf('Removing podcast episode %d', $podcastEpisode->getId()),
