@@ -35,7 +35,9 @@ use Ampache\Repository\Model\Artist;
 use Ampache\Repository\Model\Catalog;
 use Ampache\Repository\Model\Democratic;
 use Ampache\Repository\Model\Live_Stream;
+use Ampache\Repository\Model\Media;
 use Ampache\Repository\Model\ModelFactoryInterface;
+use Ampache\Repository\Model\PlayableMediaInterface;
 use Ampache\Repository\Model\Playlist;
 use Ampache\Repository\Model\Podcast;
 use Ampache\Repository\Model\Podcast_Episode;
@@ -1109,6 +1111,7 @@ final class XmlOutput implements ApiOutputInterface
         $string     = '';
 
         foreach ($objectIds as $row_id => $data) {
+            /** @var Media&PlayableMediaInterface $song */
             $song = $this->modelFactory->mapObjectType($data['object_type'], (int) $data['object_id']);
             $song->format();
 
@@ -1127,7 +1130,7 @@ final class XmlOutput implements ApiOutputInterface
                 // Title is an alias for name
                 "\t<title><![CDATA[" . $song->title . "]]></title>\n" .
                 "\t<name><![CDATA[" . $song->title . "]]></name>\n" .
-                "\t<artist id=\"" . $song->artist . "\"><![CDATA[" . $song->f_artist_full . "]]></artist>\n" .
+                "\t<artist id=\"" . $song->artist . "\"><![CDATA[" . $song->getFullArtistNameFormatted() . "]]></artist>\n" .
                 "\t<album id=\"" . $song->album . "\"><![CDATA[" . $song->f_album_full . "]]></album>\n" .
                 "\t<genre id=\"" . $song->genre . "\"><![CDATA[" . $song->f_genre . "]]></genre>\n" .
                 $tag_string .

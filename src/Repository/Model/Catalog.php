@@ -2483,7 +2483,7 @@ abstract class Catalog extends database_object
                     $xml['key']                  = $results['id'];
                     $xml['dict']['Track ID']     = (int)($results['id']);
                     $xml['dict']['Name']         = $song->title;
-                    $xml['dict']['Artist']       = $song->f_artist_full;
+                    $xml['dict']['Artist']       = $song->getFullArtistNameFormatted();
                     $xml['dict']['Album']        = $song->f_album_full;
                     $xml['dict']['Total Time']   = (int) ($song->time) * 1000; // iTunes uses milliseconds
                     $xml['dict']['Track Number'] = (int) ($song->track);
@@ -2504,7 +2504,7 @@ abstract class Catalog extends database_object
                 while ($results = Dba::fetch_assoc($db_results)) {
                     $song = new Song($results['id']);
                     $song->format();
-                    echo '"' . $song->id . '","' . $song->title . '","' . $song->f_artist_full . '","' . $song->f_album_full . '","' . $song->f_time . '","' . $song->f_track . '","' . $song->year . '","' . get_datetime((int)$song->addition_time) . '","' . $song->f_bitrate . '","' . $song->played . '","' . $song->file . '"' . "\n";
+                    echo '"' . $song->id . '","' . $song->title . '","' . $song->getFullArtistNameFormatted() . '","' . $song->f_album_full . '","' . $song->f_time . '","' . $song->f_track . '","' . $song->year . '","' . get_datetime((int)$song->addition_time) . '","' . $song->f_bitrate . '","' . $song->played . '","' . $song->file . '"' . "\n";
                 }
                 break;
         } // end switch

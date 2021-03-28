@@ -37,7 +37,8 @@ use PDOStatement;
 class Podcast_Episode extends database_object implements
     Media,
     library_item,
-    MediaFileInterface
+    MediaFileInterface,
+    PlayableMediaInterface
 {
     protected const DB_TABLENAME = 'podcast_episode';
 
@@ -63,7 +64,6 @@ class Podcast_Episode extends database_object implements
     public $catalog;
     public $f_time;
     public $f_time_h;
-    public $f_artist_full;
     public $link;
 
     private ?PodcastInterface $podcastObj = null;
@@ -132,8 +132,6 @@ class Podcast_Episode extends database_object implements
      */
     public function format($details = true)
     {
-        $this->f_artist_full = scrub_out($this->author);
-
         // Format the Time
         $min            = floor($this->time / 60);
         $sec            = sprintf("%02d", ($this->time % 60));
@@ -513,6 +511,11 @@ class Podcast_Episode extends database_object implements
     public function remove()
     {
         return $this->getPodcastEpisodeDeleter()->delete($this);
+    }
+
+    public function getFullArtistNameFormatted(): string
+    {
+        return scrub_out($this->author);
     }
 
     /**

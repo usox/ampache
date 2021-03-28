@@ -33,6 +33,9 @@ use Ampache\Module\Util\ObjectTypeToClassNameMapper;
 use Ampache\Repository\Model\Art;
 use Ampache\Repository\Model\Media;
 use Ampache\Repository\Model\Podcast_Episode;
+use Ampache\Repository\Model\Song;
+use Ampache\Repository\Model\Song_Preview;
+use Ampache\Repository\Model\Video;
 use PDOStatement;
 use Psr\Http\Message\ResponseInterface;
 
@@ -248,8 +251,9 @@ class Stream_Playlist
             $url['time']   = $object->time;
             switch ($type) {
                 case 'song':
+                    /** @var Song $object */
                     $url['title']     = $object->title;
-                    $url['author']    = $object->f_artist_full;
+                    $url['author']    = $object->getFullArtistNameFormatted();
                     $url['info_url']  = $object->f_link;
                     $show_song_art    = AmpConfig::get('show_song_art', false);
                     $art_object       = ($show_song_art) ? $object->id : $object->album;
@@ -260,8 +264,9 @@ class Stream_Playlist
                     //$url['track_num'] = $object->f_track;
                     break;
                 case 'video':
+                    /** @var Video $object */
                     $url['title']      = 'Video - ' . $object->title;
-                    $url['author']     = $object->f_artist_full;
+                    $url['author']     = $object->getFullArtistNameFormatted();
                     $url['resolution'] = $object->f_resolution;
                     $url['codec']      = $object->type;
                     break;
@@ -274,8 +279,9 @@ class Stream_Playlist
                     $url['codec']     = $object->codec;
                     break;
                 case 'song_preview':
+                    /** @var Song_Preview $object */
                     $url['title']  = $object->title;
-                    $url['author'] = $object->f_artist_full;
+                    $url['author'] = $object->getFullArtistNameFormatted();
                     $url['codec']  = $object->type;
                     break;
                 case 'channel':

@@ -33,7 +33,9 @@ use Ampache\Repository\Model\Art;
 use Ampache\Repository\Model\Artist;
 use Ampache\Repository\Model\Catalog;
 use Ampache\Repository\Model\Democratic;
+use Ampache\Repository\Model\Media;
 use Ampache\Repository\Model\ModelFactoryInterface;
+use Ampache\Repository\Model\PlayableMediaInterface;
 use Ampache\Repository\Model\Playlist;
 use Ampache\Repository\Model\Podcast;
 use Ampache\Repository\Model\Podcast_Episode;
@@ -1157,6 +1159,7 @@ final class JsonOutput implements ApiOutputInterface
         $result = [];
 
         foreach ($objectIds as $row_id => $data) {
+            /** @var Media&PlayableMediaInterface $song */
             $song = $this->modelFactory->mapObjectType(
                 $data['object_type'],
                 (int) $data['object_id']
@@ -1169,7 +1172,7 @@ final class JsonOutput implements ApiOutputInterface
             $result[] = [
                 'id' => (string) $song->id,
                 'title' => $song->title,
-                'artist' => ['id' => (string) $song->artist, 'name' => $song->f_artist_full],
+                'artist' => ['id' => (string) $song->artist, 'name' => $song->getFullArtistNameFormatted()],
                 'album' => ['id' => (string) $song->album, 'name' => $song->f_album_full],
                 'genre' => $this->genre_array($song->tags),
                 'track' => (int) $song->track,

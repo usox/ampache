@@ -377,7 +377,7 @@ class Art extends database_object
             foreach ($songs as $song_id) {
                 $song   = new Song($song_id);
                 $song->format();
-                $description = ($this->type == 'artist') ? $song->f_artist_full : $object->full_name;
+                $description = ($this->type == 'artist') ? $song->getFullArtistNameFormatted() : $object->full_name;
                 $id3         = new vainfo($song->file);
                 $ndata       = array();
                 $data        = $id3->read_id3();

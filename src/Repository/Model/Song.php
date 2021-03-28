@@ -45,7 +45,8 @@ class Song extends database_object implements
     Media,
     library_item,
     GarbageCollectibleInterface,
-    MediaFileInterface
+    MediaFileInterface,
+    PlayableMediaInterface
 {
     use Metadata;
 
@@ -227,10 +228,6 @@ class Song extends database_object implements
      * @var string $f_album
      */
     public $f_album;
-    /**
-     * @var string $f_artist_full
-     */
-    public $f_artist_full;
     /**
      * @var integer $albumartist
      */
@@ -1643,8 +1640,7 @@ class Song extends database_object implements
         $this->f_album      = $this->f_album_full;
 
         // Format the artist name
-        $this->f_artist_full = $this->get_artist_name();
-        $this->f_artist      = $this->f_artist_full;
+        $this->f_artist = $this->get_artist_name();
 
         // Format the album_artist name
         $this->f_albumartist_full = $this->get_album_artist_name();
@@ -1657,7 +1653,7 @@ class Song extends database_object implements
         $this->link          = AmpConfig::get('web_path') . "/song.php?action=show_song&song_id=" . $this->id;
         $this->f_link        = "<a href=\"" . scrub_out($this->link) . "\" title=\"" . scrub_out($this->f_artist) . " - " . scrub_out($this->title) . "\"> " . scrub_out($this->f_title) . "</a>";
         $this->f_album_link  = "<a href=\"" . AmpConfig::get('web_path') . "/albums.php?action=show&amp;album=" . $this->album . "\" title=\"" . scrub_out($this->f_album_full) . "\"> " . scrub_out($this->f_album) . "</a>";
-        $this->f_artist_link = "<a href=\"" . AmpConfig::get('web_path') . "/artists.php?action=show&amp;artist=" . $this->artist . "\" title=\"" . scrub_out($this->f_artist_full) . "\"> " . scrub_out($this->f_artist) . "</a>";
+        $this->f_artist_link = "<a href=\"" . AmpConfig::get('web_path') . "/artists.php?action=show&amp;artist=" . $this->artist . "\" title=\"" . scrub_out($this->get_artist_name()) . "\"> " . scrub_out($this->f_artist) . "</a>";
         if (!empty($this->albumartist)) {
             $this->f_albumartist_link = "<a href=\"" . AmpConfig::get('web_path') . "/artists.php?action=show&amp;artist=" . $this->albumartist . "\" title=\"" . scrub_out($this->f_albumartist_full) . "\"> " . scrub_out($this->f_albumartist_full) . "</a>";
         }
@@ -2292,6 +2288,11 @@ class Song extends database_object implements
     public function setFilename(string $filename): void
     {
         $this->filename = $filename;
+    }
+
+    public function getFullArtistNameFormatted(): string
+    {
+        return $this->get_artist_name();
     }
 
     /**

@@ -39,7 +39,8 @@ class Video extends database_object implements
     Media,
     library_item,
     GarbageCollectibleInterface,
-    MediaFileInterface
+    MediaFileInterface,
+    PlayableMediaInterface
 {
     protected const DB_TABLENAME = 'video';
 
@@ -152,10 +153,6 @@ class Video extends database_object implements
      * @var string $f_full_title
      */
     public $f_full_title;
-    /**
-     * @var string $f_artist_full
-     */
-    public $f_artist_full;
     /**
      * @var string $f_time
      */
@@ -1093,6 +1090,11 @@ class Video extends database_object implements
     public function setFilename(string $filename): void
     {
         $this->filename = $filename;
+    }
+
+    public function getFullArtistNameFormatted(): string
+    {
+        return '';
     }
 
     /**
