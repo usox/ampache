@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace Ampache\Repository;
 
 use Ampache\Repository\Model\Podcast;
+use Ampache\Repository\Model\PodcastInterface;
 use Doctrine\DBAL\Connection;
 
 final class PodcastRepository implements PodcastRepositoryInterface
@@ -58,7 +59,7 @@ final class PodcastRepository implements PodcastRepositoryInterface
     }
 
     public function remove(
-        Podcast $podcast
+        PodcastInterface $podcast
     ): bool {
         $result = $this->connection->executeQuery(
             'DELETE FROM `podcast` WHERE `id` = ?',

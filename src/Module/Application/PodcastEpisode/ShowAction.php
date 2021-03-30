@@ -30,7 +30,7 @@ use Ampache\Module\Application\ApplicationActionInterface;
 use Ampache\Module\Authorization\GuiGatekeeperInterface;
 use Ampache\Module\Podcast\Gui\PodcastGuiFactoryInterface;
 use Ampache\Module\Util\UiInterface;
-use Ampache\Repository\Model\ModelFactoryInterface;
+use Ampache\Repository\PodcastEpisodeRepositoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -42,31 +42,31 @@ final class ShowAction implements ApplicationActionInterface
 
     private UiInterface $ui;
 
-    private ModelFactoryInterface $modelFactory;
-
     private TalFactoryInterface $talFactory;
 
     private PodcastGuiFactoryInterface $podcastGuiFactory;
 
+    private PodcastEpisodeRepositoryInterface $podcastEpisodeRepository;
+
     public function __construct(
         ConfigContainerInterface $configContainer,
         UiInterface $ui,
-        ModelFactoryInterface $modelFactory,
         TalFactoryInterface $talFactory,
-        PodcastGuiFactoryInterface $podcastGuiFactory
+        PodcastGuiFactoryInterface $podcastGuiFactory,
+        PodcastEpisodeRepositoryInterface $podcastEpisodeRepository
     ) {
-        $this->configContainer   = $configContainer;
-        $this->ui                = $ui;
-        $this->modelFactory      = $modelFactory;
-        $this->talFactory        = $talFactory;
-        $this->podcastGuiFactory = $podcastGuiFactory;
+        $this->configContainer          = $configContainer;
+        $this->ui                       = $ui;
+        $this->talFactory               = $talFactory;
+        $this->podcastGuiFactory        = $podcastGuiFactory;
+        $this->podcastEpisodeRepository = $podcastEpisodeRepository;
     }
 
     public function run(ServerRequestInterface $request, GuiGatekeeperInterface $gatekeeper): ?ResponseInterface
     {
-        $episode = $this->modelFactory->createPodcastEpisode(
-            (int) ($request->getQueryParams()['podcast_episode'] ?? 0)
-        );
+        $episodeId = (int) ($request->getQueryParams()['podcast_episode'] ?? 0);
+
+        $episode = $this->podcastEpisodeRepository->findById($episodeId);
 
         $this->ui->showHeader();
         echo $this->talFactory

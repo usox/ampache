@@ -24,7 +24,6 @@ declare(strict_types=1);
 namespace Ampache\Module\Podcast;
 
 use Ampache\MockeryTestCase;
-use Ampache\Repository\Model\ModelFactoryInterface;
 use Ampache\Repository\Model\Podcast;
 use Ampache\Repository\Model\Podcast_Episode;
 use Ampache\Repository\PodcastEpisodeRepositoryInterface;
@@ -42,9 +41,6 @@ class PodcastDeleterTest extends MockeryTestCase
     /** @var PodcastEpisodeDeleterInterface|MockInterface */
     private MockInterface $podcastEpisodeDeleter;
 
-    /** @var ModelFactoryInterface|MockInterface */
-    private MockInterface $modelFactory;
-
     private PodcastDeleter $subject;
 
     public function setUp(): void
@@ -52,13 +48,11 @@ class PodcastDeleterTest extends MockeryTestCase
         $this->podcastRepository        = $this->mock(PodcastRepositoryInterface::class);
         $this->podcastEpisodeRepository = $this->mock(PodcastEpisodeRepositoryInterface::class);
         $this->podcastEpisodeDeleter    = $this->mock(PodcastEpisodeDeleterInterface::class);
-        $this->modelFactory             = $this->mock(ModelFactoryInterface::class);
 
         $this->subject = new PodcastDeleter(
             $this->podcastRepository,
             $this->podcastEpisodeRepository,
-            $this->podcastEpisodeDeleter,
-            $this->modelFactory
+            $this->podcastEpisodeDeleter
         );
     }
 
@@ -73,8 +67,7 @@ class PodcastDeleterTest extends MockeryTestCase
             ->with($podcast)
             ->once()
             ->andReturn([$episodeId]);
-
-        $this->modelFactory->shouldReceive('createPodcastEpisode')
+        $this->podcastEpisodeRepository->shouldReceive('findById')
             ->with($episodeId)
             ->once()
             ->andReturn($podcastEpisode);

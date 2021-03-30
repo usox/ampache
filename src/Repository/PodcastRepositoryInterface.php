@@ -22,6 +22,7 @@
 namespace Ampache\Repository;
 
 use Ampache\Repository\Model\Podcast;
+use Ampache\Repository\Model\PodcastInterface;
 
 interface PodcastRepositoryInterface
 {
@@ -33,7 +34,7 @@ interface PodcastRepositoryInterface
     public function getPodcastIds(int $catalogId): array;
 
     public function remove(
-        Podcast $podcast
+        PodcastInterface $podcast
     ): bool;
 
     public function updateLastsync(

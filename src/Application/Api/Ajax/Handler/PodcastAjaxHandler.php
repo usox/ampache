@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=0);
-
 /*
  * vim:set softtabstop=4 shiftwidth=4 expandtab:
  *
@@ -23,6 +21,8 @@ declare(strict_types=0);
  *
  */
 
+declare(strict_types=0);
+
 namespace Ampache\Application\Api\Ajax\Handler;
 
 use Ampache\Module\Authorization\Access;
@@ -30,7 +30,7 @@ use Ampache\Module\Podcast\PodcastEpisodeDownloaderInterface;
 use Ampache\Module\Podcast\PodcastSyncerInterface;
 use Ampache\Module\System\Core;
 use Ampache\Repository\Model\Podcast;
-use Ampache\Repository\Model\Podcast_Episode;
+use Ampache\Repository\PodcastEpisodeRepositoryInterface;
 
 final class PodcastAjaxHandler implements AjaxHandlerInterface
 {
@@ -38,12 +38,16 @@ final class PodcastAjaxHandler implements AjaxHandlerInterface
 
     private PodcastEpisodeDownloaderInterface $podcastEpisodeDownloader;
 
+    private PodcastEpisodeRepositoryInterface $podcastEpisodeRepository;
+
     public function __construct(
         PodcastSyncerInterface $podcastSyncer,
-        PodcastEpisodeDownloaderInterface $podcastEpisodeDownloader
+        PodcastEpisodeDownloaderInterface $podcastEpisodeDownloader,
+        PodcastEpisodeRepositoryInterface $podcastEpisodeRepository
     ) {
         $this->podcastSyncer            = $podcastSyncer;
         $this->podcastEpisodeDownloader = $podcastEpisodeDownloader;
+        $this->podcastEpisodeRepository = $podcastEpisodeRepository;
     }
 
     public function handle(): void
@@ -65,11 +69,13 @@ final class PodcastAjaxHandler implements AjaxHandlerInterface
                         debug_event('podcast.ajax', 'Cannot find podcast', 1);
                     }
                 } elseif (isset($_REQUEST['podcast_episode_id'])) {
-                    $episode = new Podcast_Episode($_REQUEST['podcast_episode_id']);
-                    if ($episode->isNew() === false) {
-                        $this->podcastEpisodeDownloader->download($episode);
-                    } else {
+                    $episode = $this->podcastEpisodeRepository->findById(
+                        (int) $_REQUEST['podcast_episode_id']
+                    );
+                    if ($episode === null) {
                         debug_event('podcast.ajax', 'Cannot find podcast episode', 1);
+                    } else {
+                        $this->podcastEpisodeDownloader->download($episode);
                     }
                 }
                 $results['rfc3514'] = '0x1';

@@ -102,4 +102,8 @@ interface PodcastEpisodeRepositoryInterface
      * Returns the amount of available episodes for a certain podcast
      */
     public function getEpisodeCount(PodcastInterface $podcast): int;
+
+    public function findById(
+        int $id
+    ): ?PodcastEpisodeInterface;
 }

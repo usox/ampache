@@ -29,9 +29,13 @@ use Ampache\Repository\Model\User;
 use Ampache\Repository\Model\Userflag;
 use Ampache\Module\Api\Ajax;
 use Ampache\Module\Util\Ui;
+use Ampache\Repository\PodcastEpisodeRepositoryInterface;
 
 /** @var Browse $browse */
 /** @var int[] $object_ids */
+
+global $dic;
+$podcastEpisodeRepository = $dic->get(PodcastEpisodeRepositoryInterface::class);
 
 $thcount  = 7;
 $is_table = $browse->is_grid_view();
@@ -83,7 +87,7 @@ $cel_counter = ($is_table) ? "cel_counter" : 'grid_counter'; ?>
         }
 
         foreach ($object_ids as $episode_id) {
-            $libitem = new Podcast_Episode($episode_id); ?>
+            $libitem = $podcastEpisodeRepository->findById((int) $episode_id); ?>
         <tr id="podcast_episode_<?php echo $libitem->getId(); ?>" class="<?php echo Ui::flip_class(); ?>">
             <?php require Ui::find_template('show_podcast_episode_row.inc.php'); ?>
         </tr>

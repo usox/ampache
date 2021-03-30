@@ -118,7 +118,6 @@ final class CronProcessCommand extends Command
          */
         Share::garbage_collection();
         Stream::garbage_collection();
-        Podcast_Episode::garbage_collection();
         $this->podcastEpisodeRepository->collectGarbage();
         $this->bookmarkRepository->collectGarbage();
         Recommendation::garbage_collection();

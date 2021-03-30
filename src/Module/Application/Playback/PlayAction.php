@@ -52,6 +52,7 @@ use Ampache\Module\System\Dba;
 use Ampache\Module\System\Session;
 use Ampache\Module\Util\Horde_Browser;
 use Ampache\Module\Util\ObjectTypeToClassNameMapper;
+use Ampache\Repository\PodcastEpisodeRepositoryInterface;
 use Ampache\Repository\SongRepositoryInterface;
 use Ampache\Repository\UserRepositoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -75,6 +76,8 @@ final class PlayAction implements ApplicationActionInterface
 
     private ExtensionToMimeTypeMapperInterface $extensionToMimeTypeMapper;
 
+    private PodcastEpisodeRepositoryInterface $podcastEpisodeRepository;
+
     public function __construct(
         Horde_Browser $browser,
         AuthenticationManagerInterface $authenticationManager,
@@ -82,7 +85,8 @@ final class PlayAction implements ApplicationActionInterface
         SongRepositoryInterface $songRepository,
         UserRepositoryInterface $userRepository,
         UserMediaPlaySaverAdapterInterface $userMediaPlaySaverAdapter,
-        ExtensionToMimeTypeMapperInterface $extensionToMimeTypeMapper
+        ExtensionToMimeTypeMapperInterface $extensionToMimeTypeMapper,
+        PodcastEpisodeRepositoryInterface $podcastEpisodeRepository
     ) {
         $this->browser                   = $browser;
         $this->authenticationManager     = $authenticationManager;
@@ -91,6 +95,7 @@ final class PlayAction implements ApplicationActionInterface
         $this->userRepository            = $userRepository;
         $this->userMediaPlaySaverAdapter = $userMediaPlaySaverAdapter;
         $this->extensionToMimeTypeMapper = $extensionToMimeTypeMapper;
+        $this->podcastEpisodeRepository  = $podcastEpisodeRepository;
     }
 
     public function run(ServerRequestInterface $request, GuiGatekeeperInterface $gatekeeper): ?ResponseInterface
@@ -424,8 +429,7 @@ final class PlayAction implements ApplicationActionInterface
             $media = new Song_Preview($object_id);
             $media->format();
         } elseif ($type == 'podcast_episode') {
-            $media = new Podcast_Episode($object_id);
-            $media->format();
+            $media = $this->podcastEpisodeRepository->findById((int) $object_id);
         } else {
             $type  = 'video';
             $media = new Video($object_id);

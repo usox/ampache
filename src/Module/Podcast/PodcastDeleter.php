@@ -23,7 +23,6 @@ declare(strict_types=1);
 
 namespace Ampache\Module\Podcast;
 
-use Ampache\Repository\Model\ModelFactoryInterface;
 use Ampache\Repository\Model\PodcastInterface;
 use Ampache\Repository\PodcastEpisodeRepositoryInterface;
 use Ampache\Repository\PodcastRepositoryInterface;
@@ -39,18 +38,14 @@ final class PodcastDeleter implements PodcastDeleterInterface
 
     private PodcastEpisodeDeleterInterface $podcastEpisodeDeleter;
 
-    private ModelFactoryInterface $modelFactory;
-
     public function __construct(
         PodcastRepositoryInterface $podcastRepository,
         PodcastEpisodeRepositoryInterface $podcastEpisodeRepository,
-        PodcastEpisodeDeleterInterface $podcastEpisodeDeleter,
-        ModelFactoryInterface $modelFactory
+        PodcastEpisodeDeleterInterface $podcastEpisodeDeleter
     ) {
         $this->podcastRepository        = $podcastRepository;
         $this->podcastEpisodeRepository = $podcastEpisodeRepository;
         $this->podcastEpisodeDeleter    = $podcastEpisodeDeleter;
-        $this->modelFactory             = $modelFactory;
     }
 
     public function delete(
@@ -60,7 +55,7 @@ final class PodcastDeleter implements PodcastDeleterInterface
 
         foreach ($episodeIds as $episodeId) {
             $this->podcastEpisodeDeleter->delete(
-                $this->modelFactory->createPodcastEpisode($episodeId)
+                $this->podcastEpisodeRepository->findById($episodeId)
             );
         }
 

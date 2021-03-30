@@ -35,6 +35,7 @@ use Ampache\Repository\Model\Clip;
 use Ampache\Repository\AlbumRepositoryInterface;
 use Ampache\Repository\CatalogRepositoryInterface;
 use Ampache\Repository\LiveStreamRepositoryInterface;
+use Ampache\Repository\Model\PodcastEpisodeInterface;
 use Ampache\Repository\PlaylistRepositoryInterface;
 use Ampache\Repository\PodcastEpisodeRepositoryInterface;
 use Ampache\Repository\SongRepositoryInterface;
@@ -750,8 +751,8 @@ class Upnp_Api
                         }
                         break;
                     case 3:
-                        $episode = new Podcast_Episode($pathreq[2]);
-                        if (!$episode->isNew()) {
+                        $episode = static::getPodcastEpisodeRepository()->findById((int) $pathreq[2]);
+                        if ($episode !== null) {
                             $meta = self::_itemPodcastEpisode($episode, $root . '/podcasts/' . $pathreq[1]);
                         }
                         break;
@@ -959,10 +960,11 @@ class Upnp_Api
                     case 2: // Get podcast episodes list
                         $podcast = new Podcast($pathreq[1]);
                         if ($podcast->id) {
-                            $episodes                  = static::getPodcastEpisodeRepository()->getEpisodeIds($podcast);
-                            [$maxCount, $episodes]     = self::_slice($episodes, $start, $count);
+                            $podcastEpisodeRepository = static::getPodcastEpisodeRepository();
+                            $episodes                 = $podcastEpisodeRepository->getEpisodeIds($podcast);
+                            [$maxCount, $episodes]    = self::_slice($episodes, $start, $count);
                             foreach ($episodes as $episode_id) {
-                                $episode      = new Podcast_Episode($episode_id);
+                                $episode      = $podcastEpisodeRepository->findById($episode_id);
                                 $mediaItems[] = self::_itemPodcastEpisode($episode, $parent);
                             }
                         }
@@ -1835,11 +1837,11 @@ class Upnp_Api
     }
 
     /**
-     * @param Podcast_Episode $episode
+     * @param PodcastEpisodeInterface $episode
      * @param string $parent
      * @return array
      */
-    private static function _itemPodcastEpisode($episode, $parent)
+    private static function _itemPodcastEpisode(PodcastEpisodeInterface $episode, $parent)
     {
         $api_session = (AmpConfig::get('require_session')) ? Stream::get_session() : false;
         $art_url     = Art::url($episode->getPodcast()->getId(), 'podcast', $api_session);

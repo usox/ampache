@@ -22,12 +22,12 @@
 
 namespace Ampache\Module\Podcast;
 
-use Ampache\Repository\Model\Podcast_Episode;
+use Ampache\Repository\Model\PodcastEpisodeInterface;
 
 interface PodcastEpisodeDownloaderInterface
 {
     /**
      * Downloads the podcast episode to the catalog
      */
-    public function download(Podcast_Episode $podcastEpisode): void;
+    public function download(PodcastEpisodeInterface $podcastEpisode): void;
 }

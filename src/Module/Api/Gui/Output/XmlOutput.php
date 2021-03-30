@@ -676,7 +676,7 @@ final class XmlOutput implements ApiOutputInterface
         $string = ($simple === false) ? "<total_count>" . Catalog::get_count('podcast_episode') . "</total_count>\n" : '';
 
         foreach ($podcastEpisodeIds as $episodeId) {
-            $episode = new Podcast_Episode($episodeId);
+            $episode = $this->podcastEpisodeRepository->findById($episodeId);
             $rating  = new Rating($episodeId, 'podcast_episode');
             $flag    = new Userflag($episodeId, 'podcast_episode');
             $art_url = Art::url($episode->getPodcast()->getId(), 'podcast', Core::get_request('auth'));

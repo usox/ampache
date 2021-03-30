@@ -33,7 +33,7 @@ use Ampache\Module\Catalog\MediaDeletionCheckerInterface;
 use Ampache\Module\Podcast\PodcastEpisodeDeleterInterface;
 use Ampache\Module\System\LegacyLogger;
 use Ampache\Module\Util\UiInterface;
-use Ampache\Repository\Model\ModelFactoryInterface;
+use Ampache\Repository\PodcastEpisodeRepositoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
@@ -46,28 +46,28 @@ final class ConfirmDeleteAction implements ApplicationActionInterface
 
     private UiInterface $ui;
 
-    private ModelFactoryInterface $modelFactory;
-
     private LoggerInterface $logger;
 
     private MediaDeletionCheckerInterface $mediaDeletionChecker;
 
     private PodcastEpisodeDeleterInterface $podcastEpisodeDeleter;
 
+    private PodcastEpisodeRepositoryInterface $podcastEpisodeRepository;
+
     public function __construct(
         ConfigContainerInterface $configContainer,
         UiInterface $ui,
-        ModelFactoryInterface $modelFactory,
         LoggerInterface $logger,
         MediaDeletionCheckerInterface $mediaDeletionChecker,
-        PodcastEpisodeDeleterInterface $podcastEpisodeDeleter
+        PodcastEpisodeDeleterInterface $podcastEpisodeDeleter,
+        PodcastEpisodeRepositoryInterface $podcastEpisodeRepository
     ) {
-        $this->configContainer       = $configContainer;
-        $this->ui                    = $ui;
-        $this->modelFactory          = $modelFactory;
-        $this->logger                = $logger;
-        $this->mediaDeletionChecker  = $mediaDeletionChecker;
-        $this->podcastEpisodeDeleter = $podcastEpisodeDeleter;
+        $this->configContainer          = $configContainer;
+        $this->ui                       = $ui;
+        $this->logger                   = $logger;
+        $this->mediaDeletionChecker     = $mediaDeletionChecker;
+        $this->podcastEpisodeDeleter    = $podcastEpisodeDeleter;
+        $this->podcastEpisodeRepository = $podcastEpisodeRepository;
     }
 
     public function run(ServerRequestInterface $request, GuiGatekeeperInterface $gatekeeper): ?ResponseInterface
@@ -78,7 +78,7 @@ final class ConfirmDeleteAction implements ApplicationActionInterface
 
         $episodeId = (int) ($request->getQueryParams()['podcast_episode_id'] ?? 0);
 
-        $episode = $this->modelFactory->createPodcastEpisode($episodeId);
+        $episode = $this->podcastEpisodeRepository->findById($episodeId);
 
         if ($this->mediaDeletionChecker->mayDelete($episode, $gatekeeper->getUserId()) === false) {
             $this->logger->warning(

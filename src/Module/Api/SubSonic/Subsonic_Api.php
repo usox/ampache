@@ -62,6 +62,7 @@ use Ampache\Repository\Model\Tag;
 use Ampache\Repository\Model\User;
 use Ampache\Repository\Model\Userflag;
 use Ampache\Repository\PlaylistRepositoryInterface;
+use Ampache\Repository\PodcastEpisodeRepositoryInterface;
 use Ampache\Repository\PrivateMessageRepositoryInterface;
 use Ampache\Repository\SearchRepositoryInterface;
 use Ampache\Repository\ShareRepositoryInterface;
@@ -1178,8 +1179,10 @@ class Subsonic_Api
             $object = new Song(Subsonic_Xml_Data::getAmpacheId($fileid));
             $url    = $object->play_url($params, 'api', function_exists('curl_version'), $user_id);
         } elseif (Subsonic_Xml_Data::isPodcastEp($fileid)) {
-            $object = new Podcast_Episode(Subsonic_Xml_Data::getAmpacheId($fileid));
-            $url    = $object->play_url($params, 'api', function_exists('curl_version'), $user_id);
+            $object = static::getPodcastEpisodeRepository()->findById(
+                (int) Subsonic_Xml_Data::getAmpacheId($fileid)
+            );
+            $url = $object->play_url($params, 'api', function_exists('curl_version'), $user_id);
         }
 
         // return an error on missing files
@@ -1208,8 +1211,10 @@ class Subsonic_Api
             $object = new Song(Subsonic_Xml_Data::getAmpacheId($fileid));
             $url    = $object->play_url($params, 'api', function_exists('curl_version'), $user_id);
         } elseif (Subsonic_Xml_Data::isPodcastEp($fileid)) {
-            $object = new Podcast_Episode(Subsonic_Xml_Data::getAmpacheId($fileid));
-            $url    = $object->play_url($params, 'api', function_exists('curl_version'), $user_id);
+            $object = static::getPodcastEpisodeRepository()->findById(
+                (int) Subsonic_Xml_Data::getAmpacheId($fileid)
+            );
+            $url = $object->play_url($params, 'api', function_exists('curl_version'), $user_id);
         }
         // return an error on missing files
         if (empty($url)) {
@@ -2555,5 +2560,15 @@ class Subsonic_Api
         global $dic;
 
         return $dic->get(ShareCreatorInterface::class);
+    }
+
+    /**
+     * @deprecated Inject by constructor
+     */
+    private static function getPodcastEpisodeRepository(): PodcastEpisodeRepositoryInterface
+    {
+        global $dic;
+
+        return $dic->get(PodcastEpisodeRepositoryInterface::class);
     }
 }

@@ -84,7 +84,7 @@ final class PodcastEpisodeRepository implements PodcastEpisodeRepositoryInterfac
         );
 
         while ($episodeId = $result->fetchOne()) {
-            yield $this->modelFactory->createPodcastEpisode((int) $episodeId);
+            yield $this->findById((int) $episodeId);
         }
     }
 
@@ -117,7 +117,7 @@ final class PodcastEpisodeRepository implements PodcastEpisodeRepositoryInterfac
         );
 
         while ($episodeId = $result->fetchOne()) {
-            yield $this->modelFactory->createPodcastEpisode((int) $episodeId);
+            yield $this->findById((int) $episodeId);
         }
     }
 
@@ -147,7 +147,7 @@ final class PodcastEpisodeRepository implements PodcastEpisodeRepositoryInterfac
         );
 
         while ($episodeId = $result->fetchOne()) {
-            yield $this->modelFactory->createPodcastEpisode((int) $episodeId);
+            yield $this->findById((int) $episodeId);
         }
     }
 
@@ -312,5 +312,16 @@ final class PodcastEpisodeRepository implements PodcastEpisodeRepositoryInterfac
             $sql,
             [$podcast->getId()]
         );
+    }
+
+    public function findById(
+        int $id
+    ): ?PodcastEpisodeInterface {
+        $episode = $this->modelFactory->createPodcastEpisode($id);
+        if ($episode->isNew()) {
+            return null;
+        }
+
+        return $episode;
     }
 }

@@ -39,6 +39,7 @@ use Ampache\Module\System\Dba;
 use Ampache\Repository\Model\Live_Stream;
 use Ampache\Repository\Model\Playlist;
 use Ampache\Repository\Model\Podcast_Episode;
+use Ampache\Repository\Model\PodcastEpisodeInterface;
 use Ampache\Repository\Model\Preference;
 use Ampache\Repository\Model\PrivateMsg;
 use Ampache\Repository\Model\Rating;
@@ -872,7 +873,7 @@ class Subsonic_Xml_Data
      * getAmpacheObject
      * Return the Ampache media object
      * @param integer $object_id
-     * @return Song|Video|Podcast_Episode|null
+     * @return Song|Video|PodcastEpisodeInterface|null
      */
     public static function getAmpacheObject($object_id)
     {
@@ -883,7 +884,9 @@ class Subsonic_Xml_Data
             return new Video(Subsonic_Xml_Data::getAmpacheId($object_id));
         }
         if (Subsonic_Xml_Data::isPodcastEp($object_id)) {
-            return new Podcast_Episode(Subsonic_Xml_Data::getAmpacheId($object_id));
+            return static::getPodcastEpisodeRepository()->findById(
+                (int) Subsonic_Xml_Data::getAmpacheId($object_id)
+            );
         }
 
         return null;
@@ -1471,8 +1474,10 @@ class Subsonic_Xml_Data
             if ($includeEpisodes) {
                 $episodes = static::getPodcastEpisodeRepository()->getEpisodeIds($podcast);
                 foreach ($episodes as $episode_id) {
-                    $episode = new Podcast_Episode($episode_id);
-                    self::addPodcastEpisode($xchannel, $episode);
+                    self::addPodcastEpisode(
+                        $xchannel,
+                        static::getPodcastEpisodeRepository()->findById($episode_id)
+                    );
                 }
             }
         }
@@ -1481,7 +1486,7 @@ class Subsonic_Xml_Data
     /**
      * addPodcastEpisode
      * @param SimpleXMLElement $xml
-     * @param Podcast_Episode $episode
+     * @param PodcastEpisodeInterface $episode
      * @param string $elementName
      */
     private static function addPodcastEpisode($xml, $episode, $elementName = 'episode')
@@ -1563,7 +1568,11 @@ class Subsonic_Xml_Data
         } elseif ($bookmark->object_type == "video") {
             self::addVideo($xbookmark, new Video($bookmark->object_id), 'entry');
         } elseif ($bookmark->object_type == "podcast_episode") {
-            self::addPodcastEpisode($xbookmark, new Podcast_Episode($bookmark->object_id), 'entry');
+            self::addPodcastEpisode(
+                $xbookmark,
+                static::getPodcastEpisodeRepository()->findById((int) $bookmark->object_id),
+                'entry'
+            );
         }
     }
 

@@ -29,7 +29,7 @@ use Ampache\Module\Api\SubSonic\Subsonic_Api;
 use Ampache\Module\Api\SubSonic\Subsonic_Xml_Data;
 use Ampache\Module\Authorization\Access;
 use Ampache\Module\Podcast\PodcastEpisodeDownloaderInterface;
-use Ampache\Repository\Model\ModelFactoryInterface;
+use Ampache\Repository\PodcastEpisodeRepositoryInterface;
 
 /**
  * Request the server to download a podcast episode
@@ -39,14 +39,14 @@ final class DownloadPodcastEpisodeMethod implements SubsonicApiMethodInterface
 {
     private PodcastEpisodeDownloaderInterface $podcastEpisodeDownloader;
 
-    private ModelFactoryInterface $modelFactory;
+    private PodcastEpisodeRepositoryInterface $podcastEpisodeRepository;
 
     public function __construct(
         PodcastEpisodeDownloaderInterface $podcastEpisodeDownloader,
-        ModelFactoryInterface $modelFactory
+        PodcastEpisodeRepositoryInterface $podcastEpisodeRepository
     ) {
         $this->podcastEpisodeDownloader = $podcastEpisodeDownloader;
-        $this->modelFactory             = $modelFactory;
+        $this->podcastEpisodeRepository = $podcastEpisodeRepository;
     }
 
     public function handle(array $input): void
@@ -54,8 +54,10 @@ final class DownloadPodcastEpisodeMethod implements SubsonicApiMethodInterface
         $id = Subsonic_Api::check_parameter($input, 'id');
 
         if (AmpConfig::get('podcast') && Access::check('interface', 75)) {
-            $episode = $this->modelFactory->createPodcastEpisode((int) Subsonic_Xml_Data::getAmpacheId($id));
-            if (!$episode->isNew()) {
+            $episode = $this->podcastEpisodeRepository->findById(
+                (int) Subsonic_Xml_Data::getAmpacheId($id)
+            );
+            if ($episode !== null) {
                 $this->podcastEpisodeDownloader->download($episode);
                 $response = Subsonic_Xml_Data::createSuccessResponse('downloadpodcastepisode');
             } else {

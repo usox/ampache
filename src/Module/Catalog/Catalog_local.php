@@ -929,16 +929,17 @@ class Catalog_local extends Catalog
         $podcasts                 = static::getPodcastByCatalogLoader()->load();
         $podcastSyncer            = static::getPodcastSyncer();
         $podcastEpisodeDownloader = static::getPodcastEpisodeDownloader();
+        $podcastEpisodeRepository = static::getPodcastEpisodeRepository();
 
         foreach ($podcasts as $podcast) {
             $podcastSyncer->sync($podcast, false);
-            $episodeIds = static::getPodcastEpisodeRepository()->getEpisodeIds(
+            $episodeIds = $podcastEpisodeRepository->getEpisodeIds(
                 $podcast,
                 PodcastStateEnum::PENDING
             );
             foreach ($episodeIds as $episodeId) {
                 $podcastEpisodeDownloader->download(
-                    new Podcast_Episode($episodeId)
+                    $podcastEpisodeRepository->findById($episodeId)
                 );
 
                 $this->count++;

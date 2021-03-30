@@ -104,6 +104,11 @@ class PodcastEpisodeRepositoryTest extends MockeryTestCase
             ->once()
             ->andReturn($episode);
 
+        $episode->shouldReceive('isNew')
+            ->withNoArgs()
+            ->once()
+            ->andReturnFalse();
+
         foreach ($this->subject->getNewestPodcastEpisodes($catalogId, $count) as $episodeObj) {
             $this->assertSame(
                 $episode,
@@ -161,6 +166,11 @@ class PodcastEpisodeRepositoryTest extends MockeryTestCase
             ->once()
             ->andReturn($episode);
 
+        $episode->shouldReceive('isNew')
+            ->withNoArgs()
+            ->once()
+            ->andReturnFalse();
+
         foreach ($this->subject->getDownloadableEpisodes($podcast, $limit) as $episodeObj) {
             $this->assertSame(
                 $episode,
@@ -214,6 +224,11 @@ class PodcastEpisodeRepositoryTest extends MockeryTestCase
             ->with($episodeId)
             ->once()
             ->andReturn($episode);
+
+        $episode->shouldReceive('isNew')
+            ->withNoArgs()
+            ->once()
+            ->andReturnFalse();
 
         foreach ($this->subject->getDeletableEpisodes($podcast, $limit) as $episodeObj) {
             $this->assertSame(
@@ -474,6 +489,27 @@ class PodcastEpisodeRepositoryTest extends MockeryTestCase
         $this->assertSame(
             $count,
             $this->subject->getEpisodeCount($podcast)
+        );
+    }
+
+    public function testGetFindByIdReturnsNullIfNotFound(): void
+    {
+        $id = 666;
+
+        $episode = $this->mock(PodcastEpisodeInterface::class);
+
+        $this->modelFactory->shouldReceive('createPodcastEpisode')
+            ->with($id)
+            ->once()
+            ->andReturn($episode);
+
+        $episode->shouldReceive('isNew')
+            ->withNoArgs()
+            ->once()
+            ->andReturnTrue();
+
+        $this->assertNull(
+            $this->subject->findById($id)
         );
     }
 }

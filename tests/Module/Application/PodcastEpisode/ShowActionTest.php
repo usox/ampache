@@ -31,8 +31,8 @@ use Ampache\Module\Authorization\GuiGatekeeperInterface;
 use Ampache\Module\Podcast\Gui\PodcastEpisodeViewAdapterInterface;
 use Ampache\Module\Podcast\Gui\PodcastGuiFactoryInterface;
 use Ampache\Module\Util\UiInterface;
-use Ampache\Repository\Model\ModelFactoryInterface;
 use Ampache\Repository\Model\Podcast_Episode;
+use Ampache\Repository\PodcastEpisodeRepositoryInterface;
 use Mockery\MockInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -44,31 +44,31 @@ class ShowActionTest extends MockeryTestCase
     /** @var UiInterface|MockInterface */
     private MockInterface $ui;
 
-    /** @var ModelFactoryInterface|MockInterface */
-    private MockInterface $modelFactory;
-
     /** @var MockInterface|TalFactoryInterface */
     private MockInterface $talFactory;
 
     /** @var MockInterface|PodcastGuiFactoryInterface */
     private MockInterface $podcastGuiFactory;
 
+    /** @var MockInterface|PodcastEpisodeRepositoryInterface */
+    private MockInterface $podcastEpisodeRepository;
+
     private ShowAction $subject;
 
     public function setUp(): void
     {
-        $this->configContainer   = $this->mock(ConfigContainerInterface::class);
-        $this->ui                = $this->mock(UiInterface::class);
-        $this->modelFactory      = $this->mock(ModelFactoryInterface::class);
-        $this->talFactory        = $this->mock(TalFactoryInterface::class);
-        $this->podcastGuiFactory = $this->mock(PodcastGuiFactoryInterface::class);
+        $this->configContainer          = $this->mock(ConfigContainerInterface::class);
+        $this->ui                       = $this->mock(UiInterface::class);
+        $this->talFactory               = $this->mock(TalFactoryInterface::class);
+        $this->podcastGuiFactory        = $this->mock(PodcastGuiFactoryInterface::class);
+        $this->podcastEpisodeRepository = $this->mock(PodcastEpisodeRepositoryInterface::class);
 
         $this->subject = new ShowAction(
             $this->configContainer,
             $this->ui,
-            $this->modelFactory,
             $this->talFactory,
-            $this->podcastGuiFactory
+            $this->podcastGuiFactory,
+            $this->podcastEpisodeRepository
         );
     }
 
@@ -126,7 +126,7 @@ class ShowActionTest extends MockeryTestCase
             ->once()
             ->andReturn(['podcast_episode' => (string) $podcastEpisodeId]);
 
-        $this->modelFactory->shouldReceive('createPodcastEpisode')
+        $this->podcastEpisodeRepository->shouldReceive('findById')
             ->with($podcastEpisodeId)
             ->once()
             ->andReturn($episode);

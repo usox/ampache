@@ -28,7 +28,7 @@ use Ampache\Module\Catalog\Loader\CatalogLoaderInterface;
 use Ampache\Module\System\LegacyLogger;
 use Ampache\Module\Util\UtilityFactoryInterface;
 use Ampache\Repository\Model\ModelFactoryInterface;
-use Ampache\Repository\Model\Podcast_Episode;
+use Ampache\Repository\Model\PodcastEpisodeInterface;
 use Ampache\Repository\Model\PodcastInterface;
 use Ampache\Repository\PodcastEpisodeRepositoryInterface;
 use Psr\Log\LoggerInterface;
@@ -62,7 +62,7 @@ final class PodcastEpisodeDownloader implements PodcastEpisodeDownloaderInterfac
     /**
      * Downloads the podcast episode to the catalog
      */
-    public function download(Podcast_Episode $podcastEpisode): void
+    public function download(PodcastEpisodeInterface $podcastEpisode): void
     {
         $source = $podcastEpisode->getSource();
 

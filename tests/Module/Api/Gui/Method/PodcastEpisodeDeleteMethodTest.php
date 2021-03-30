@@ -34,8 +34,8 @@ use Ampache\Module\Api\Gui\Method\Exception\ResultEmptyException;
 use Ampache\Module\Api\Gui\Output\ApiOutputInterface;
 use Ampache\Module\Catalog\MediaDeletionCheckerInterface;
 use Ampache\Module\Podcast\PodcastEpisodeDeleterInterface;
-use Ampache\Repository\Model\ModelFactoryInterface;
 use Ampache\Repository\Model\Podcast_Episode;
+use Ampache\Repository\PodcastEpisodeRepositoryInterface;
 use Ampache\Repository\UpdateInfoRepositoryInterface;
 use Mockery\MockInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -50,9 +50,6 @@ class PodcastEpisodeDeleteMethodTest extends MockeryTestCase
     /** @var ConfigContainerInterface|MockInterface|null */
     private MockInterface $configContainer;
 
-    /** @var ModelFactoryInterface|MockInterface|null */
-    private MockInterface $modelFactory;
-
     /** @var MediaDeletionCheckerInterface|MockInterface|null */
     private MockInterface $mediaDeletionChecker;
 
@@ -62,24 +59,27 @@ class PodcastEpisodeDeleteMethodTest extends MockeryTestCase
     /** @var MockInterface|PodcastEpisodeDeleterInterface */
     private MockInterface $podcastEpisodeDeleter;
 
+    /** @var MockInterface|PodcastEpisodeRepositoryInterface */
+    private MockInterface $podcastEpisodeRepository;
+
     private ?PodcastEpisodeDeleteMethod $subject;
 
     public function setUp(): void
     {
-        $this->streamFactory         = $this->mock(StreamFactoryInterface::class);
-        $this->configContainer       = $this->mock(ConfigContainerInterface::class);
-        $this->modelFactory          = $this->mock(ModelFactoryInterface::class);
-        $this->mediaDeletionChecker  = $this->mock(MediaDeletionCheckerInterface::class);
-        $this->updateInfoRepository  = $this->mock(UpdateInfoRepositoryInterface::class);
-        $this->podcastEpisodeDeleter = $this->mock(PodcastEpisodeDeleterInterface::class);
+        $this->streamFactory            = $this->mock(StreamFactoryInterface::class);
+        $this->configContainer          = $this->mock(ConfigContainerInterface::class);
+        $this->mediaDeletionChecker     = $this->mock(MediaDeletionCheckerInterface::class);
+        $this->updateInfoRepository     = $this->mock(UpdateInfoRepositoryInterface::class);
+        $this->podcastEpisodeDeleter    = $this->mock(PodcastEpisodeDeleterInterface::class);
+        $this->podcastEpisodeRepository = $this->mock(PodcastEpisodeRepositoryInterface::class);
 
         $this->subject = new PodcastEpisodeDeleteMethod(
             $this->streamFactory,
             $this->configContainer,
-            $this->modelFactory,
             $this->mediaDeletionChecker,
             $this->updateInfoRepository,
-            $this->podcastEpisodeDeleter
+            $this->podcastEpisodeDeleter,
+            $this->podcastEpisodeRepository
         );
     }
 
@@ -144,15 +144,10 @@ class PodcastEpisodeDeleteMethodTest extends MockeryTestCase
         $this->expectException(ResultEmptyException::class);
         $this->expectExceptionMessage(sprintf('Not Found: %d', $objectId));
 
-        $this->modelFactory->shouldReceive('createPodcastEpisode')
+        $this->podcastEpisodeRepository->shouldReceive('findById')
             ->with($objectId)
             ->once()
-            ->andReturn($podcastEpisode);
-
-        $podcastEpisode->shouldReceive('isNew')
-            ->withNoArgs()
-            ->once()
-            ->andReturnTrue();
+            ->andReturnNull();
 
         $this->subject->handle(
             $gatekeeper,
@@ -180,15 +175,10 @@ class PodcastEpisodeDeleteMethodTest extends MockeryTestCase
         $this->expectException(AccessDeniedException::class);
         $this->expectExceptionMessage('Require: 75');
 
-        $this->modelFactory->shouldReceive('createPodcastEpisode')
+        $this->podcastEpisodeRepository->shouldReceive('findById')
             ->with($objectId)
             ->once()
             ->andReturn($podcastEpisode);
-
-        $podcastEpisode->shouldReceive('isNew')
-            ->withNoArgs()
-            ->once()
-            ->andReturnFalse();
 
         $gatekeeper->shouldReceive('getUser->getId')
             ->withNoArgs()
@@ -226,15 +216,11 @@ class PodcastEpisodeDeleteMethodTest extends MockeryTestCase
         $this->expectException(RequestParamMissingException::class);
         $this->expectExceptionMessage(sprintf('Bad Request: %d', $objectId));
 
-        $this->modelFactory->shouldReceive('createPodcastEpisode')
+        $this->podcastEpisodeRepository->shouldReceive('findById')
             ->with($objectId)
             ->once()
             ->andReturn($podcastEpisode);
 
-        $podcastEpisode->shouldReceive('isNew')
-            ->withNoArgs()
-            ->once()
-            ->andReturnFalse();
         $podcastEpisode->shouldReceive('getId')
             ->withNoArgs()
             ->once()
@@ -280,15 +266,11 @@ class PodcastEpisodeDeleteMethodTest extends MockeryTestCase
             ->once()
             ->andReturnTrue();
 
-        $this->modelFactory->shouldReceive('createPodcastEpisode')
+        $this->podcastEpisodeRepository->shouldReceive('findById')
             ->with($objectId)
             ->once()
             ->andReturn($podcastEpisode);
 
-        $podcastEpisode->shouldReceive('isNew')
-            ->withNoArgs()
-            ->once()
-            ->andReturnFalse();
         $podcastEpisode->shouldReceive('getId')
             ->withNoArgs()
             ->once()

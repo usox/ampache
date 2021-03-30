@@ -765,7 +765,7 @@ final class JsonOutput implements ApiOutputInterface
         $result = [];
 
         foreach ($podcastEpisodeIds as $episode_id) {
-            $episode = new Podcast_Episode($episode_id);
+            $episode = $this->podcastEpisodeRepository->findById($episode_id);
             $rating  = new Rating($episode_id, 'podcast_episode');
             $flag    = new Userflag($episode_id, 'podcast_episode');
             $art_url = Art::url($episode->getPodcast()->getId(), 'podcast', Core::get_request('auth'));
