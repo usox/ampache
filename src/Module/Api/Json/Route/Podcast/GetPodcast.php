@@ -30,6 +30,7 @@ use Ampache\Module\Api\Gui\Method\Exception\FunctionDisabledException;
 use Ampache\Module\Api\Json\AbstractApiMethod;
 use Ampache\Module\Api\Json\ErrorHandling\Exception\ObjectNotFoundException;
 use Ampache\Repository\Model\ModelFactoryInterface;
+use Ampache\Repository\PodcastRepositoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -42,14 +43,14 @@ final class GetPodcast extends AbstractApiMethod
 {
     private ConfigContainerInterface $configContainer;
 
-    private ModelFactoryInterface $modelFactory;
+    private PodcastRepositoryInterface $podcastRepository;
 
     public function __construct(
         ConfigContainerInterface $configContainer,
-        ModelFactoryInterface $modelFactory
+        PodcastRepositoryInterface $podcastRepository
     ) {
-        $this->configContainer = $configContainer;
-        $this->modelFactory    = $modelFactory;
+        $this->configContainer   = $configContainer;
+        $this->podcastRepository = $podcastRepository;
     }
 
     /**
@@ -69,8 +70,8 @@ final class GetPodcast extends AbstractApiMethod
 
         $podcastId = (int) $arguments['podcastId'];
 
-        $podcast = $this->modelFactory->createPodcast($podcastId);
-        if ($podcast->isNew()) {
+        $podcast = $this->podcastRepository->findById($podcastId);
+        if ($podcast === null) {
             throw new ObjectNotFoundException(
                 sprintf('podcast `%d` not found', $podcastId)
             );

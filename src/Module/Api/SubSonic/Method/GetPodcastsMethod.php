@@ -30,6 +30,7 @@ use Ampache\Module\Api\SubSonic\Subsonic_Api;
 use Ampache\Module\Api\SubSonic\Subsonic_Xml_Data;
 use Ampache\Module\Podcast\PodcastByCatalogLoaderInterface;
 use Ampache\Repository\Model\ModelFactoryInterface;
+use Ampache\Repository\PodcastRepositoryInterface;
 
 /**
  * Get all podcast channels.
@@ -43,14 +44,18 @@ final class GetPodcastsMethod implements SubsonicApiMethodInterface
 
     private PodcastByCatalogLoaderInterface $podcastByCatalogLoader;
 
+    private PodcastRepositoryInterface $podcastRepository;
+
     public function __construct(
         ConfigContainerInterface $configContainer,
         ModelFactoryInterface $modelFactory,
-        PodcastByCatalogLoaderInterface $podcastByCatalogLoader
+        PodcastByCatalogLoaderInterface $podcastByCatalogLoader,
+        PodcastRepositoryInterface $podcastRepository
     ) {
         $this->configContainer        = $configContainer;
         $this->modelFactory           = $modelFactory;
         $this->podcastByCatalogLoader = $podcastByCatalogLoader;
+        $this->podcastRepository      = $podcastRepository;
     }
 
     public function handle(array $input): void
@@ -60,9 +65,9 @@ final class GetPodcastsMethod implements SubsonicApiMethodInterface
 
         if (AmpConfig::get('podcast')) {
             if ($podcastId) {
-                $podcast = $this->modelFactory->createPodcast((int) Subsonic_Xml_Data::getAmpacheId($podcastId));
+                $podcast = $this->podcastRepository->findById((int) Subsonic_Xml_Data::getAmpacheId($podcastId));
 
-                if (!$podcast->isNew()) {
+                if ($podcast !== null) {
                     $response = Subsonic_Xml_Data::createSuccessResponse('getpodcasts');
                     Subsonic_Xml_Data::addPodcasts($response, [$podcast], $includeEpisodes);
                 } else {

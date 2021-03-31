@@ -30,6 +30,7 @@ use Ampache\Module\Api\SubSonic\Subsonic_Xml_Data;
 use Ampache\Module\Authorization\Access;
 use Ampache\Module\Podcast\PodcastDeleterInterface;
 use Ampache\Repository\Model\ModelFactoryInterface;
+use Ampache\Repository\PodcastRepositoryInterface;
 
 /**
  * Delete an existing podcast channel
@@ -41,12 +42,16 @@ final class DeletePodcastChannelMethod implements SubsonicApiMethodInterface
 
     private ModelFactoryInterface $modelFactory;
 
+    private PodcastRepositoryInterface $podcastRepository;
+
     public function __construct(
         PodcastDeleterInterface $podcastDeleter,
-        ModelFactoryInterface $modelFactory
+        ModelFactoryInterface $modelFactory,
+        PodcastRepositoryInterface $podcastRepository
     ) {
-        $this->podcastDeleter = $podcastDeleter;
-        $this->modelFactory   = $modelFactory;
+        $this->podcastDeleter    = $podcastDeleter;
+        $this->modelFactory      = $modelFactory;
+        $this->podcastRepository = $podcastRepository;
     }
 
     public function handle(array $input): void
@@ -54,8 +59,8 @@ final class DeletePodcastChannelMethod implements SubsonicApiMethodInterface
         $podcast_id = (int) Subsonic_Api::check_parameter($input, 'id');
 
         if (AmpConfig::get('podcast') && Access::check('interface', 75)) {
-            $podcast = $this->modelFactory->createPodcast((int) Subsonic_Xml_Data::getAmpacheId($podcast_id));
-            if ($podcast->id) {
+            $podcast = $this->podcastRepository->findById((int) Subsonic_Xml_Data::getAmpacheId($podcast_id));
+            if ($podcast !== null) {
                 if ($this->podcastDeleter->delete($podcast)) {
                     $response = Subsonic_Xml_Data::createSuccessResponse('deletepodcastchannel');
                 } else {

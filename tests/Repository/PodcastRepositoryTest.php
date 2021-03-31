@@ -27,6 +27,7 @@ namespace Ampache\Repository;
 use Ampache\MockeryTestCase;
 use Ampache\Repository\Model\ModelFactoryInterface;
 use Ampache\Repository\Model\Podcast;
+use Ampache\Repository\Model\PodcastInterface;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Result;
 use Mockery\MockInterface;
@@ -331,6 +332,49 @@ class PodcastRepositoryTest extends MockeryTestCase
         $this->assertSame(
             $podcastId,
             $this->subject->findByFeedUrl($feedUrl)
+        );
+    }
+
+    public function testFindByIdReturnsNullIfNew(): void
+    {
+        $id = 666;
+
+        $podcast = $this->mock(PodcastInterface::class);
+
+        $this->modelFactory->shouldReceive('createPodcast')
+            ->with($id)
+            ->once()
+            ->andReturn($podcast);
+
+        $podcast->shouldReceive('isNew')
+            ->withNoArgs()
+            ->once()
+            ->andReturnTrue();
+
+        $this->assertNull(
+            $this->subject->findById($id)
+        );
+    }
+
+    public function testFindByIdReturnsObject(): void
+    {
+        $id = 666;
+
+        $podcast = $this->mock(PodcastInterface::class);
+
+        $this->modelFactory->shouldReceive('createPodcast')
+            ->with($id)
+            ->once()
+            ->andReturn($podcast);
+
+        $podcast->shouldReceive('isNew')
+            ->withNoArgs()
+            ->once()
+            ->andReturnFalse();
+
+        $this->assertSame(
+            $podcast,
+            $this->subject->findById($id)
         );
     }
 }

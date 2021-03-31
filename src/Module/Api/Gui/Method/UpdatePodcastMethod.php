@@ -31,7 +31,7 @@ use Ampache\Module\Api\Gui\Method\Exception\ResultEmptyException;
 use Ampache\Module\Api\Gui\Output\ApiOutputInterface;
 use Ampache\Module\Authorization\AccessLevelEnum;
 use Ampache\Module\Podcast\PodcastSyncerInterface;
-use Ampache\Repository\Model\ModelFactoryInterface;
+use Ampache\Repository\PodcastRepositoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 
@@ -39,20 +39,20 @@ final class UpdatePodcastMethod implements MethodInterface
 {
     public const ACTION = 'update_podcast';
 
-    private ModelFactoryInterface $modelFactory;
-
     private StreamFactoryInterface $streamFactory;
 
     private PodcastSyncerInterface $podcastSyncer;
 
+    private PodcastRepositoryInterface $podcastRepository;
+
     public function __construct(
-        ModelFactoryInterface $modelFactory,
         StreamFactoryInterface $streamFactory,
-        PodcastSyncerInterface $podcastSyncer
+        PodcastSyncerInterface $podcastSyncer,
+        PodcastRepositoryInterface $podcastRepository
     ) {
-        $this->modelFactory  = $modelFactory;
-        $this->streamFactory = $streamFactory;
-        $this->podcastSyncer = $podcastSyncer;
+        $this->streamFactory     = $streamFactory;
+        $this->podcastSyncer     = $podcastSyncer;
+        $this->podcastRepository = $podcastRepository;
     }
 
     /**
@@ -91,9 +91,9 @@ final class UpdatePodcastMethod implements MethodInterface
             );
         }
 
-        $podcast = $this->modelFactory->createPodcast((int) $objectId);
+        $podcast = $this->podcastRepository->findById((int) $objectId);
 
-        if ($podcast->isNew()) {
+        if ($podcast === null) {
             throw new ResultEmptyException(
                 sprintf(T_('Not Found: %d'), $objectId)
             );

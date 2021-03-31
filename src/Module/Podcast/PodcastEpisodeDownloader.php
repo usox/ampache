@@ -27,7 +27,6 @@ namespace Ampache\Module\Podcast;
 use Ampache\Module\Catalog\Loader\CatalogLoaderInterface;
 use Ampache\Module\System\LegacyLogger;
 use Ampache\Module\Util\UtilityFactoryInterface;
-use Ampache\Repository\Model\ModelFactoryInterface;
 use Ampache\Repository\Model\PodcastEpisodeInterface;
 use Ampache\Repository\Model\PodcastInterface;
 use Ampache\Repository\PodcastEpisodeRepositoryInterface;
@@ -39,8 +38,6 @@ final class PodcastEpisodeDownloader implements PodcastEpisodeDownloaderInterfac
 
     private LoggerInterface $logger;
 
-    private ModelFactoryInterface $modelFactory;
-
     private UtilityFactoryInterface $utilityFactory;
 
     private CatalogLoaderInterface $catalogLoader;
@@ -48,13 +45,11 @@ final class PodcastEpisodeDownloader implements PodcastEpisodeDownloaderInterfac
     public function __construct(
         PodcastEpisodeRepositoryInterface $podcastEpisodeRepository,
         LoggerInterface $logger,
-        ModelFactoryInterface $modelFactory,
         UtilityFactoryInterface $utilityFactory,
         CatalogLoaderInterface $catalogLoader
     ) {
         $this->podcastEpisodeRepository = $podcastEpisodeRepository;
         $this->logger                   = $logger;
-        $this->modelFactory             = $modelFactory;
         $this->utilityFactory           = $utilityFactory;
         $this->catalogLoader            = $catalogLoader;
     }
@@ -67,7 +62,7 @@ final class PodcastEpisodeDownloader implements PodcastEpisodeDownloaderInterfac
         $source = $podcastEpisode->getSource();
 
         if (!empty($source)) {
-            $podcast = $this->modelFactory->createPodcast($podcastEpisode->getPodcast()->getId());
+            $podcast = $podcastEpisode->getPodcast();
             $file    = $this->getRootPath($podcast);
             if (!empty($file)) {
                 $pinfo = pathinfo($source);

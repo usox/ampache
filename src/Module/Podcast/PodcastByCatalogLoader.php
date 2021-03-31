@@ -25,7 +25,6 @@ declare(strict_types=1);
 namespace Ampache\Module\Podcast;
 
 use Ampache\Repository\CatalogRepositoryInterface;
-use Ampache\Repository\Model\ModelFactoryInterface;
 use Ampache\Repository\Model\PodcastInterface;
 use Ampache\Repository\PodcastRepositoryInterface;
 
@@ -35,16 +34,12 @@ final class PodcastByCatalogLoader implements PodcastByCatalogLoaderInterface
 
     private PodcastRepositoryInterface $podcastRepository;
 
-    private ModelFactoryInterface $modelFactory;
-
     public function __construct(
         CatalogRepositoryInterface $catalogRepository,
-        PodcastRepositoryInterface $podcastRepository,
-        ModelFactoryInterface $modelFactory
+        PodcastRepositoryInterface $podcastRepository
     ) {
         $this->catalogRepository = $catalogRepository;
         $this->podcastRepository = $podcastRepository;
-        $this->modelFactory      = $modelFactory;
     }
 
     /**
@@ -62,7 +57,7 @@ final class PodcastByCatalogLoader implements PodcastByCatalogLoaderInterface
         foreach ($catalogIds as $catalogId) {
             $podcastIds = $this->podcastRepository->getPodcastIds((int) $catalogId);
             foreach ($podcastIds as $podcastId) {
-                $results[] = $this->modelFactory->createPodcast($podcastId);
+                $results[] = $this->podcastRepository->findById($podcastId);
             }
         }
 

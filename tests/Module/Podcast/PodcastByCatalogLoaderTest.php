@@ -25,7 +25,6 @@ namespace Ampache\Module\Podcast;
 
 use Ampache\MockeryTestCase;
 use Ampache\Repository\CatalogRepositoryInterface;
-use Ampache\Repository\Model\ModelFactoryInterface;
 use Ampache\Repository\Model\Podcast;
 use Ampache\Repository\PodcastRepositoryInterface;
 use Mockery\MockInterface;
@@ -38,21 +37,16 @@ class PodcastByCatalogLoaderTest extends MockeryTestCase
     /** @var PodcastRepositoryInterface|MockInterface */
     private MockInterface $podcastRepository;
 
-    /** @var ModelFactoryInterface|MockInterface */
-    private MockInterface $modelFactory;
-
     private PodcastByCatalogLoader $subject;
 
     public function setUp(): void
     {
         $this->catalogRepository = $this->mock(CatalogRepositoryInterface::class);
         $this->podcastRepository = $this->mock(PodcastRepositoryInterface::class);
-        $this->modelFactory      = $this->mock(ModelFactoryInterface::class);
 
         $this->subject = new PodcastByCatalogLoader(
             $this->catalogRepository,
-            $this->podcastRepository,
-            $this->modelFactory
+            $this->podcastRepository
         );
     }
 
@@ -73,7 +67,7 @@ class PodcastByCatalogLoaderTest extends MockeryTestCase
             ->once()
             ->andReturn([$podcastId]);
 
-        $this->modelFactory->shouldReceive('createPodcast')
+        $this->podcastRepository->shouldReceive('findById')
             ->with($podcastId)
             ->once()
             ->andReturn($podcast);
@@ -95,8 +89,7 @@ class PodcastByCatalogLoaderTest extends MockeryTestCase
             ->with($catalogId)
             ->once()
             ->andReturn([$podcastId]);
-
-        $this->modelFactory->shouldReceive('createPodcast')
+        $this->podcastRepository->shouldReceive('findById')
             ->with($podcastId)
             ->once()
             ->andReturn($podcast);

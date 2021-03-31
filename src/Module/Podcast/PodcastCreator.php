@@ -28,7 +28,6 @@ use Ampache\Module\Podcast\Exception\PodcastFeedLoadingException;
 use Ampache\Module\System\AmpError;
 use Ampache\Repository\Model\Art;
 use Ampache\Repository\Model\ModelFactoryInterface;
-use Ampache\Repository\Model\Podcast;
 use Ampache\Repository\Model\PodcastInterface;
 use Ampache\Repository\PodcastRepositoryInterface;
 use Psr\Log\LoggerInterface;
@@ -88,7 +87,7 @@ final class PodcastCreator implements PodcastCreatorInterface
         // don't allow duplicate podcasts
         $podcastId = $this->podcastRepository->findByFeedUrl($feedUrl);
         if ($podcastId !== null) {
-            return $this->modelFactory->createPodcast($podcastId);
+            return $this->podcastRepository->findById($podcastId);
         }
 
         try {
@@ -136,7 +135,7 @@ final class PodcastCreator implements PodcastCreatorInterface
             return null;
         }
 
-        $podcast = $this->modelFactory->createPodcast($podcastId);
+        $podcast = $this->podcastRepository->findById($podcastId);
         if (!empty($arturl)) {
             $art = new Art((int)$podcastId, 'podcast');
             $art->insert_url($arturl);

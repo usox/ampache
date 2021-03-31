@@ -31,8 +31,8 @@ use Ampache\Module\Application\ApplicationActionInterface;
 use Ampache\Module\Authorization\GuiGatekeeperInterface;
 use Ampache\Module\Podcast\Gui\PodcastGuiFactoryInterface;
 use Ampache\Module\Util\UiInterface;
-use Ampache\Repository\Model\ModelFactoryInterface;
 use Ampache\Repository\PodcastEpisodeRepositoryInterface;
+use Ampache\Repository\PodcastRepositoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -44,28 +44,28 @@ final class ShowAction implements ApplicationActionInterface
 
     private UiInterface $ui;
 
-    private ModelFactoryInterface $modelFactory;
-
     private PodcastEpisodeRepositoryInterface $podcastEpisodeRepository;
 
     private TalFactoryInterface $talFactory;
 
     private PodcastGuiFactoryInterface $podcastGuiFactory;
 
+    private PodcastRepositoryInterface $podcastRepository;
+
     public function __construct(
         ConfigContainerInterface $configContainer,
         UiInterface $ui,
-        ModelFactoryInterface $modelFactory,
         PodcastEpisodeRepositoryInterface $podcastEpisodeRepository,
         TalFactoryInterface $talFactory,
-        PodcastGuiFactoryInterface $podcastGuiFactory
+        PodcastGuiFactoryInterface $podcastGuiFactory,
+        PodcastRepositoryInterface $podcastRepository
     ) {
         $this->configContainer          = $configContainer;
         $this->ui                       = $ui;
-        $this->modelFactory             = $modelFactory;
         $this->podcastEpisodeRepository = $podcastEpisodeRepository;
         $this->talFactory               = $talFactory;
         $this->podcastGuiFactory        = $podcastGuiFactory;
+        $this->podcastRepository        = $podcastRepository;
     }
 
     public function run(ServerRequestInterface $request, GuiGatekeeperInterface $gatekeeper): ?ResponseInterface
@@ -77,7 +77,7 @@ final class ShowAction implements ApplicationActionInterface
 
         $this->ui->showHeader();
         if ($podcastId > 0) {
-            $podcast = $this->modelFactory->createPodcast($podcastId);
+            $podcast = $this->podcastRepository->findById($podcastId);
 
             echo $this->talFactory
                 ->createTalView()
