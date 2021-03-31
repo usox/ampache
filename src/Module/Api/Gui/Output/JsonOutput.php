@@ -37,8 +37,6 @@ use Ampache\Repository\Model\Media;
 use Ampache\Repository\Model\ModelFactoryInterface;
 use Ampache\Repository\Model\PlayableMediaInterface;
 use Ampache\Repository\Model\Playlist;
-use Ampache\Repository\Model\Podcast;
-use Ampache\Repository\Model\Podcast_Episode;
 use Ampache\Repository\Model\Rating;
 use Ampache\Repository\Model\Search;
 use Ampache\Repository\Model\Share;
@@ -47,6 +45,7 @@ use Ampache\Repository\Model\User;
 use Ampache\Repository\Model\Userflag;
 use Ampache\Repository\Model\Video;
 use Ampache\Repository\PodcastEpisodeRepositoryInterface;
+use Ampache\Repository\PodcastRepositoryInterface;
 use Ampache\Repository\SongRepositoryInterface;
 
 final class JsonOutput implements ApiOutputInterface
@@ -62,16 +61,20 @@ final class JsonOutput implements ApiOutputInterface
 
     private PodcastEpisodeRepositoryInterface $podcastEpisodeRepository;
 
+    private PodcastRepositoryInterface $podcastRepository;
+
     public function __construct(
         ModelFactoryInterface $modelFactory,
         AlbumRepositoryInterface $albumRepository,
         SongRepositoryInterface $songRepository,
-        PodcastEpisodeRepositoryInterface $podcastEpisodeRepository
+        PodcastEpisodeRepositoryInterface $podcastEpisodeRepository,
+        PodcastRepositoryInterface $podcastRepository
     ) {
         $this->modelFactory             = $modelFactory;
         $this->albumRepository          = $albumRepository;
         $this->songRepository           = $songRepository;
         $this->podcastEpisodeRepository = $podcastEpisodeRepository;
+        $this->podcastRepository        = $podcastRepository;
     }
 
     /**
@@ -685,7 +688,7 @@ final class JsonOutput implements ApiOutputInterface
         $result = [];
 
         foreach ($podcastIds as $podcast_id) {
-            $podcast             = new Podcast($podcast_id);
+            $podcast             = $this->podcastRepository->findById($podcast_id);
             $rating              = new Rating($podcast_id, 'podcast');
             $flag                = new Userflag($podcast_id, 'podcast');
             $art_url             = Art::url($podcast_id, 'podcast', Core::get_request('auth'));

@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace Ampache\Repository;
 
+use Ampache\Repository\Model\ModelFactoryInterface;
 use Ampache\Repository\Model\Podcast;
 use Ampache\Repository\Model\PodcastInterface;
 use Doctrine\DBAL\Connection;
@@ -31,10 +32,14 @@ final class PodcastRepository implements PodcastRepositoryInterface
 {
     private Connection $connection;
 
+    private ModelFactoryInterface $modelFactory;
+
     public function __construct(
-        Connection $connection
+        Connection $connection,
+        ModelFactoryInterface $modelFactory
     ) {
-        $this->connection = $connection;
+        $this->connection   = $connection;
+        $this->modelFactory = $modelFactory;
     }
 
     /**
@@ -152,5 +157,15 @@ final class PodcastRepository implements PodcastRepositoryInterface
         }
 
         return (int) $podcastId;
+    }
+
+    public function findById(int $id): ?PodcastInterface
+    {
+        $podcast = $this->modelFactory->createPodcast($id);
+        if ($podcast->isNew()) {
+            return null;
+        }
+
+        return $podcast;
     }
 }

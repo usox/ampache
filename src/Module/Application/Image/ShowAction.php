@@ -27,17 +27,17 @@ namespace Ampache\Module\Application\Image;
 use Ampache\Config\AmpConfig;
 use Ampache\Config\ConfigContainerInterface;
 use Ampache\Config\ConfigurationKeyEnum;
-use Ampache\Repository\Model\Art;
 use Ampache\Module\Application\ApplicationActionInterface;
-use Ampache\Module\Authorization\GuiGatekeeperInterface;
 use Ampache\Module\Authentication\AuthenticationManagerInterface;
+use Ampache\Module\Authorization\GuiGatekeeperInterface;
 use Ampache\Module\System\Core;
 use Ampache\Module\System\LegacyLogger;
 use Ampache\Module\System\Session;
 use Ampache\Module\Util\Horde_Browser;
 use Ampache\Module\Util\ObjectTypeToClassNameMapper;
 use Ampache\Module\Util\Ui;
-use Ampache\Repository\Model\Podcast;
+use Ampache\Repository\Model\Art;
+use Ampache\Repository\Model\PodcastInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -163,7 +163,7 @@ final class ShowAction implements ApplicationActionInterface
             /**
              * @todo special handling for podcasts
              */
-            if ($item instanceof Podcast) {
+            if ($item instanceof PodcastInterface) {
                 $filename = $item->getTitle();
             } else {
                 $filename = $item->name ?: $item->title;

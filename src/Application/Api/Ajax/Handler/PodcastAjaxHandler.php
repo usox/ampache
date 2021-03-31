@@ -31,6 +31,7 @@ use Ampache\Module\Podcast\PodcastSyncerInterface;
 use Ampache\Module\System\Core;
 use Ampache\Repository\Model\Podcast;
 use Ampache\Repository\PodcastEpisodeRepositoryInterface;
+use Ampache\Repository\PodcastRepositoryInterface;
 
 final class PodcastAjaxHandler implements AjaxHandlerInterface
 {
@@ -40,14 +41,18 @@ final class PodcastAjaxHandler implements AjaxHandlerInterface
 
     private PodcastEpisodeRepositoryInterface $podcastEpisodeRepository;
 
+    private PodcastRepositoryInterface $podcastRepository;
+
     public function __construct(
         PodcastSyncerInterface $podcastSyncer,
         PodcastEpisodeDownloaderInterface $podcastEpisodeDownloader,
-        PodcastEpisodeRepositoryInterface $podcastEpisodeRepository
+        PodcastEpisodeRepositoryInterface $podcastEpisodeRepository,
+        PodcastRepositoryInterface $podcastRepository
     ) {
         $this->podcastSyncer            = $podcastSyncer;
         $this->podcastEpisodeDownloader = $podcastEpisodeDownloader;
         $this->podcastEpisodeRepository = $podcastEpisodeRepository;
+        $this->podcastRepository        = $podcastRepository;
     }
 
     public function handle(): void
@@ -62,8 +67,8 @@ final class PodcastAjaxHandler implements AjaxHandlerInterface
                 }
 
                 if (isset($_REQUEST['podcast_id'])) {
-                    $podcast = new Podcast($_REQUEST['podcast_id']);
-                    if ($podcast->id) {
+                    $podcast = $this->podcastRepository->findById((int) $_REQUEST['podcast_id']);
+                    if ($podcast !== null) {
                         $this->podcastSyncer->sync($podcast, true);
                     } else {
                         debug_event('podcast.ajax', 'Cannot find podcast', 1);

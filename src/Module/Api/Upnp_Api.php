@@ -24,29 +24,23 @@ declare(strict_types=0);
 
 namespace Ampache\Module\Api;
 
-use Ampache\Module\Podcast\PodcastByCatalogLoaderInterface;
-use Ampache\Repository\Model\Album;
-use Ampache\Module\Playback\Stream;
 use Ampache\Config\AmpConfig;
+use Ampache\Module\Playback\Stream;
+use Ampache\Module\Podcast\PodcastByCatalogLoaderInterface;
+use Ampache\Repository\AlbumRepositoryInterface;
+use Ampache\Repository\CatalogRepositoryInterface;
+use Ampache\Repository\LiveStreamRepositoryInterface;
+use Ampache\Repository\Model\Album;
 use Ampache\Repository\Model\Art;
 use Ampache\Repository\Model\Artist;
 use Ampache\Repository\Model\Catalog;
 use Ampache\Repository\Model\Clip;
-use Ampache\Repository\AlbumRepositoryInterface;
-use Ampache\Repository\CatalogRepositoryInterface;
-use Ampache\Repository\LiveStreamRepositoryInterface;
-use Ampache\Repository\Model\PodcastEpisodeInterface;
-use Ampache\Repository\PlaylistRepositoryInterface;
-use Ampache\Repository\PodcastEpisodeRepositoryInterface;
-use Ampache\Repository\SongRepositoryInterface;
-use DateTime;
-use DOMDocument;
 use Ampache\Repository\Model\Live_Stream;
 use Ampache\Repository\Model\Movie;
 use Ampache\Repository\Model\Personal_Video;
 use Ampache\Repository\Model\Playlist;
 use Ampache\Repository\Model\Podcast;
-use Ampache\Repository\Model\Podcast_Episode;
+use Ampache\Repository\Model\PodcastEpisodeInterface;
 use Ampache\Repository\Model\Search;
 use Ampache\Repository\Model\Song;
 use Ampache\Repository\Model\Tag;
@@ -54,6 +48,12 @@ use Ampache\Repository\Model\TvShow;
 use Ampache\Repository\Model\TVShow_Episode;
 use Ampache\Repository\Model\TVShow_Season;
 use Ampache\Repository\Model\Video;
+use Ampache\Repository\PlaylistRepositoryInterface;
+use Ampache\Repository\PodcastEpisodeRepositoryInterface;
+use Ampache\Repository\PodcastRepositoryInterface;
+use Ampache\Repository\SongRepositoryInterface;
+use DateTime;
+use DOMDocument;
 use Exception;
 use XMLReader;
 
@@ -745,8 +745,8 @@ class Upnp_Api
                         );
                         break;
                     case 2:
-                        $podcast = new Podcast($pathreq[1]);
-                        if ($podcast->id) {
+                        $podcast = static::getPodcastRepository()->findById((int) $pathreq[1]);
+                        if ($podcast !== null) {
                             $meta = self::_itemPodcast($podcast, $root . '/podcasts');
                         }
                         break;
@@ -958,8 +958,8 @@ class Upnp_Api
                         }
                         break;
                     case 2: // Get podcast episodes list
-                        $podcast = new Podcast($pathreq[1]);
-                        if ($podcast->id) {
+                        $podcast = static::getPodcastRepository()->findById((int) $pathreq[1]);
+                        if ($podcast !== null) {
                             $podcastEpisodeRepository = static::getPodcastEpisodeRepository();
                             $episodes                 = $podcastEpisodeRepository->getEpisodeIds($podcast);
                             [$maxCount, $episodes]    = self::_slice($episodes, $start, $count);
@@ -1999,5 +1999,15 @@ class Upnp_Api
         global $dic;
 
         return $dic->get(PodcastByCatalogLoaderInterface::class);
+    }
+
+    /**
+     * @deprecated Inject by constructor
+     */
+    private static function getPodcastRepository(): PodcastRepositoryInterface
+    {
+        global $dic;
+
+        return $dic->get(PodcastRepositoryInterface::class);
     }
 }

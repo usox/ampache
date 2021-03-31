@@ -50,6 +50,7 @@ use Ampache\Repository\Model\User;
 use Ampache\Repository\Model\Userflag;
 use Ampache\Repository\Model\Video;
 use Ampache\Repository\PodcastEpisodeRepositoryInterface;
+use Ampache\Repository\PodcastRepositoryInterface;
 use Ampache\Repository\SongRepositoryInterface;
 
 final class XmlOutput implements ApiOutputInterface
@@ -67,18 +68,22 @@ final class XmlOutput implements ApiOutputInterface
 
     private PodcastEpisodeRepositoryInterface $podcastEpisodeRepository;
 
+    private PodcastRepositoryInterface $podcastRepository;
+
     public function __construct(
         ModelFactoryInterface $modelFactory,
         XmlWriterInterface $xmlWriter,
         AlbumRepositoryInterface $albumRepository,
         SongRepositoryInterface $songRepository,
-        PodcastEpisodeRepositoryInterface $podcastEpisodeRepository
+        PodcastEpisodeRepositoryInterface $podcastEpisodeRepository,
+        PodcastRepositoryInterface $podcastRepository
     ) {
         $this->modelFactory             = $modelFactory;
         $this->xmlWriter                = $xmlWriter;
         $this->albumRepository          = $albumRepository;
         $this->songRepository           = $songRepository;
         $this->podcastEpisodeRepository = $podcastEpisodeRepository;
+        $this->podcastRepository        = $podcastRepository;
     }
 
     /**
@@ -616,7 +621,7 @@ final class XmlOutput implements ApiOutputInterface
         $string = "<total_count>" . Catalog::get_count('podcast') . "</total_count>\n";
 
         foreach ($podcastIds as $podcastId) {
-            $podcast = new Podcast($podcastId);
+            $podcast = $this->podcastRepository->findById($podcastId);
             $rating  = new Rating($podcastId, 'podcast');
             $flag    = new Userflag($podcastId, 'podcast');
             $art_url = Art::url($podcastId, 'podcast', Core::get_request('auth'));
@@ -1055,7 +1060,7 @@ final class XmlOutput implements ApiOutputInterface
                     $string .= $this->shares($objectIds);
                     break;
                 case 'podcast':
-                    $podcast = new Podcast($objectId);
+                    $podcast = $this->podcastRepository->findById($objectId);
                     $string .= "<podcast id=\"$objectId\">\n" .
                         "\t<name><![CDATA[" . $podcast->getTitleFormatted() . "]]></name>\n" .
                         "\t<description><![CDATA[" . $podcast->getDescription() . "]]></description>\n" .

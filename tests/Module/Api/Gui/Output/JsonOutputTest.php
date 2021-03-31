@@ -35,6 +35,7 @@ use Ampache\Repository\Model\Tag;
 use Ampache\Repository\Model\User;
 use Ampache\Repository\Model\Useractivity;
 use Ampache\Repository\PodcastEpisodeRepositoryInterface;
+use Ampache\Repository\PodcastRepositoryInterface;
 use Ampache\Repository\SongRepositoryInterface;
 use Mockery\MockInterface;
 
@@ -52,6 +53,9 @@ class JsonOutputTest extends MockeryTestCase
     /** @var MockInterface|PodcastEpisodeRepositoryInterface */
     private MockInterface $podcastEpisodeRepository;
 
+    /** @var MockInterface|PodcastRepositoryInterface */
+    private MockInterface $podcastRepository;
+
     private ?JsonOutput $subject;
 
     public function setUp(): void
@@ -60,12 +64,14 @@ class JsonOutputTest extends MockeryTestCase
         $this->albumRepository          = $this->mock(AlbumRepositoryInterface::class);
         $this->songRepository           = $this->mock(SongRepositoryInterface::class);
         $this->podcastEpisodeRepository = $this->mock(PodcastEpisodeRepositoryInterface::class);
+        $this->podcastRepository        = $this->mock(PodcastRepositoryInterface::class);
 
         $this->subject = new JsonOutput(
             $this->modelFactory,
             $this->albumRepository,
             $this->songRepository,
-            $this->podcastEpisodeRepository
+            $this->podcastEpisodeRepository,
+            $this->podcastRepository
         );
     }
 

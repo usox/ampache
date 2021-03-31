@@ -70,4 +70,6 @@ interface PodcastRepositoryInterface
     public function findByFeedUrl(
         string $feedUrl
     ): ?int;
+
+    public function findById(int $id): ?PodcastInterface;
 }

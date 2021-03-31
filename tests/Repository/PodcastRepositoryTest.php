@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace Ampache\Repository;
 
 use Ampache\MockeryTestCase;
+use Ampache\Repository\Model\ModelFactoryInterface;
 use Ampache\Repository\Model\Podcast;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Result;
@@ -35,14 +36,19 @@ class PodcastRepositoryTest extends MockeryTestCase
     /** @var MockInterface|Connection */
     private MockInterface $connection;
 
+    /** @var MockInterface|ModelFactoryInterface */
+    private MockInterface $modelFactory;
+
     private PodcastRepository $subject;
 
     public function setUp(): void
     {
-        $this->connection = $this->mock(Connection::class);
+        $this->connection   = $this->mock(Connection::class);
+        $this->modelFactory = $this->mock(ModelFactoryInterface::class);
 
         $this->subject = new PodcastRepository(
-            $this->connection
+            $this->connection,
+            $this->modelFactory
         );
     }
 
