@@ -23,8 +23,8 @@ declare(strict_types=1);
 
 namespace Ampache\Module\Podcast;
 
-use Ampache\Module\System\Core;
 use Ampache\Module\System\LegacyLogger;
+use Ampache\Module\Util\ExternalResourceLoaderInterface;
 use Psr\Log\LoggerInterface;
 use SimpleXMLElement;
 
@@ -32,10 +32,14 @@ final class PodcastFeedLoader implements PodcastFeedLoaderInterface
 {
     private LoggerInterface $logger;
 
+    private ExternalResourceLoaderInterface $externalResourceLoader;
+
     public function __construct(
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        ExternalResourceLoaderInterface $externalResourceLoader
     ) {
-        $this->logger = $logger;
+        $this->logger                 = $logger;
+        $this->externalResourceLoader = $externalResourceLoader;
     }
 
     /**
@@ -49,17 +53,8 @@ final class PodcastFeedLoader implements PodcastFeedLoaderInterface
             [LegacyLogger::CONTEXT_TYPE => __CLASS__]
         );
 
-        if (strpos($feedUrl, 'http://') !== 0 && strpos($feedUrl, 'https://') !== 0) {
-            $this->logger->error(
-                'Podcast update canceled, bad feed url.',
-                [LegacyLogger::CONTEXT_TYPE => __CLASS__]
-            );
-
-            throw new Exception\PodcastFeedLoadingException();
-        }
-
-        $content = file_get_contents($feedUrl, false, stream_context_create(Core::requests_options()));
-        if ($content === false) {
+        $content = $this->externalResourceLoader->retrieve($feedUrl);
+        if ($content === null) {
             $this->logger->error(
                 sprintf('Cannot access feed %s', $feedUrl),
                 [LegacyLogger::CONTEXT_TYPE => __CLASS__]
@@ -68,7 +63,7 @@ final class PodcastFeedLoader implements PodcastFeedLoaderInterface
             throw new Exception\PodcastFeedLoadingException();
         }
 
-        $root = simplexml_load_string($content);
+        $root = simplexml_load_string((string) $content->getBody());
         if ($root === false) {
             $this->logger->critical(
                 sprintf('Cannot read feed %s', $feedUrl),

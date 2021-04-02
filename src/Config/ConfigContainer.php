@@ -163,4 +163,17 @@ final class ConfigContainer implements ConfigContainerInterface
         /** @todo change it */
         return 86400;
     }
+
+    /**
+     * @return array{"host": string, "port": int, "user": string, "pass": string}
+     */
+    public function getProxyOptions(): array
+    {
+        return [
+            'host' => (string) $this->get(ConfigurationKeyEnum::PROXY_HOST),
+            'port' => (int) $this->get(ConfigurationKeyEnum::PROXY_PORT),
+            'user' => (string) $this->get(ConfigurationKeyEnum::PROXY_USER),
+            'pass' => (string) $this->get(ConfigurationKeyEnum::PROXY_PASS),
+        ];
+    }
 }

@@ -126,4 +126,8 @@ final class ConfigurationKeyEnum
     public const FILE_ZIP_COMMENT              = 'file_zip_comment';
     public const OFFSET_LIMIT                  = 'offset_limit';
     public const JWT_INSECURE                  = 'jwt_insecure';
+    public const PROXY_HOST                    = 'proxy_host';
+    public const PROXY_PORT                    = 'proxy_port';
+    public const PROXY_USER                    = 'proxy_user';
+    public const PROXY_PASS                    = 'proxy_pass';
 }

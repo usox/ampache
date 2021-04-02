@@ -26,6 +26,7 @@ namespace Ampache\Repository\Model;
 use Ampache\Config\AmpConfig;
 use Ampache\Module\Podcast\Exception\PodcastFeedLoadingException;
 use Ampache\Module\Podcast\PodcastFeedLoaderInterface;
+use Ampache\Module\Util\ExternalResourceLoaderInterface;
 use Ampache\Repository\PodcastEpisodeRepositoryInterface;
 use Ampache\Repository\PodcastRepositoryInterface;
 

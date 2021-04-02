@@ -124,4 +124,9 @@ interface ConfigContainerInterface
      * Returns the validity period of an issued jwt
      */
     public function getJwtTimeout(): int;
+
+    /**
+     * @return array{"host": string, "port": int, "user": string, "pass": string}
+     */
+    public function getProxyOptions(): array;
 }
