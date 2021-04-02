@@ -17,15 +17,14 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *
  */
 
 declare(strict_types=1);
 
-namespace Ampache\Module\Api\Json\Route\Session;
+namespace Ampache\Module\Api\Json\Route\V1\Session;
 
 use Ampache\Config\ConfigContainerInterface;
-use Ampache\Module\Api\Json\AbstractApiMethod;
+use Ampache\Module\Api\Json\Route\V1\AbstractApiMethod;
 use Ampache\Module\Api\Json\ErrorHandling\Exception\LoginFailedException;
 use Ampache\Module\Api\Json\ErrorHandling\Exception\LoginRestrictedException;
 use Ampache\Module\Authentication\AuthenticationManagerInterface;
@@ -84,8 +83,6 @@ final class Login extends AbstractApiMethod
     }
 
     /**
-     * @return mixed
-     *
      * @throws LoginRestrictedException
      * @throws LoginFailedException
      */
@@ -93,7 +90,7 @@ final class Login extends AbstractApiMethod
         ServerRequestInterface $request,
         ResponseInterface $response,
         array $arguments
-    ) {
+    ): array {
         $data     = $request->getParsedBody();
         $username = $data['username'] ?? '';
         $password = $data['password'] ?? '';

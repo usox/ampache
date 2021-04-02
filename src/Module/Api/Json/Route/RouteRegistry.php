@@ -17,28 +17,23 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *
  */
 
-declare(strict_types=1);
+namespace Ampache\Module\Api\Json\Route;
 
-namespace Ampache\Module\Api\Json\Middleware;
+use Slim\App;
 
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\RequestHandlerInterface;
-
-final class AuthenticationMiddleware
+/**
+ * Registers all routes of the current version
+ */
+final class RouteRegistry implements RouteRegistryInterface
 {
-    /**
-     * @todo add jwt auth
-     */
-    public function __invoke(
-        ServerRequestInterface $request,
-        RequestHandlerInterface $handler
-    ): ResponseInterface {
-        $request = $request->withAttribute('userId', 1);
+    public function register(
+        App $app
+    ): void {
+        $app->get('/v1/podcast', V1\Podcast\GetPodcastIds::class);
+        $app->get('/v1/podcast/{podcastId}', V1\Podcast\GetPodcast::class);
 
-        return $handler->handle($request);
+        $app->post('/v1/session/login', V1\Session\Login::class);
     }
 }

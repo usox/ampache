@@ -17,19 +17,19 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *
  */
 
 declare(strict_types=1);
 
-namespace Ampache\Module\Api\Json\Route\Podcast;
+namespace Ampache\Module\Api\Json\Route\V1\Podcast;
 
 use Ampache\Config\ConfigContainerInterface;
 use Ampache\Config\ConfigurationKeyEnum;
 use Ampache\Module\Api\Gui\Method\Exception\FunctionDisabledException;
-use Ampache\Module\Api\Json\AbstractApiMethod;
+use Ampache\Module\Api\Json\Route\V1\AbstractApiMethod;
 use Ampache\Module\Api\Json\ErrorHandling\Exception\SortOrderInvalidException;
 use Ampache\Repository\Model\ModelFactoryInterface;
+use Ampache\Repository\Model\Query;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -53,8 +53,6 @@ final class GetPodcastIds extends AbstractApiMethod
     }
 
     /**
-     * @return mixed
-     *
      * @throws FunctionDisabledException
      * @throws SortOrderInvalidException
      */
@@ -62,7 +60,7 @@ final class GetPodcastIds extends AbstractApiMethod
         ServerRequestInterface $request,
         ResponseInterface $response,
         array $arguments
-    ) {
+    ): array {
         if ($this->configContainer->isFeatureEnabled(ConfigurationKeyEnum::PODCAST) === false) {
             throw new FunctionDisabledException(T_('Enable: podcast'));
         }
@@ -70,7 +68,7 @@ final class GetPodcastIds extends AbstractApiMethod
 
         $sortField = $queryParams['sortField'] ?? 'title';
         $sortOrder = $queryParams['sortOrder'] ?? 'ASC';
-        $limit     = (int) ($queryParams['limit'] ?? 25);
+        $limit     = (int) ($queryParams['limit'] ?? Query::DEFAULT_LIMIT);
         $offset    = (int) ($queryParams['offset'] ?? 0);
 
         $browse = $this->modelFactory->createBrowse();

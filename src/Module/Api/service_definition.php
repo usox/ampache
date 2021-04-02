@@ -143,9 +143,9 @@ return [
     SubSonic\Method\DownloadPodcastEpisodeMethod::class => autowire(),
     SubSonic\Method\DeletePodcastEpisode::class => autowire(),
     SubSonic\Method\RefreshPodcastsMethod::class => autowire(),
-    Json\Route\Podcast\GetPodcastIds::class => autowire(),
-    Json\Route\Podcast\GetPodcast::class => autowire(),
-    Json\Route\Session\Login::class => autowire(),
-    Json\Middleware\AuthenticationMiddleware::class => autowire(),
+    Json\Route\V1\Podcast\GetPodcastIds::class => autowire(),
+    Json\Route\V1\Podcast\GetPodcast::class => autowire(),
+    Json\Route\V1\Session\Login::class => autowire(),
     Json\ApiHandler::class => autowire(),
+    Json\Route\RouteRegistryInterface::class => autowire(Json\Route\RouteRegistry::class),
 ];

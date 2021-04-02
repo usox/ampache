@@ -17,38 +17,42 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *
  */
 
 declare(strict_types=1);
 
-namespace Ampache\Module\Api\Json;
+namespace Ampache\Module\Api\Json\ErrorHandling;
 
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
+use Ampache\MockeryTestCase;
 
-abstract class AbstractApiMethod
+class JsonErrorHandlerTest extends MockeryTestCase
 {
-    public function __invoke(
-        ServerRequestInterface $request,
-        ResponseInterface $response,
-        array $arguments
-    ): ResponseInterface {
-        $response->getBody()->write(
-            json_encode([
-                'data' => $this->handle($request, $response, $arguments)
-            ], JSON_PRETTY_PRINT)
-        );
+    private JsonErrorHandler $subject;
 
-        return $response->withHeader('Content-Type', 'application/json');
+    public function setUp(): void
+    {
+        $this->subject = new JsonErrorHandler();
     }
 
-    /**
-     * @return mixed
-     */
-    abstract protected function handle(
-        ServerRequestInterface $request,
-        ResponseInterface $response,
-        array $arguments
-    );
+    public function testInvokeReturnsData(): void
+    {
+        $code    = 666;
+        $message = 'some-message';
+
+        $exception = new \Exception(
+            $message,
+            $code
+        );
+
+        $this->assertSame(
+            json_encode(
+            [
+                'error' => [
+                    'code' => $code,
+                    'message' => $message,
+                ]
+            ], JSON_PRETTY_PRINT),
+            call_user_func_array($this->subject, [$exception, true])
+        );
+    }
 }

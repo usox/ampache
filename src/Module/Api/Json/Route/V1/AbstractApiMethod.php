@@ -17,23 +17,34 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *
  */
 
 declare(strict_types=1);
 
-use Ampache\Module\Api\Json\ApiHandler;
-use Ampache\Module\Api\Json\Route;
-use Psr\Container\ContainerInterface;
-use Psr\Http\Message\ResponseFactoryInterface;
-use Slim\Factory\AppFactory;
+namespace Ampache\Module\Api\Json\Route\V1;
 
-/** @var ContainerInterface $dic */
-$dic = require __DIR__ . '/../../../src/Config/Init.php';
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
-$dic->get(ApiHandler::class)->handle(
-    AppFactory::create(
-        $dic->get(ResponseFactoryInterface::class),
-        $dic
-    )
-);
+abstract class AbstractApiMethod
+{
+    public function __invoke(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        array $arguments
+    ): ResponseInterface {
+        $response->getBody()->write(
+            json_encode([
+                'data' => $this->handle($request, $response, $arguments)
+            ], JSON_PRETTY_PRINT)
+        );
+
+        return $response->withHeader('Content-Type', 'application/json');
+    }
+
+    abstract protected function handle(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        array $arguments
+    ): array;
+}

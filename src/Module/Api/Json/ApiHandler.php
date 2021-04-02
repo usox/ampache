@@ -27,13 +27,12 @@ namespace Ampache\Module\Api\Json;
 use Ampache\Config\ConfigContainerInterface;
 use Ampache\Config\ConfigurationKeyEnum;
 use Ampache\Module\Api\Json\ErrorHandling\JsonErrorHandler;
+use Ampache\Module\Api\Json\Route\RouteRegistryInterface;
 use Laminas\HttpHandlerRunner\Emitter\SapiEmitter;
-use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
-use Slim\Factory\AppFactory;
-use Slim\Routing\RouteCollectorProxy;
+use Slim\App;
 use Teapot\StatusCode;
 use Tuupola\Middleware\JwtAuthentication;
 
@@ -45,30 +44,27 @@ final class ApiHandler
 
     private LoggerInterface $logger;
 
-    private ContainerInterface $dic;
-
     private SapiEmitter $sapiEmitter;
+
+    private RouteRegistryInterface $routeRegistry;
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         ConfigContainerInterface $configContainer,
         LoggerInterface $logger,
         SapiEmitter $sapiEmitter,
-        ContainerInterface $dic
+        RouteRegistryInterface $routeRegistry
     ) {
         $this->responseFactory = $responseFactory;
         $this->configContainer = $configContainer;
         $this->logger          = $logger;
         $this->sapiEmitter     = $sapiEmitter;
-        $this->dic             = $dic;
+        $this->routeRegistry   = $routeRegistry;
     }
 
-    public function handle(): void
-    {
-        $app = AppFactory::create(
-            $this->responseFactory,
-            $this->dic
-        );
+    public function handle(
+        App $app
+    ): void {
         $app->setBasePath('/api/json');
         $app->addBodyParsingMiddleware();
 
@@ -87,21 +83,17 @@ final class ApiHandler
         );
 
         // jwt auth
-        $app->add(new JwtAuthentication([
-            'secure' => $this->configContainer->isFeatureEnabled(ConfigurationKeyEnum::JWT_INSECURE) === false,
-            'logger' => $this->logger,
-            'path' => ['/api/json'],
-            'ignore' => ['/api/json/v1/session'],
-            'secret' => $this->configContainer->getJwtSecret(),
-        ]));
+        $app->add(
+            new JwtAuthentication([
+                'secure' => !$this->configContainer->isFeatureEnabled(ConfigurationKeyEnum::JWT_INSECURE),
+                'logger' => $this->logger,
+                'path' => ['/api/json'],
+                'ignore' => ['/api/json/v1/session'],
+                'secret' => $this->configContainer->getJwtSecret(),
+            ])
+        );
 
-        // register routes
-        $app->group('/v1', function (RouteCollectorProxy $group) {
-            $group->get('/podcast', Route\Podcast\GetPodcastIds::class);
-            $group->get('/podcast/{podcastId}', Route\Podcast\GetPodcast::class);
-
-            $group->post('/session/login', Route\Session\Login::class);
-        });
+        $this->routeRegistry->register($app);
 
         try {
             $app->run();

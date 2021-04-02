@@ -17,23 +17,16 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *
  */
 
-declare(strict_types=1);
+namespace Ampache\Module\Api\Json\Route;
 
-use Ampache\Module\Api\Json\ApiHandler;
-use Ampache\Module\Api\Json\Route;
-use Psr\Container\ContainerInterface;
-use Psr\Http\Message\ResponseFactoryInterface;
-use Slim\Factory\AppFactory;
+use Slim\App;
 
-/** @var ContainerInterface $dic */
-$dic = require __DIR__ . '/../../../src/Config/Init.php';
-
-$dic->get(ApiHandler::class)->handle(
-    AppFactory::create(
-        $dic->get(ResponseFactoryInterface::class),
-        $dic
-    )
-);
+/**
+ * Registers all routes of the current version
+ */
+interface RouteRegistryInterface
+{
+    public function register(App $app): void;
+}

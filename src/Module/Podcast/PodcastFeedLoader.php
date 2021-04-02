@@ -63,7 +63,7 @@ final class PodcastFeedLoader implements PodcastFeedLoaderInterface
             throw new Exception\PodcastFeedLoadingException();
         }
 
-        $root = simplexml_load_string((string) $content->getBody());
+        $root = @simplexml_load_string((string) $content->getBody());
         if ($root === false) {
             $this->logger->critical(
                 sprintf('Cannot read feed %s', $feedUrl),
