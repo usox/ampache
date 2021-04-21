@@ -67,10 +67,6 @@ class Live_Stream extends database_object implements Media, library_item
      * @var string $codec
      */
     public $codec;
-    /**
-     * @var integer $catalog
-     */
-    public $catalog;
 
     /**
      * @var string $f_name
@@ -203,7 +199,7 @@ class Live_Stream extends database_object implements Media, library_item
      */
     public function get_catalogs()
     {
-        return array($this->catalog);
+        return array();
     }
 
     /**
@@ -238,7 +234,7 @@ class Live_Stream extends database_object implements Media, library_item
     public function display_art($thumb = 2, $force = false)
     {
         if (Art::has_db($this->id, 'live_stream') || $force) {
-            Art::display('live_stream', $this->id, $this->get_fullname(), $thumb, $this->link);
+            echo Art::display('live_stream', $this->id, $this->get_fullname(), $thumb, $this->link);
         }
     }
 

@@ -27,6 +27,7 @@ namespace Ampache\Module\Application\Playback;
 
 use Ampache\Config\AmpConfig;
 use Ampache\Module\Plugin\Adapter\UserMediaPlaySaverAdapterInterface;
+use Ampache\Module\Util\ExtensionToMimeTypeMapperInterface;
 use Ampache\Repository\Model\Catalog;
 use Ampache\Repository\Model\Democratic;
 use Ampache\Repository\Model\Podcast_Episode;
@@ -51,6 +52,7 @@ use Ampache\Module\System\Dba;
 use Ampache\Module\System\Session;
 use Ampache\Module\Util\Horde_Browser;
 use Ampache\Module\Util\ObjectTypeToClassNameMapper;
+use Ampache\Repository\PodcastEpisodeRepositoryInterface;
 use Ampache\Repository\SongRepositoryInterface;
 use Ampache\Repository\UserRepositoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -72,13 +74,19 @@ final class PlayAction implements ApplicationActionInterface
 
     private UserMediaPlaySaverAdapterInterface $userMediaPlaySaverAdapter;
 
+    private ExtensionToMimeTypeMapperInterface $extensionToMimeTypeMapper;
+
+    private PodcastEpisodeRepositoryInterface $podcastEpisodeRepository;
+
     public function __construct(
         Horde_Browser $browser,
         AuthenticationManagerInterface $authenticationManager,
         NetworkCheckerInterface $networkChecker,
         SongRepositoryInterface $songRepository,
         UserRepositoryInterface $userRepository,
-        UserMediaPlaySaverAdapterInterface $userMediaPlaySaverAdapter
+        UserMediaPlaySaverAdapterInterface $userMediaPlaySaverAdapter,
+        ExtensionToMimeTypeMapperInterface $extensionToMimeTypeMapper,
+        PodcastEpisodeRepositoryInterface $podcastEpisodeRepository
     ) {
         $this->browser                   = $browser;
         $this->authenticationManager     = $authenticationManager;
@@ -86,6 +94,8 @@ final class PlayAction implements ApplicationActionInterface
         $this->songRepository            = $songRepository;
         $this->userRepository            = $userRepository;
         $this->userMediaPlaySaverAdapter = $userMediaPlaySaverAdapter;
+        $this->extensionToMimeTypeMapper = $extensionToMimeTypeMapper;
+        $this->podcastEpisodeRepository  = $podcastEpisodeRepository;
     }
 
     public function run(ServerRequestInterface $request, GuiGatekeeperInterface $gatekeeper): ?ResponseInterface
@@ -419,8 +429,7 @@ final class PlayAction implements ApplicationActionInterface
             $media = new Song_Preview($object_id);
             $media->format();
         } elseif ($type == 'podcast_episode') {
-            $media = new Podcast_Episode($object_id);
-            $media->format();
+            $media = $this->podcastEpisodeRepository->findById((int) $object_id);
         } else {
             $type  = 'video';
             $media = new Video($object_id);
@@ -440,9 +449,10 @@ final class PlayAction implements ApplicationActionInterface
             );
         }
 
-        if ($media->catalog) {
+        $mediaCatalogId = $media->getCatalogId();
+        if ($mediaCatalogId) {
             // Build up the catalog for our current object
-            $catalog = Catalog::create_from_id($media->catalog);
+            $catalog = Catalog::create_from_id($mediaCatalogId);
 
             /* If the media is disabled */
             if ($media->isEnabled() === false) {
@@ -528,7 +538,7 @@ final class PlayAction implements ApplicationActionInterface
         } elseif ($action == 'download' && AmpConfig::get('download')) {
             debug_event('play/index', 'Downloading raw file...', 4);
             // STUPID IE
-            $media_name = str_replace(array('?', '/', '\\'), "_", $media->f_file);
+            $media_name = str_replace(array('?', '/', '\\'), "_", $media->getFilename());
 
             $headers = $this->browser->getDownloadHeaders($media_name, $media->mime, false, $media->size);
 
@@ -689,7 +699,7 @@ final class PlayAction implements ApplicationActionInterface
 
             $transcoder  = Stream::start_transcode($media, $transcode_to, $player, $troptions);
             $filepointer = $transcoder['handle'];
-            $media_name  = $media->f_artist_full . " - " . $media->title . "." . $transcoder['format'];
+            $media_name  = $media->getFullArtistNameFormatted() . " - " . $media->title . "." . $transcoder['format'];
         } else {
             if ($cpaction) {
                 $transcoder  = $media->run_custom_play_action($cpaction, $transcode_to);
@@ -803,7 +813,11 @@ final class PlayAction implements ApplicationActionInterface
 
         $mime = $media->mime;
         if ($transcode && isset($transcoder)) {
-            $mime = $media->type_to_mime($transcoder['format']);
+            if ($type === 'video') {
+                $mime = $this->extensionToMimeTypeMapper->mapVideo($transcoder['format']);
+            } else {
+                $mime = $this->extensionToMimeTypeMapper->mapAudio($transcoder['format']);
+            }
             // Non-blocking stream doesn't work in Windows (php bug since 2005 and still here in 2020...)
             // We don't want to wait indefinitely for a potential error so we just ignore it.
             // https://bugs.php.net/bug.php?id=47918
